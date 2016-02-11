@@ -1,0 +1,23 @@
+{
+  "name": "fxos-mvc",
+  "homepage": "https://github.com/fxos/mvc",
+  "license": "MPL",
+  "main": "mvc.js",
+  "ignore": [
+    "**/.*",
+    "example",
+    "node_modules",
+    "package.json",
+    "README.md",
+    "test"
+  ],
+  "_release": "e1ee1ca658",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "e1ee1ca658c6cac20cb9a3173ba2df126747348a"
+  },
+  "_source": "git@github.com:fxos-eng/mvc.git",
+  "_target": "master",
+  "_originalSource": "git@github.com:fxos-eng/mvc.git"
+}

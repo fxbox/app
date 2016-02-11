@@ -1,0 +1,24 @@
+{
+  "name": "foxbox-client",
+  "description": "A client for Foxbox",
+  "version": "1.0.0",
+  "authors": [
+    "Guillaume Marty <edo999@gmail.com>"
+  ],
+  "keywords": [
+    "iot"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "fxos-mvc": "git@github.com:fxos-eng/mvc.git#master",
+    "react": "~0.14.7"
+  }
+}

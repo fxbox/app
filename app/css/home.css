@@ -1,0 +1,55 @@
+.modal {
+  display: none;
+  opacity: 0;
+  width: 90vw;
+  padding: 0;
+  box-shadow: 1rem 1rem 2rem grey;
+  left: 5vw;
+  top: 5vh;
+  position: absolute;
+  margin: auto;
+  background: white;
+  text-align: center;
+  top: 40%;
+}
+
+.modal.visible {
+  display: block;
+  opacity: 1;
+}
+
+.modal button {
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid grey;
+  border-radius: .3rem;
+}
+
+ul {
+  padding: 0 3rem;
+  margin: 0;
+  list-style: none;
+}
+
+li {
+  padding: 0;
+  position: relative;
+}
+
+li[data-icon] {
+  padding-left: 4rem;
+  background: no-repeat left 1rem;
+  background-size: 3rem;
+}
+
+li[data-connected="false"] {
+  opacity: 0.25;
+}
+
+input[type="checkbox"] {
+  position: absolute;
+  right: 0;
+  top: 1rem;
+  width: 2rem;
+  height: 2rem;
+}

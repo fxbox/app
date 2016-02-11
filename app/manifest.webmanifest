@@ -1,0 +1,53 @@
+{
+  "name": "Foxbox Client",
+  "short_name": "Foxbox",
+  "lang": "en",
+  "scope": "/",
+  "start_url": "/index.html",
+  "orientation": "portrait",
+  "display": "standalone",
+  "theme_color": "#2F99CD",
+  "background_color": "#fff",
+  "icons": [
+    {
+      "src": "/img/icons/16.png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "/img/icons/32.png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "/img/icons/48.png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "/img/icons/60.png",
+      "sizes": "60x60"
+    },
+    {
+      "src": "/img/icons/64.png",
+      "sizes": "64x64"
+    },
+    {
+      "src": "/img/icons/90.png",
+      "sizes": "90x90"
+    },
+    {
+      "src": "/img/icons/128.png",
+      "sizes": "128x128"
+    },
+    {
+      "src": "/img/icons/256.png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "/img/icons/336.png",
+      "sizes": "336x336"
+    },
+    {
+      "src": "/img/icons/512.png",
+      "sizes": "512x512"
+    }
+  ]
+}

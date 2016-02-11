@@ -1,0 +1,15 @@
+li[data-icon="white_and_color_e27_b22"] {
+  background-image: url('philips-hue/white_and_color_e27_b22.svg');
+}
+
+li[data-icon="white_e27_b22"] {
+  background-image: url('philips-hue/white_e27_b22.svg');
+}
+
+li[data-icon="br30"] {
+  background-image: url('philips-hue/br30.svg');
+}
+
+li[data-icon="gu10_par16"] {
+  background-image: url('philips-hue/gu10_par16.svg');
+}
