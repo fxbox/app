@@ -3,6 +3,30 @@ import { Service } from 'components/fxos-mvc/dist/mvc';
 const USER_NAME = 'web';
 const APP_NAME = 'foxbox-client';
 
+let loadJSON = function(method, url, content = '') {
+  return new Promise((resolve, reject) => {
+    let xhr = new XMLHttpRequest();
+    xhr.open(method, url, true);
+    xhr.responseType = 'json';
+    xhr.timeout = 3000;
+    xhr.overrideMimeType('application/json');
+    xhr.setRequestHeader('Accept', 'application/json,text/javascript,*/*;q=0.01');
+    xhr.addEventListener('load', () => {
+      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        resolve(xhr.response);
+      } else {
+        reject('Could not complete the operation.');
+      }
+    });
+    xhr.addEventListener('error', reject);
+    xhr.send(JSON.stringify(content));
+  });
+};
+
+let toArray = function(object) {
+  return Object.keys(object).map(k => object[k]);
+};
+
 export default class Hue extends Service {
   constructor(settings) {
     this.settings = settings;
@@ -53,8 +77,9 @@ export default class Hue extends Service {
       }
 
       let userInterval = setInterval(() => {
-        loadJSON('POST', `http://${this.settings.bridgeAddress}/api`,
-          `{"devicetype":"${APP_NAME}#${USER_NAME}"}`)
+        loadJSON('POST', `http://${this.settings.bridgeAddress}/api`, {
+          devicetype: `${APP_NAME}#${USER_NAME}`
+        })
           .then(response => {
             console.log(response);
 
@@ -104,7 +129,7 @@ export default class Hue extends Service {
   changeLightState(id, states) {
     return new Promise((resolve, reject) => {
       return loadJSON('PUT', `http://${this.settings.bridgeAddress}/api/${this.settings.userId}/lights/${id}/state`,
-        JSON.stringify(states))
+        states)
         .then(response => {
           if (response[0] && response[0].error) {
             return reject(response[0].error.description);
@@ -114,28 +139,4 @@ export default class Hue extends Service {
         });
     });
   }
-}
-
-function loadJSON(method, url, content = '') {
-  return new Promise((resolve, reject) => {
-    let xhr = new XMLHttpRequest();
-    xhr.open(method, url, true);
-    xhr.responseType = 'json';
-    xhr.timeout = 3000;
-    xhr.overrideMimeType('application/json');
-    xhr.setRequestHeader('Accept', 'application/json,text/javascript,*/*;q=0.01');
-    xhr.addEventListener('load', () => {
-      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-        resolve(xhr.response);
-      } else {
-        reject('Could not complete the operation.');
-      }
-    });
-    xhr.addEventListener('error', reject);
-    xhr.send(content);
-  });
-}
-
-function toArray(object) {
-  return Object.keys(object).map(k => object[k]);
 }
