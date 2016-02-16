@@ -20,6 +20,20 @@ export default class Device extends React.Component {
       });
   }
 
+  /**
+   * Convert colours from xy space to RGB.
+   * See http://www.developers.meethue.com/documentation/color-conversions-rgb-xy
+   */
+  getBulbColour() {
+    let h = Math.round(this.state.hue / 65535 * 360) % 360;
+    let s = Math.round(this.state.sat / 255 * 100);
+    let l = (this.state.bri / 255).toFixed(2);
+
+    // We set the luminosity to 50% and use the brightness as the opacity. The
+    // brighter, the more opaque. Pale shades get transparent.
+    return `hsla(${h},${s}%,50%,${l})`;
+  }
+
   render() {
     let deviceType = 'Unknown device';
     let icon = 'unknown';
@@ -139,6 +153,7 @@ export default class Device extends React.Component {
     return (
       <li data-icon={icon} data-connected={isConnected}>{deviceType}
         <small> ({this.props.name})</small>
+        <div className="colour-picker" style={{ background: this.getBulbColour.call(this) }}></div>
         <input type="checkbox" checked={this.state.on} disabled={!isConnected}
           onChange={this.handleLightOnChange.bind(this)}/>
       </li>
