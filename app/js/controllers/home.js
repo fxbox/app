@@ -4,14 +4,11 @@ import { Controller } from 'components/fxos-mvc/dist/mvc';
 
 import HomeView from 'js/views/home';
 
-import Hue from 'js/lib/hue';
-
 export default class HomeController extends Controller {
   constructor(options) {
     super(options);
 
     this.mountNode = document.getElementById('main');
-    this.hue = new Hue(this.settings);
   }
 
   main() {
