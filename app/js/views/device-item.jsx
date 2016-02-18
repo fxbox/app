@@ -1,8 +1,9 @@
 /* global React */
 
-export default class Device extends React.Component {
+export default class DeviceItem extends React.Component {
   constructor(props) {
     super(props);
+    this.props = props;
     this.state = this.props.state;
   }
 

@@ -1,13 +1,13 @@
 /* global React */
 
-import Device from 'js/views/device';
+import DeviceItem from 'js/views/device-item';
 
 export default class DeviceGroup extends React.Component {
   render() {
-    let deviceNodes = this.props.devices.map((device, id) => {
-      return (
-        <Device
+    let deviceNodes = this.props.devices.map((device, id) => (
+        <DeviceItem
           key={device.uniqueid}
+          id={device.uniqueid}
           lightId={id + 1}
           type={device.type}
           name={device.name}
@@ -15,8 +15,8 @@ export default class DeviceGroup extends React.Component {
           modelid={device.modelid}
           state={device.state}
           hue={this.props.hue}/>
-      );
-    });
+      )
+    );
 
     return (
       <ul>{deviceNodes}</ul>
