@@ -49,13 +49,13 @@ export default class HomeController extends Controller {
 
   showMessage(message) {
     this.view.setState({
-      showModal: true,
+      visible: true,
       title: message.title,
       body: message.body
     });
   }
 
   hideMessage() {
-    this.view.setState({ showModal: false });
+    this.view.setState({ visible: false });
   }
 }

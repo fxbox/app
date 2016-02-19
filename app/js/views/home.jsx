@@ -7,7 +7,7 @@ export default class HomeView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showModal: false,
+      visible: false,
       title: '',
       body: ''
     };
@@ -19,7 +19,7 @@ export default class HomeView extends React.Component {
         <h1>My Home</h1>
         <h2>General</h2>
         <DeviceGroup devices={this.props.devices} hue={this.props.hue}/>
-        <Modal showModal={this.state.showModal} title={this.state.title} body={this.state.body}/>
+        <Modal visible={this.state.visible} title={this.state.title} body={this.state.body}/>
       </div>
     );
   }
