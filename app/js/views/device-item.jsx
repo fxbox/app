@@ -9,14 +9,16 @@ export default class DeviceItem extends React.Component {
 
   handleLightOnChange(evt) {
     let value = evt.target.checked;
+    this.setState({ on: value });
 
     this.props.hue.changeLightState(this.props.lightId, { on: value })
       .then(response => {
-        if (response[0] && response[0].success) {
-          this.setState({ on: value });
+        if (!response[0] || !response[0].success) {
+          throw 'Command failed.';
         }
       })
       .catch(error => {
+        this.setState({ on: !value }); // Revert back to original state.
         console.error(error);
       });
   }
