@@ -33,9 +33,9 @@ export default class HomeController extends Controller {
         console.error(error);
       });
 
-    this.db.getRooms()
-      .then(rooms => {
-        console.log(rooms);
+    this.db.getTags()
+      .then(tags => {
+        console.log(tags);
       })
       .catch(error => {
         console.error(error);

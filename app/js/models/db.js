@@ -1,14 +1,14 @@
 'use strict';
 
 const DB_DEVICE_STORE = 'device';
-const DB_ROOM_STORE = 'room';
+const DB_TAG_STORE = 'tag';
 
 export default class Db {
   constructor() {
     /**
      * The name of the db
      */
-    this.name = 'fxbox-client';
+    this.name = 'foxbox-app';
 
     /**
      * The version of the indexed database
@@ -48,7 +48,7 @@ export default class Db {
       store.createIndex('id', 'id', { unique: true });
       store.createIndex('type', 'type', { unique: false });
 
-      store = db.createObjectStore(DB_ROOM_STORE, {
+      store = db.createObjectStore(DB_TAG_STORE, {
         keyPath: 'id',
         autoIncrement: true
       });
@@ -60,24 +60,24 @@ export default class Db {
     return this.getAll(DB_DEVICE_STORE).call(this);
   }
 
-  getRooms() {
-    return getAll(DB_ROOM_STORE).call(this);
+  getTags() {
+    return getAll(DB_TAG_STORE).call(this);
   }
 
   getDevice(id) {
     return getById(DB_DEVICE_STORE).call(this, id);
   }
 
-  getRoom(id) {
-    return getById(DB_ROOM_STORE).call(this, id);
+  getTag(id) {
+    return getById(DB_TAG_STORE).call(this, id);
   }
 
   setDevice(data) {
     return set(DB_DEVICE_STORE).call(this, data);
   }
 
-  setRoom(data) {
-    return set(DB_ROOM_STORE).call(this, data);
+  setTag(data) {
+    return set(DB_TAG_STORE).call(this, data);
   }
 
   deleteDevice(data) {
@@ -85,8 +85,8 @@ export default class Db {
     return remove(DB_DEVICE_STORE).call(this, data);
   }
 
-  deleteRoom(data) {
-    return remove(DB_ROOM_STORE).call(this, data);
+  deleteTag(data) {
+    return remove(DB_TAG_STORE).call(this, data);
   }
 }
 
@@ -129,7 +129,11 @@ function set(store) {
       txn.oncomplete = resolve;
       txn.onerror = reject;
       try {
-        txn.objectStore(store).put({ id: data.id, data: data });
+        if (data.id) {
+          txn.objectStore(store).put({ id: data.id, data: data });
+        } else {
+          txn.objectStore(store).put({ data: data });
+        }
       } catch (e) {
         console.error(`Error putting data in ${this.idbName}:`, e);
         resolve();
