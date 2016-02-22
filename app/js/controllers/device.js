@@ -21,7 +21,9 @@ export default class DeviceController extends Controller {
         this.hue.getLight(lightId)
           .then(response => {
             let props = response;
+            props.lightId = lightId;
             props.db = this.db;
+            props.hue = this.hue;
             this.view = ReactDOM.render(React.createElement(DevicePage, props), this.mountNode);
           });
       })

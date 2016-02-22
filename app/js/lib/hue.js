@@ -152,4 +152,18 @@ export default class Hue extends Service {
         });
     });
   }
+
+  changeLightAttribute(id, attrs) {
+    return new Promise((resolve, reject) => {
+      return loadJSON('PUT', `http://${this.settings.bridgeAddress}/api/${this.settings.userId}/lights/${id}`,
+        attrs)
+        .then(response => {
+          if (response[0] && response[0].error) {
+            return reject(response[0].error.description);
+          }
+
+          resolve(response);
+        });
+    });
+  }
 }

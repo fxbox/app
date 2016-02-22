@@ -7,9 +7,13 @@ export default class DevicePage extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-    this.state = { tags: [] };
+    this.state = {
+      tags: [],
+      name: props.name
+    };
 
     this.db = props.db;
+    this.hue = props.hue;
   }
 
   componentDidMount() {
@@ -33,6 +37,25 @@ export default class DevicePage extends React.Component {
       });
   }
 
+  handleRename() {
+    const oldName = this.state.name;
+    let deviceName = prompt('Enter new device name', oldName);
+
+    if (!deviceName || !deviceName.trim()) {
+      return;
+    }
+
+    deviceName = deviceName.trim();
+
+    this.setState({ name: deviceName }); // Optimist update.
+
+    this.hue.changeLightAttribute(this.props.lightId, { name: deviceName })
+      .catch(error => {
+        this.setState({ name: oldName }); // Revert to previous value.
+        console.error(error);
+      });
+  }
+
   handleAddTag() {
     let tagName = prompt('Enter new tag name');
 
@@ -50,7 +73,10 @@ export default class DevicePage extends React.Component {
   render() {
     return (
       <div>
-        <h1>{this.props.name}</h1>
+        <h1>
+          {this.state.name}
+          <img className="rename" src="css/icons/rename.svg" alt="Rename" onClick={this.handleRename.bind(this)}/>
+        </h1>
         <h2>Tags</h2>
         <TagList tags={this.state.tags} deviceId={this.props.uniqueid} db={this.db}/>
         <div className="add">
