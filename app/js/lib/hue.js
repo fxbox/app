@@ -126,6 +126,19 @@ export default class Hue extends Service {
     });
   }
 
+  getLight(id) {
+    return new Promise((resolve, reject) => {
+      return loadJSON('GET', `http://${this.settings.bridgeAddress}/api/${this.settings.userId}/lights/${id}`)
+        .then(response => {
+          if (!response) {
+            return reject('Response is empty.');
+          }
+
+          resolve(response);
+        });
+    });
+  }
+
   changeLightState(id, states) {
     return new Promise((resolve, reject) => {
       return loadJSON('PUT', `http://${this.settings.bridgeAddress}/api/${this.settings.userId}/lights/${id}/state`,

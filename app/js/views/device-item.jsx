@@ -154,8 +154,11 @@ export default class DeviceItem extends React.Component {
     }
 
     return (
-      <li data-icon={icon} data-connected={isConnected}>{deviceType}
-        <small>{` (${this.props.name})`}</small>
+      <li data-icon={icon} data-connected={isConnected}>
+        <a href={`#home/device/${this.props.id}`}>
+          {deviceType}
+          <small>{` (${this.props.name})`}</small>
+        </a>
         <div className="colour-picker" style={{ background: this.getBulbColour.call(this) }}></div>
         <input type="checkbox" checked={this.state.on} disabled={!isConnected}
           onChange={this.handleLightOnChange.bind(this)}/>

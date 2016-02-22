@@ -1,6 +1,7 @@
 import { RoutingController } from 'components/fxos-mvc/dist/mvc';
 
 import HomeController from 'js/controllers/home';
+import DeviceController from 'js/controllers/device';
 
 import Hue from 'js/lib/hue';
 
@@ -15,7 +16,8 @@ export default class MainController extends RoutingController {
     let options = { settings: this.settings, db: this.db, hue: this.hue };
 
     super({
-      home: new HomeController(options)
+      'home': new HomeController(options),
+      'home/device/(.+)': new DeviceController(options)
     });
   }
 

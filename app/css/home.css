@@ -46,6 +46,11 @@ li[data-connected="false"] {
   opacity: 0.25;
 }
 
+li a {
+  color: #000;
+  text-decoration: none;
+}
+
 input[type="checkbox"] {
   position: absolute;
   right: 0;
@@ -64,4 +69,14 @@ div.colour-picker {
   width: 2rem;
   height: 2rem;
   border-radius: .2rem;
+}
+
+ul.tag-list li {
+  padding-left: 4rem;
+}
+
+div.add {
+  background: url(icons/plus.svg) 3.5rem no-repeat;
+  background-size: 2rem;
+  padding: 0 7rem;
 }
