@@ -49,3 +49,50 @@ h2 {
   font-size: 2.6rem;
   padding-bottom: 0;
 }
+
+.footer {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  padding: 0;
+}
+
+.footer > li {
+  flex-grow: 1;
+  text-align: center;
+  background: #2F99CD;
+  margin: .1rem;
+}
+
+.footer > li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0;
+  background: url(menu-icons/home.svg) center center no-repeat;
+  background-size: 7.5vmin;
+  height: 15vmin;
+  display: block;
+  opacity: .5;
+}
+
+.footer > li a.active {
+  opacity: 1;
+  background-color: orange;
+}
+
+.footer > li a[href~="#home"] {
+  background-image: url(menu-icons/home.svg);
+}
+
+.footer > li a[href~="#themes"] {
+  background-image: url(menu-icons/themes.svg);
+}
+
+.footer > li a[href~="#mr-fox"] {
+  background-image: url(menu-icons/mr-fox.svg);
+}
+
+.footer > li a[href~="#settings"] {
+  background-image: url(menu-icons/settings.svg);
+}

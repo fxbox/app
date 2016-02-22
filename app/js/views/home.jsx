@@ -1,5 +1,6 @@
 /* global React */
 
+import FooterMenu from 'js/views/footer-menu';
 import DeviceGroup from 'js/views/device-group';
 import Modal from 'js/views/modal';
 
@@ -20,6 +21,7 @@ export default class HomeView extends React.Component {
         <h2>General</h2>
         <DeviceGroup devices={this.props.devices} hue={this.props.hue}/>
         <Modal visible={this.state.visible} title={this.state.title} body={this.state.body}/>
+        <FooterMenu/>
       </div>
     );
   }
