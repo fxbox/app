@@ -22,12 +22,29 @@ export default class HomeController extends Controller {
 
     this.hue.connectToBridge()
       .then(this.hue.getLights.bind(this.hue))
-      .then(response => {
-        console.log(response);
+      .then(devices => {
+        console.log(devices);
         this.view = ReactDOM.render(React.createElement(HomeView, {
-          devices: response,
+          devices: devices,
           hue: this.hue
         }), this.mountNode);
+
+        devices.forEach((device, id) => {
+          let lightId = (id + 1);
+
+          this.db.getDevice(device.uniqueid)
+            .then(deviceData => {
+              if (!deviceData) {
+                this.db.setDevice({
+                  id: device.uniqueid,
+                  lightId: lightId
+                });
+              } else {
+                deviceData.data.lightId = lightId; // In case the id changed.
+                this.db.setDevice(deviceData.data);
+              }
+            });
+        });
       })
       .catch(error => {
         console.error(error);
