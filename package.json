@@ -3,6 +3,10 @@
   "description": "A client for Foxbox",
   "version": "1.0.0",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fxbox/app.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate-icons": "inkscape -e app/img/icons/128.png -w 128 app/img/icon.svg;inkscape -e app/img/icons/512.png -w 512 app/img/icon.svg;inkscape -e app/img/icons/60.png -w 60 app/img/icon.svg;inkscape -e app/img/icons/16.png -w 16 app/img/icon.svg;inkscape -e app/img/icons/32.png -w 32 app/img/icon.svg;inkscape -e app/img/icons/48.png -w 48 app/img/icon.svg;inkscape -e app/img/icons/64.png -w 64 app/img/icon.svg;inkscape -e app/img/icons/90.png -w 90 app/img/icon.svg;inkscape -e app/img/icons/256.png -w 256 app/img/icon.svg;inkscape -e app/img/icons/336.png -w 336 app/img/icon.svg;inkscape -e app/favicon.ico -w 32 app/img/icon.svg"
@@ -15,6 +19,7 @@
   "dependencies": {
     "babel-preset-react": "^6.5.0",
     "fxos-build": "^0.7.0",
+    "gulp": "^3.9.1",
     "gulp-rename": "^1.2.2"
   }
 }
