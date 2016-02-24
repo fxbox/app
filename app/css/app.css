@@ -5,7 +5,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font: normal 2.4rem/4.8rem "Fira Sans", Arial;
+  font: normal 2.2rem/4.4rem "Fira Sans", Arial;
   overflow-x: hidden;
   overflow-y: scroll;
   background: white;
@@ -33,39 +33,51 @@ body > section.active {
   opacity: 1;
 }
 
-h1, h2 {
+header {
+  background-color: #2F99CD;
+  color: white;
   padding: 1rem 3rem;
+  display: flex;
+}
+
+h1, h2 {
   margin: 0;
   font-weight: 300;
 }
 
 h1 {
-  background-color: #2F99CD;
-  color: white;
   font-size: 3.2rem;
+  width: 100%;
 }
 
 h2 {
   font-size: 2.6rem;
-  padding-bottom: 0;
+  padding: 1rem 3rem 0;
 }
 
-.footer {
+ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Footer menu */
+footer ul {
   width: 100%;
   position: absolute;
   bottom: 0;
   display: flex;
-  padding: 0;
 }
 
-.footer > li {
+footer ul li {
   flex-grow: 1;
   text-align: center;
-  background: #2F99CD;
+  background: grey;
   margin: .1rem;
+  opacity: .5;
 }
 
-.footer > li a {
+footer ul li a {
   color: #fff;
   text-decoration: none;
   font-size: 0;
@@ -76,23 +88,24 @@ h2 {
   opacity: .5;
 }
 
-.footer > li a.active {
+footer ul li.active,
+footer ul li.active a {
   opacity: 1;
-  background-color: orange;
+  background-color: #2F99CD;
 }
 
-.footer > li a[href~="#home"] {
+footer ul li a[href~="#home"] {
   background-image: url(menu-icons/home.svg);
 }
 
-.footer > li a[href~="#themes"] {
+footer ul li a[href~="#themes"] {
   background-image: url(menu-icons/themes.svg);
 }
 
-.footer > li a[href~="#mr-fox"] {
+footer ul li a[href~="#mr-fox"] {
   background-image: url(menu-icons/mr-fox.svg);
 }
 
-.footer > li a[href~="#settings"] {
+footer ul li a[href~="#settings"] {
   background-image: url(menu-icons/settings.svg);
 }

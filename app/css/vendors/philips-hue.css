@@ -1,15 +1,71 @@
-li[data-icon="white_and_color_e27_b22"] {
+[data-icon="bridge_v2"] {
+  background-image: url('philips-hue/bridge_v2.svg');
+}
+
+[data-icon="white_and_color_e27_b22"] {
   background-image: url('philips-hue/white_and_color_e27_b22.svg');
 }
 
-li[data-icon="white_e27_b22"] {
+[data-icon="white_e27_b22"] {
   background-image: url('philips-hue/white_e27_b22.svg');
 }
 
-li[data-icon="br30"] {
+[data-icon="br30"] {
   background-image: url('philips-hue/br30.svg');
 }
 
-li[data-icon="gu10_par16"] {
+[data-icon="gu10_par16"] {
   background-image: url('philips-hue/gu10_par16.svg');
+}
+
+[data-icon="lightstrip"] {
+  background-image: url('philips-hue/lightstrip.svg');
+}
+
+[data-icon="iris"] {
+  background-image: url('philips-hue/iris.svg');
+}
+
+[data-icon="bloom"] {
+  background-image: url('philips-hue/bloom.svg');
+}
+
+[data-icon="aura"] {
+  background-image: url('philips-hue/aura.svg');
+}
+
+[data-icon="storylight"] {
+  background-image: url('philips-hue/storylight.svg');
+}
+
+[data-icon="go"] {
+  background-image: url('philips-hue/go.svg');
+}
+
+[data-icon="beyond_ceiling_pendant_table"] {
+  background-image: url('philips-hue/beyond_ceiling_pendant_table.svg');
+}
+
+[data-icon="impulse"] {
+  background-image: url('philips-hue/impulse.svg');
+}
+
+[data-icon="entity"] {
+  background-image: url('philips-hue/entity.svg');
+}
+
+[data-icon="phoenix_ceiling_pendant_table_wall"] {
+  background-image: url('philips-hue/phoenix_ceiling_pendant_table_wall.svg');
+}
+
+[data-icon="phoenix_recessed_spot"] {
+  background-image: url('philips-hue/phoenix_recessed_spot.svg');
+}
+
+[data-icon="tap"] {
+  background-image: url('philips-hue/tap.svg');
+}
+
+[data-icon="hds"] {
+  background-image: url('philips-hue/hds.svg');
 }

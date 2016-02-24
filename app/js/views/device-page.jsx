@@ -73,10 +73,12 @@ export default class DevicePage extends React.Component {
   render() {
     return (
       <div>
-        <h1>
-          {this.state.name}
+        <header>
+          <h1>
+            {this.state.name}
+          </h1>
           <img className="rename" src="css/icons/rename.svg" alt="Rename" onClick={this.handleRename.bind(this)}/>
-        </h1>
+        </header>
         <h2>Tags</h2>
         <TagList tags={this.state.tags} deviceId={this.props.uniqueid} db={this.db}/>
         <div className="add">

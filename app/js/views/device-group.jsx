@@ -19,7 +19,7 @@ export default class DeviceGroup extends React.Component {
     );
 
     return (
-      <ul>{deviceNodes}</ul>
+      <ul className="device-list">{deviceNodes}</ul>
     );
   }
 }

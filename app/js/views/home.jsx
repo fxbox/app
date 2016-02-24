@@ -17,7 +17,9 @@ export default class HomeView extends React.Component {
   render() {
     return (
       <div>
-        <h1>My Home</h1>
+        <header>
+          <h1>My Home</h1>
+        </header>
         <h2>General</h2>
         <DeviceGroup devices={this.props.devices} hue={this.props.hue}/>
         <Modal visible={this.state.visible} title={this.state.title} body={this.state.body}/>

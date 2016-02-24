@@ -14,10 +14,10 @@ export default class FooterMenu extends React.Component {
       ['themes', 'Themes'],
       ['mr-fox', 'Mr. Fox'],
       ['settings', 'Settings']
-    ].map(menu => (<li key={menu[0]}>
-        <a href={`#${menu[0]}`} className={route === menu[0] ? 'active' : undefined}>{menu[1]}</a>
-      </li>)
-    );
+    ].map(menu => (
+      <li key={menu[0]} className={route === menu[0] ? 'active' : undefined}>
+        <a href={`#${menu[0]}`}>{menu[1]}</a>
+      </li>));
 
     return (
       <footer>
