@@ -1,5 +1,6 @@
 #!/bin/bash
 # Deploys to GitHub Pages.
+# Make sure to stash your local changes before running this script.
 
 BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
 git checkout -b deploy
