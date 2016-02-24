@@ -5,12 +5,6 @@ import { Controller } from 'components/fxos-mvc/dist/mvc';
 import HomeView from 'js/views/home';
 
 export default class HomeController extends Controller {
-  constructor(options) {
-    super(options);
-
-    this.mountNode = document.getElementById('main');
-  }
-
   main() {
     this.hue.addEventListener('message', this.showMessage.bind(this));
     this.hue.addEventListener('dismiss-message', this.hideMessage.bind(this));

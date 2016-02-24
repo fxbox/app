@@ -13,7 +13,13 @@ export default class MainController extends RoutingController {
     this.settings = new Settings();
     this.db = new Db();
     this.hue = new Hue(this.settings);
-    let options = { settings: this.settings, db: this.db, hue: this.hue };
+    this.mountNode = document.getElementById('main');
+    const options = {
+      settings: this.settings,
+      db: this.db,
+      hue: this.hue,
+      mountNode: this.mountNode
+    };
 
     super({
       'home': new HomeController(options),
