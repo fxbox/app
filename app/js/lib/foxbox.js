@@ -1,5 +1,7 @@
 import { Service } from 'components/fxos-mvc/dist/mvc';
 
+import FoxboxSettings from './foxbox-settings';
+
 // The delay after which a request is considered failed.
 const REQUEST_TIMEOUT = 5000;
 
@@ -50,6 +52,15 @@ const loadJSON = function(url, method = 'GET', body = undefined) {
 };
 
 export default class Foxbox extends Service {
+  constructor() {
+    super();
+    this.settings = new FoxboxSettings();
+  }
+
+  get origin() {
+    return `${this.settings.scheme}://${this.settings.hostname}:${this.settings.port}`;
+  }
+
   /**
    * Retrieve the list of the services available.
    *
@@ -57,7 +68,7 @@ export default class Foxbox extends Service {
    */
   getServices() {
     return new Promise((resolve, reject) => {
-      loadJSON('http://localhost:3000/services/list.json')
+      loadJSON(`${this.origin}/services/list.json`)
         .then(services => {
           // Let's remove the dummy services here.
           services = services.filter(service => service.name !== 'dummy service');
@@ -83,7 +94,7 @@ export default class Foxbox extends Service {
    */
   changeServiceState(id, state) {
     return new Promise((resolve, reject) => {
-      loadJSON(`http://localhost:3000/services/${id}/state`, 'PUT', state)
+      loadJSON(`${this.origin}/services/${id}/state`, 'PUT', state)
         .then(response => {
           if (!response || !response.result || response.result !== 'success') {
             return reject(new Error(`The action couldn't be performed.`));
