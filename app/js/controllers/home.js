@@ -6,56 +6,43 @@ import HomeView from 'js/views/home';
 
 export default class HomeController extends Controller {
   main() {
-    this.hue.addEventListener('message', this.showMessage.bind(this));
-    this.hue.addEventListener('dismiss-message', this.hideMessage.bind(this));
+    this.foxbox.addEventListener('message', this.showMessage.bind(this));
+    this.foxbox.addEventListener('dismiss-message', this.hideMessage.bind(this));
 
     this.view = ReactDOM.render(React.createElement(HomeView, {
-      devices: [],
-      hue: this.hue
+      services: [],
+      foxbox: this.foxbox
     }), this.mountNode);
 
-    this.hue.connectToBridge()
-      .then(this.hue.getLights.bind(this.hue))
-      .then(devices => {
-        console.log(devices);
+    this.foxbox.getServices()
+      .then(services => {
+        console.log(services);
         this.view = ReactDOM.render(React.createElement(HomeView, {
-          devices: devices,
-          hue: this.hue
+          services: services,
+          foxbox: this.foxbox
         }), this.mountNode);
 
-        devices.forEach((device, id) => {
-          let lightId = (id + 1);
-
-          this.db.getDevice(device.uniqueid)
-            .then(deviceData => {
-              if (!deviceData) {
-                this.db.setDevice({
-                  id: device.uniqueid,
-                  lightId: lightId
-                });
-              } else {
-                deviceData.data.lightId = lightId; // In case the id changed.
-                this.db.setDevice(deviceData.data);
-              }
+        // Clear the services db.
+        this.db.clearServices()
+          .then(() => {
+            // Populate the db with the latest services.
+            services.forEach(service => {
+              this.db.setService(service);
             });
-        });
+          });
       })
-      .catch(error => {
-        console.error(error);
-      });
+      .catch(console.error.bind(console));
 
-    this.db.getTags()
+    /*this.db.getTags()
       .then(tags => {
         console.log(tags);
       })
-      .catch(error => {
-        console.error(error);
-      });
+      .catch(console.error.bind(console));*/
   }
 
   teardown() {
-    this.hue.removeEventListener('message', this.showMessage.bind(this));
-    this.hue.removeEventListener('dismiss-message', this.hideMessage.bind(this));
+    this.foxbox.removeEventListener('message', this.showMessage.bind(this));
+    this.foxbox.removeEventListener('dismiss-message', this.hideMessage.bind(this));
   }
 
   showMessage(message) {

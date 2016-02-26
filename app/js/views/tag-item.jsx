@@ -13,18 +13,18 @@ export default class TagItem extends React.Component {
     let value = evt.target.checked;
     this.setState({ checked: value });
 
-    this.db.getDevice(this.props.deviceId)
-      .then(device => {
-        if (!device.data.tags) {
-          device.data.tags = [];
+    this.db.getService(this.props.serviceId)
+      .then(service => {
+        if (!service.data.tags) {
+          service.data.tags = [];
         }
 
-        device.data.tags = device.data.tags.filter(tag => tag !== this.props.id);
+        service.data.tags = service.data.tags.filter(tag => tag !== this.props.id);
         if (value) {
-          device.data.tags.push(this.props.id);
+          service.data.tags.push(this.props.id);
         }
 
-        this.db.setDevice(device.data);
+        this.db.setService(service.data);
       })
       .catch(error => {
         this.setState({ checked: !value }); // Revert back to original state.

@@ -25,46 +25,46 @@
 }
 
 /* Device list */
-ul.device-list {
+ul.service-list {
   padding: 0 3rem;
 }
 
-ul.device-list li {
+ul.service-list li {
   padding: 0;
   position: relative;
   display: flex;
 }
 
-ul.device-list li[data-icon] {
+ul.service-list li[data-icon] {
   padding-left: 4rem;
   background-size: 2.5rem;
   background-position: left 1rem;
   background-repeat: no-repeat;
 }
 
-ul.device-list li[data-connected="false"] {
+ul.service-list li[data-connected="false"] {
   opacity: 0.25;
 }
 
-ul.device-list li a {
+ul.service-list li a {
   color: #000;
   text-decoration: none;
   width: 100%;
 }
 
-ul.device-list div.colour-picker,
-ul.device-list input[type="checkbox"] {
+ul.service-list div.colour-picker,
+ul.service-list input[type="checkbox"] {
   width: 2.5rem;
   height: 2rem;
   margin: 1.5rem 0 0 1rem;
   border-radius: .2rem;
 }
 
-ul.device-list input[type="checkbox"] {
+ul.service-list input[type="checkbox"] {
   border: 1px solid black;
 }
 
-ul.device-list div.colour-picker {
+ul.service-list div.colour-picker {
 }
 
 /* Tag list */

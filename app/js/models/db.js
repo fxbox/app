@@ -1,6 +1,6 @@
 'use strict';
 
-const DB_DEVICE_STORE = 'device';
+const DB_SERVICE_STORE = 'device';
 const DB_TAG_STORE = 'tag';
 
 export default class Db {
@@ -44,7 +44,7 @@ export default class Db {
     let db = evt.target.result;
     let fromVersion = evt.oldVersion;
     if (fromVersion < 1) {
-      let store = db.createObjectStore(DB_DEVICE_STORE, { keyPath: 'id' });
+      let store = db.createObjectStore(DB_SERVICE_STORE, { keyPath: 'id' });
       store.createIndex('id', 'id', { unique: true });
       store.createIndex('type', 'type', { unique: false });
 
@@ -56,42 +56,50 @@ export default class Db {
     }
   }
 
-  getDevices() {
-    return this.getAll(DB_DEVICE_STORE).call(this);
+  getServices() {
+    return this.getAll(DB_SERVICE_STORE).call(this);
   }
 
   getTags() {
     return getAll(DB_TAG_STORE).call(this);
   }
 
-  getDevice(id) {
-    return getById(DB_DEVICE_STORE).call(this, id);
+  getService(id) {
+    return getById(DB_SERVICE_STORE).call(this, id);
   }
 
   getTag(id) {
     return getById(DB_TAG_STORE).call(this, id);
   }
 
-  setDevice(data) {
-    return set(DB_DEVICE_STORE).call(this, data);
+  setService(data) {
+    return set(DB_SERVICE_STORE).call(this, data);
   }
 
   setTag(data) {
     return set(DB_TAG_STORE).call(this, data);
   }
 
-  deleteDevice(data) {
+  deleteService(data) {
     // Is useful?!
-    return remove(DB_DEVICE_STORE).call(this, data);
+    return remove(DB_SERVICE_STORE).call(this, data);
   }
 
   deleteTag(data) {
     return remove(DB_TAG_STORE).call(this, data);
   }
+
+  clearServices() {
+    return clear(DB_SERVICE_STORE).call(this);
+  }
+
+  clearTags() {
+    return clear(DB_TAG_STORE).call(this);
+  }
 }
 
 function getAll(store) {
-  return function() {
+  return function getAll() {
     return new Promise((resolve, reject) => {
       let txn = this.db.transaction([store], 'readonly');
       let results = [];
@@ -111,7 +119,7 @@ function getAll(store) {
 }
 
 function getById(store) {
-  return function(id) {
+  return function getById(id) {
     return new Promise((resolve, reject) => {
       let txn = this.db.transaction([store], 'readonly');
       txn.onerror = reject;
@@ -123,7 +131,7 @@ function getById(store) {
 }
 
 function set(store) {
-  return function(data) {
+  return function set(data) {
     return new Promise((resolve, reject) => {
       let txn = this.db.transaction([store], 'readwrite');
       txn.oncomplete = resolve;
@@ -143,7 +151,7 @@ function set(store) {
 }
 
 function remove(store) {
-  return function(id) {
+  return function remove(id) {
     return new Promise((resolve, reject) => {
       let txn = this.db.transaction([store], 'readwrite');
       txn.oncomplete = resolve;
@@ -154,6 +162,17 @@ function remove(store) {
         console.error(`Error deleting data from ${this.idbName}:`, e);
         resolve();
       }
+    });
+  };
+}
+
+function clear(store) {
+  return function clear() {
+    return new Promise((resolve, reject) => {
+      var txn = this.db.transaction([store], 'readwrite');
+      txn.oncomplete = resolve;
+      txn.onerror = reject;
+      txn.objectStore(store).clear();
     });
   };
 }

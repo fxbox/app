@@ -1,26 +1,23 @@
 /* global React */
 
-export default class DeviceItem extends React.Component {
+export default class ServiceItem extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-    this.state = this.props.state;
+    this.state = props.state;
+
+    this.foxbox = props.foxbox;
   }
 
   handleLightOnChange(evt) {
+    // No optimistic update because some network issues can't be caught.
     let value = evt.target.checked;
-    this.setState({ on: value });
 
-    this.props.hue.changeLightState(this.props.lightId, { on: value })
-      .then(response => {
-        if (!response[0] || !response[0].success) {
-          throw 'Command failed.';
-        }
+    this.foxbox.changeServiceState(this.props.id, { on: value })
+      .then(() => {
+        this.setState({ on: value });
       })
-      .catch(error => {
-        this.setState({ on: !value }); // Revert back to original state.
-        console.error(error);
-      });
+      .catch(console.error.bind(console));
   }
 
   /**
@@ -28,9 +25,9 @@ export default class DeviceItem extends React.Component {
    * See http://www.developers.meethue.com/documentation/color-conversions-rgb-xy
    */
   getBulbColour() {
-    let h = Math.round(this.state.hue / 65535 * 360) % 360;
-    let s = Math.round(this.state.sat / 255 * 100);
-    let l = (this.state.bri / 255).toFixed(2);
+    let h = this.state.hue;
+    let s = Math.round(this.state.sat * 100);
+    let l = this.state.val;
 
     // We set the luminosity to 50% and use the brightness as the opacity. The
     // brighter, the more opaque. Pale shades get transparent.
@@ -38,12 +35,12 @@ export default class DeviceItem extends React.Component {
   }
 
   render() {
-    let deviceType = 'Unknown device';
+    let serviceType = 'Unknown service';
     let icon = 'unknown';
 
     switch (this.props.type) {
       case 'Extended color light':
-        deviceType = 'Light';
+        serviceType = 'Light';
         icon = 'light';
         break;
     }
@@ -149,14 +146,14 @@ export default class DeviceItem extends React.Component {
     }
 
     let isConnected = false;
-    if (this.state.reachable !== undefined) {
-      isConnected = this.state.reachable;
+    if (this.state.available !== undefined) {
+      isConnected = this.state.available;
     }
 
     return (
       <li data-icon={icon} data-connected={isConnected}>
-        <a href={`#home/device/${this.props.id}`}>
-          {deviceType}
+        <a href={`#services/${this.props.id}`}>
+          {serviceType}
           <small>{` (${this.props.name})`}</small>
         </a>
         <div className="colour-picker" style={{ background: this.getBulbColour.call(this) }}></div>

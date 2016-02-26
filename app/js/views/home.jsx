@@ -1,7 +1,7 @@
 /* global React */
 
 import FooterMenu from 'js/views/footer-menu';
-import DeviceGroup from 'js/views/device-group';
+import ServiceList from 'js/views/service-list';
 import Modal from 'js/views/modal';
 
 export default class HomeView extends React.Component {
@@ -21,7 +21,7 @@ export default class HomeView extends React.Component {
           <h1>My Home</h1>
         </header>
         <h2>General</h2>
-        <DeviceGroup devices={this.props.devices} hue={this.props.hue}/>
+        <ServiceList services={this.props.services} foxbox={this.props.foxbox}/>
         <Modal visible={this.state.visible} title={this.state.title} body={this.state.body}/>
         <FooterMenu/>
       </div>
