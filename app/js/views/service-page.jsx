@@ -12,7 +12,6 @@ export default class ServicePage extends React.Component {
       name: props.data.name
     };
 
-    this.db = props.db;
     this.foxbox = props.foxbox;
   }
 
@@ -21,7 +20,7 @@ export default class ServicePage extends React.Component {
   }
 
   populateTags() {
-    this.db.getTags()
+    this.foxbox.getTags()
       .then(tags => {
         tags.forEach(tag => {
           tag.data.checked = !!(this.props.data.tags && this.props.data.tags.includes(tag.id));
@@ -39,7 +38,7 @@ export default class ServicePage extends React.Component {
     }
 
     tagName = tagName.trim();
-    this.db.setTag({ name: tagName })
+    this.foxbox.setTag({ name: tagName })
       .then(() => {
         this.populateTags(); // Needed to get the newly added tag ID.
       });
@@ -55,7 +54,7 @@ export default class ServicePage extends React.Component {
           <!--<img className="rename" src="css/icons/rename.svg" alt="Rename"/>-->
         </header>
         <h2>Tags</h2>
-        <TagList tags={this.state.tags} serviceId={this.props.id} db={this.db}/>
+        <TagList tags={this.state.tags} serviceId={this.props.id} foxbox={this.foxbox}/>
         <div className="add">
           <span onClick={this.handleAddTag.bind(this)}>Create a new tag</span>
         </div>

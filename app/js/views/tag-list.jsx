@@ -5,7 +5,7 @@ import TagItem from 'js/views/tag-item';
 export default class TagList extends React.Component {
   constructor(props) {
     super(props);
-    this.db = props.db;
+    this.foxbox = props.foxbox;
   }
 
   render() {
@@ -16,7 +16,7 @@ export default class TagList extends React.Component {
           name={tag.data.name}
           checked={tag.data.checked}
           serviceId={this.props.serviceId}
-          db={this.db}/>
+          foxbox={this.foxbox}/>
       )
     );
 

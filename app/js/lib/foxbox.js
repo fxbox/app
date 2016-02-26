@@ -1,6 +1,9 @@
+'use strict';
+
 import { Service } from 'components/fxos-mvc/dist/mvc';
 
 import FoxboxSettings from './foxbox-settings';
+import FoxboxDb from './foxbox-db';
 
 // The delay after which a request is considered failed.
 const REQUEST_TIMEOUT = 5000;
@@ -55,6 +58,11 @@ export default class Foxbox extends Service {
   constructor() {
     super();
     this.settings = new FoxboxSettings();
+    this.db = new FoxboxDb();
+  }
+
+  init() {
+    return this.db.init();
   }
 
   get origin() {
@@ -78,6 +86,15 @@ export default class Foxbox extends Service {
           Promise.all(promises)
             .then(states => {
               services.forEach((service, id) => service.state = states[id]);
+
+              // Clear the services db.
+              this.db.clearServices()
+                .then(() => {
+                  // Populate the db with the latest services.
+                  services.forEach(service => {
+                    this.db.setService(service);
+                  });
+                });
 
               return resolve(services);
             });
@@ -103,5 +120,22 @@ export default class Foxbox extends Service {
           return resolve();
         });
     });
+  }
+
+  getTags() {
+    return this.db.getTags.apply(this.db, arguments);
+  }
+
+  getService() {
+    // Get data from the DB so we get the attributes, the state and the tags.
+    return this.db.getService.apply(this.db, arguments);
+  }
+
+  setService() {
+    return this.db.setService.apply(this.db, arguments);
+  }
+
+  setTag() {
+    return this.db.setTag.apply(this.db, arguments);
   }
 }

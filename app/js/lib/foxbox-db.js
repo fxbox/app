@@ -1,40 +1,29 @@
 'use strict';
 
-const DB_SERVICE_STORE = 'device';
-const DB_TAG_STORE = 'tag';
+// The name of the db.
+const DB_NAME = 'foxbox-db';
 
-export default class Db {
+// The version of the indexed database.
+const DB_VERSION = 1;
+
+const DB_SERVICE_STORE = 'services';
+const DB_TAG_STORE = 'tags';
+
+export default class FoxboxDb {
   constructor() {
-    /**
-     * The name of the db
-     */
-    this.name = 'foxbox-app';
-
-    /**
-     * The version of the indexed database
-     */
-    this.DB_VERSION = 1;
-
-    /**
-     * Our local indexed db where we store our copy of bookmarks
-     */
     this.db = null;
-  }
-
-  get idbName() {
-    return this.name + '_db';
   }
 
   init() {
     return new Promise((resolve, reject) => {
-      let req = window.indexedDB.open(this.idbName, this.DB_VERSION);
+      let req = window.indexedDB.open(DB_NAME, DB_VERSION);
       req.onupgradeneeded = this.upgradeSchema;
       req.onsuccess = evt => {
         this.db = evt.target.result;
         return resolve();
       };
       req.onerror = (e) => {
-        console.error('Error opening database', e);
+        console.error('Error opening database:', e);
         return reject(e);
       };
     });
@@ -143,7 +132,7 @@ function set(store) {
           txn.objectStore(store).put({ data: data });
         }
       } catch (e) {
-        console.error(`Error putting data in ${this.idbName}:`, e);
+        console.error(`Error putting data in ${DB_NAME}:`, e);
         resolve();
       }
     });
@@ -159,7 +148,7 @@ function remove(store) {
       try {
         txn.objectStore(store).delete(id);
       } catch (e) {
-        console.error(`Error deleting data from ${this.idbName}:`, e);
+        console.error(`Error deleting data from ${DB_NAME}:`, e);
         resolve();
       }
     });

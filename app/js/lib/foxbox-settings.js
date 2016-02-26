@@ -1,3 +1,5 @@
+'use strict';
+
 import { Model } from 'components/fxos-mvc/dist/mvc';
 
 const DEFAULT_SCHEME = 'http';

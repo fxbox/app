@@ -21,23 +21,14 @@ export default class HomeController extends Controller {
           services: services,
           foxbox: this.foxbox
         }), this.mountNode);
-
-        // Clear the services db.
-        this.db.clearServices()
-          .then(() => {
-            // Populate the db with the latest services.
-            services.forEach(service => {
-              this.db.setService(service);
-            });
-          });
       })
       .catch(console.error.bind(console));
 
-    /*this.db.getTags()
+    this.foxbox.getTags()
       .then(tags => {
         console.log(tags);
       })
-      .catch(console.error.bind(console));*/
+      .catch(console.error.bind(console));
   }
 
   teardown() {

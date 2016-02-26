@@ -6,14 +6,14 @@ export default class TagItem extends React.Component {
     this.props = props;
     this.state = { checked: props.checked };
 
-    this.db = props.db;
+    this.foxbox = props.foxbox;
   }
 
   handleSetTag(evt) {
     let value = evt.target.checked;
     this.setState({ checked: value });
 
-    this.db.getService(this.props.serviceId)
+    this.foxbox.getService(this.props.serviceId)
       .then(service => {
         if (!service.data.tags) {
           service.data.tags = [];
@@ -24,7 +24,7 @@ export default class TagItem extends React.Component {
           service.data.tags.push(this.props.id);
         }
 
-        this.db.setService(service.data);
+        this.foxbox.setService(service.data);
       })
       .catch(error => {
         this.setState({ checked: !value }); // Revert back to original state.
