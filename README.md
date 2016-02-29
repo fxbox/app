@@ -14,8 +14,8 @@ cd app
 And then run:
 
 ```bash
-$ nvm install 0.11.4
-$ nvm use 0.11.4
+$ nvm install v4.2.2
+$ nvm use v4.2.2
 $ npm install -g gulp
 ```
 
