@@ -1,3 +1,5 @@
+/* global Request, Headers */
+
 'use strict';
 
 import { Service } from 'components/fxos-mvc/dist/mvc';
@@ -18,38 +20,40 @@ const REQUEST_TIMEOUT = 5000;
  */
 const loadJSON = function(url, method = 'GET', body = undefined) {
   method = method.toUpperCase();
-
-  let req = {
-    method,
-    headers: {
-      'Accept': 'application/json'
-    },
-    cache: 'no-store'
-  };
-
-  if (body !== undefined) {
-    req.body = JSON.stringify(body);
-  }
   if (method === 'GET' || method === 'HEAD') {
-    delete req.body;
+    body = undefined;
   }
+
+  let req = new Request(url, {
+    method,
+    headers: new Headers({
+      'Accept': 'application/json'
+    }),
+    cache: 'no-store',
+    body: JSON.stringify(body)
+  });
 
   // Workaround to catch network failures.
   return new Promise((resolve, reject) => {
     let hasTimedOut = false;
     const timeout = setTimeout(() => {
       hasTimedOut = true;
-      reject(new Error('Request timed out'));
+      reject(new TypeError('Request timed out'));
     }, REQUEST_TIMEOUT);
 
-    fetch(url, req)
-      .then(response => {
+    fetch(req)
+      .then(res => {
         if (hasTimedOut) {
           return;
         }
 
         clearTimeout(timeout);
-        return resolve(response.json());
+
+        if (res.ok) {
+          return resolve(res.json());
+        } else {
+          throw new TypeError(`The response returned a ${res.status} HTTP status code.`);
+        }
       });
   });
 };
@@ -112,8 +116,8 @@ export default class Foxbox extends Service {
   changeServiceState(id, state) {
     return new Promise((resolve, reject) => {
       loadJSON(`${this.origin}/services/${id}/state`, 'PUT', state)
-        .then(response => {
-          if (!response || !response.result || response.result !== 'success') {
+        .then(res => {
+          if (!res || !res.result || res.result !== 'success') {
             return reject(new Error(`The action couldn't be performed.`));
           }
 
