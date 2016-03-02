@@ -1,0 +1,27 @@
+.user-login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.user-login label {
+  display: flex;
+  padding: 1rem;
+  height: 5rem;
+}
+
+.user-login label > span {
+  text-align: center;
+  width: 50%;
+  line-height: 5rem;
+}
+
+.user-login label input {
+  width: 50%;
+}
+
+.user-login button {
+  margin: 1rem;
+  height: 5rem;
+}
