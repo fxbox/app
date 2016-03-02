@@ -1,4 +1,4 @@
-/* global Request, Headers */
+/* global Headers */
 
 'use strict';
 
@@ -7,70 +7,106 @@ import { Service } from 'components/fxos-mvc/dist/mvc';
 import FoxboxSettings from './foxbox-settings';
 import FoxboxDb from './foxbox-db';
 
-// The delay after which a request is considered failed.
-const REQUEST_TIMEOUT = 5000;
+const settings = new FoxboxSettings();
+const db = new FoxboxDb();
 
 /**
  * Request a JSON from a specified URL.
  *
  * @param {string} url The URL to send the request to.
  * @param {string} method The HTTP method (defaults to "GET").
- * @param {Object} body An object of key/value.
+ * @param {!Object} body An object of key/value.
+ * @param {!Object} extraHeaders Any additional headers to include in the request.
  * @return {Promise}
  */
-const loadJSON = function(url, method = 'GET', body = undefined) {
+const fetchJSON = function(url, method = 'GET', body = undefined, extraHeaders = {}) {
   method = method.toUpperCase();
-  if (method === 'GET' || method === 'HEAD') {
-    body = undefined;
-  }
 
-  let req = new Request(url, {
+  const req = {
     method,
     headers: new Headers({
       'Accept': 'application/json'
     }),
-    cache: 'no-store',
-    body: JSON.stringify(body)
-  });
+    cache: 'no-store'
+  };
 
-  // Workaround to catch network failures.
-  return new Promise((resolve, reject) => {
-    let hasTimedOut = false;
-    const timeout = setTimeout(() => {
-      hasTimedOut = true;
-      reject(new TypeError('Request timed out'));
-    }, REQUEST_TIMEOUT);
+  if (method === 'POST' || method === 'PUT') {
+    req.headers.append('Content-Type', 'application/json;charset=UTF-8');
+  }
+  for (let header in extraHeaders) {
+    req.headers.append(header, extraHeaders[header]);
+  }
+  if (!extraHeaders.Authorization && !!settings.session) {
+    // The user is logged in, we authenticate the request.
+    req.headers.append('Authorization', `Bearer ${settings.session}`);
+  }
 
-    fetch(req)
-      .then(res => {
-        if (hasTimedOut) {
-          return;
-        }
+  if (method === 'GET' || method === 'HEAD') {
+    body = undefined;
+  }
+  if (body !== undefined) {
+    req.body = JSON.stringify(body);
+  }
 
-        clearTimeout(timeout);
+  return fetch(url, req)
+    .then(res => {
+      if (res.ok) {
+        return res.json();
+      }
 
-        if (res.ok) {
-          return resolve(res.json());
-        } else {
-          throw new TypeError(`The response returned a ${res.status} HTTP status code.`);
-        }
-      });
-  });
+      throw new TypeError(`The response returned a ${res.status} HTTP status code.`);
+    });
 };
 
 export default class Foxbox extends Service {
-  constructor() {
-    super();
-    this.settings = new FoxboxSettings();
-    this.db = new FoxboxDb();
-  }
-
   init() {
-    return this.db.init();
+    return db.init();
   }
 
   get origin() {
-    return `${this.settings.scheme}://${this.settings.hostname}:${this.settings.port}`;
+    return `${settings.scheme}://${settings.hostname}:${settings.port}`;
+  }
+
+  get isLoggedIn() {
+    return !!settings.session;
+  }
+
+  /**
+   * Log in a user given her credentials.
+   *
+   * @param {string} username
+   * @param {string} password
+   * @return {Promise}
+   */
+  login(username, password) {
+    if (!username) {
+      return Promise.reject(new Error('Specify a user name.'));
+    }
+    if (!password) {
+      return Promise.reject(new Error('Specify a password.'));
+    }
+
+    const header = {
+      Authorization: `Basic ${btoa(`${username}:${password}`)}`
+    };
+    return fetchJSON(`${this.origin}/users/login`, 'POST', undefined, header)
+      .then(res => {
+        if (!res.session_token) {
+          throw(new Error('Token is missing.'));
+        }
+
+        settings.session = res.session_token;
+      });
+  }
+
+  /**
+   * Log out the user.
+   *
+   * @return {Promise} A promise that resolves once the user is logged out.
+   */
+  logout() {
+    settings.session = undefined;
+    return Promise.resolve();
   }
 
   /**
@@ -80,23 +116,23 @@ export default class Foxbox extends Service {
    */
   getServices() {
     return new Promise((resolve, reject) => {
-      loadJSON(`${this.origin}/services/list.json`)
+      fetchJSON(`${this.origin}/services/list.json`)
         .then(services => {
           // Let's remove the dummy services here.
           services = services.filter(service => service.name !== 'dummy service');
 
           const promises =
-            services.map(service => loadJSON(`http://localhost:3000/services/${service.id}/state`, 'GET'));
+            services.map(service => fetchJSON(`http://localhost:3000/services/${service.id}/state`));
           Promise.all(promises)
             .then(states => {
               services.forEach((service, id) => service.state = states[id]);
 
               // Clear the services db.
-              this.db.clearServices()
+              db.clearServices()
                 .then(() => {
                   // Populate the db with the latest services.
                   services.forEach(service => {
-                    this.db.setService(service);
+                    db.setService(service);
                   });
                 });
 
@@ -115,7 +151,7 @@ export default class Foxbox extends Service {
    */
   changeServiceState(id, state) {
     return new Promise((resolve, reject) => {
-      loadJSON(`${this.origin}/services/${id}/state`, 'PUT', state)
+      fetchJSON(`${this.origin}/services/${id}/state`, 'PUT', state)
         .then(res => {
           if (!res || !res.result || res.result !== 'success') {
             return reject(new Error(`The action couldn't be performed.`));
@@ -127,19 +163,19 @@ export default class Foxbox extends Service {
   }
 
   getTags() {
-    return this.db.getTags.apply(this.db, arguments);
+    return db.getTags.apply(db, arguments);
   }
 
   getService() {
     // Get data from the DB so we get the attributes, the state and the tags.
-    return this.db.getService.apply(this.db, arguments);
+    return db.getService.apply(db, arguments);
   }
 
   setService() {
-    return this.db.setService.apply(this.db, arguments);
+    return db.setService.apply(db, arguments);
   }
 
   setTag() {
-    return this.db.setTag.apply(this.db, arguments);
+    return db.setTag.apply(db, arguments);
   }
 }

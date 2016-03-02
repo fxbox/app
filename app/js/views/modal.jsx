@@ -1,19 +1,12 @@
 /* global React */
 
 export default class Modal extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      dismissed: false
-    };
-  }
-
   close() {
-    this.setState({ dismissed: true });
+    this.props.dismiss();
   }
 
   render() {
-    let style = 'modal' + ((this.state.dismissed ? false : this.props.visible) ? ' visible' : '');
+    let style = 'modal' + (this.props.visible ? ' visible' : '');
 
     return (
       <div className={style}>

@@ -11,7 +11,8 @@ export default class FoxboxSettings extends Model {
     super({
       _scheme: localStorage.getItem('foxbox-scheme') || DEFAULT_SCHEME,
       _hostname: localStorage.getItem('foxbox-hostname') || DEFAULT_HOSTNAME,
-      _port: localStorage.getItem('foxbox-port') || DEFAULT_PORT
+      _port: localStorage.getItem('foxbox-port') || DEFAULT_PORT,
+      _session: localStorage.getItem('session')
     });
   }
 
@@ -43,5 +44,19 @@ export default class FoxboxSettings extends Model {
     port = parseInt(port, 10) || DEFAULT_PORT;
     this._port = port;
     localStorage.setItem('foxbox-port', this._port);
+  }
+
+  get session() {
+    return this._session;
+  }
+
+  set session(session) {
+    if (session === undefined) {
+      this._session = undefined;
+      localStorage.removeItem('session');
+    } else {
+      this._session = session;
+      localStorage.setItem('session', this._session);
+    }
   }
 }

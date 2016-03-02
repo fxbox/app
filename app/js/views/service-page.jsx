@@ -1,5 +1,6 @@
 /* global React */
 
+import UserLogoutButton from 'js/views/user-logout-button';
 import FooterMenu from 'js/views/footer-menu';
 import TagList from 'js/views/tag-list';
 
@@ -48,9 +49,8 @@ export default class ServicePage extends React.Component {
     return (
       <div>
         <header>
-          <h1>
-            {this.state.name}
-          </h1>
+          <h1>{this.state.name}</h1>
+          <UserLogoutButton foxbox={this.props.foxbox}/>
           <!--<img className="rename" src="css/icons/rename.svg" alt="Rename"/>-->
         </header>
         <h2>Tags</h2>

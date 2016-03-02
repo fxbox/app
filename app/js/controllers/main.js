@@ -1,5 +1,6 @@
 import { RoutingController } from 'components/fxos-mvc/dist/mvc';
 
+import UsersController from 'js/controllers/users';
 import HomeController from 'js/controllers/home';
 import ServiceController from 'js/controllers/service';
 
@@ -11,25 +12,34 @@ export default class MainController extends RoutingController {
     const foxbox = new Foxbox();
     const mountNode = document.getElementById('main');
     const options = { foxbox, mountNode };
+
+    const usersController = new UsersController(options);
     super({
+      'users': usersController,
+      'users/(.+)': usersController,
       'services': new HomeController(options),
       'services/(.+)': new ServiceController(options)
     });
 
     this.foxbox = foxbox;
-  }
 
-  main() {
-    window.location.hash = '';
     if (window.cordova) {
       // FIXME: Adding this to the `window` global for debugging, should
       // integrate this into the app's UI, see
       // https://github.com/fxbox/app/issues/6
       window.qr = new Qr();
     }
+  }
+
+  main() {
+    window.location.hash = '';
     this.foxbox.init()
       .then(() => {
-        window.location.hash = '#services';
+        if (this.foxbox.isLoggedIn) {
+          window.location.hash = '#services';
+        } else {
+          window.location.hash = '#users/login';
+        }
       });
   }
 }

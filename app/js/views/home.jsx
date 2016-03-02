@@ -1,5 +1,6 @@
 /* global React */
 
+import UserLogoutButton from 'js/views/user-logout-button';
 import FooterMenu from 'js/views/footer-menu';
 import ServiceList from 'js/views/service-list';
 import Modal from 'js/views/modal';
@@ -19,6 +20,7 @@ export default class HomeView extends React.Component {
       <div>
         <header>
           <h1>My Home</h1>
+          <UserLogoutButton foxbox={this.props.foxbox}/>
         </header>
         <h2>General</h2>
         <ServiceList services={this.props.services} foxbox={this.props.foxbox}/>
