@@ -2,12 +2,12 @@
  /* global cordova, cordovaHTTP */
 
 // Expecting URLs of the form:
-// https://192-168-0-16.0123456789abcdef0123456789abcdef.plex.direct:12346/
-// where the first part is a local IPv4 address and the second part is a 32-char
+// https://d52f9607a464a51bc4bdb43df4628f63.self-signed:4333/
+// where the first part is a 32-char
 // alphanumeric string, representing the first 128 bits of the sha256 hash of
 // the root certificate with which the local server's TLS certificate is signed,
 // in hexadecimal representation.
-const FINGERPRINT_PART = 1;
+const FINGERPRINT_PART = 0;
 
 export default class Qr {
   constructor() {
@@ -18,6 +18,7 @@ export default class Qr {
     } else {
       this.supported = false;
     }
+    this.hosts = {};
   }
 
   connectTo(url, cb) {
@@ -28,10 +29,28 @@ export default class Qr {
     cordovaHTTP.acceptHss(true, function() {
       var urlParts = url.substring('https://'.length).split('.');
       var fingerprint = urlParts[FINGERPRINT_PART];
-      cordovaHTTP.get(url, { fingerprint: fingerprint }, { }, cb, cb);
-    }, function(e) {
+      console.log('Trying', this.hosts[url], fingerprint);
+      cordovaHTTP.get(this.hosts[url], { fingerprint: fingerprint }, { }, cb, cb);
+    }.bind(this), function(e) {
       console.error('Error setting acceptHss', e);
     });
+  }
+
+  discover() {
+    cordova.plugins.zeroconf.watch('_https._tcp.local.', function(result) {
+      console.log('zeroconf msg', result);
+      var service = result.service;
+      if (result.action == 'added' && result.service.txtRecord.name) {
+        if (service.addresses[0].indexOf('.') !== -1) {
+          this.hosts[`https://${result.service.txtRecord.name}:${result.service.port}/`] =
+              `https://${result.service.addresses[0]}:${result.service.port}/`;
+        } else {
+          this.hosts[`https://${result.service.txtRecord.name}:${result.service.port}/`] =
+              `https://${result.service.addresses[1]}:${result.service.port}/`;
+        }
+        console.log('this.hosts now', this.hosts);
+      }
+    }.bind(this));
   }
 
   scanQR(cb) {
