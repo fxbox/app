@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <title>Web QR</title>
+    <script type="text/javascript" src="js/lib/llqrcode.js"></script>
+    <script type="text/javascript" src="js/lib/webqr.js"></script>
+  </head>
+  <body>
+    <div id="mainbody">
+      <table class="tsel" border="0" width="100%">
+        <tr>
+          <td valign="top" align="center" width="50%">
+            <table class="tsel" border="0">
+              <tr>
+                <td><img class="selector" id="webcamimg" src="vid.png" onclick="setwebcam()" align="left" /></td>
+                <td><img class="selector" id="qrimg" src="cam.png" onclick="setimg()" align="right"/></td>
+              </tr>
+              <tr><td colspan="2" align="center">
+                <div id="outdiv"></div>
+              </td></tr>
+            </table>
+          </td>
+        </tr>
+        <tr><td colspan="3" align="center">
+          <img src="down.png"/>
+        </td></tr>
+        <tr><td colspan="3" align="center">
+          <div id="result"></div>
+        </td></tr>
+      </table>
+    </div>&nbsp;
+    <canvas id="qr-canvas" width="800" height="600"></canvas>
+    <script type="text/javascript">load();</script>
+  </body>
+</html>
