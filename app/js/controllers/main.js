@@ -1,7 +1,7 @@
 import { RoutingController } from 'components/fxos-mvc/dist/mvc';
 
 import UsersController from 'js/controllers/users';
-import HomeController from 'js/controllers/home';
+import ServicesController from 'js/controllers/services';
 import ServiceController from 'js/controllers/service';
 
 import Foxbox from 'js/lib/foxbox';
@@ -17,7 +17,7 @@ export default class MainController extends RoutingController {
     super({
       'users': usersController,
       'users/(.+)': usersController,
-      'services': new HomeController(options),
+      'services': new ServicesController(options),
       'services/(.+)': new ServiceController(options)
     });
 

@@ -4,7 +4,7 @@ import UserLogoutButton from 'js/views/user-logout-button';
 import FooterMenu from 'js/views/footer-menu';
 import TagList from 'js/views/tag-list';
 
-export default class ServicePage extends React.Component {
+export default class Service extends React.Component {
   constructor(props) {
     super(props);
     this.state = {

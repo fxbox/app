@@ -1,11 +1,11 @@
 /* global React */
 
-import ServiceItem from 'js/views/service-item';
+import ServicesListItem from 'js/views/services-list-item';
 
-export default class ServiceList extends React.Component {
+export default class ServicesList extends React.Component {
   render() {
     let serviceNodes = this.props.services.map((service, id) => (
-        <ServiceItem
+        <ServicesListItem
           key={service.id}
           id={service.id}
           type={service.type}

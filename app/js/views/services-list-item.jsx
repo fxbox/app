@@ -1,6 +1,6 @@
 /* global React */
 
-export default class ServiceItem extends React.Component {
+export default class ServicesListItem extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;

@@ -2,10 +2,10 @@
 
 import UserLogoutButton from 'js/views/user-logout-button';
 import FooterMenu from 'js/views/footer-menu';
-import ServiceList from 'js/views/service-list';
+import ServicesList from 'js/views/services-list';
 import Modal from 'js/views/modal';
 
-export default class HomeView extends React.Component {
+export default class Services extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -46,7 +46,7 @@ export default class HomeView extends React.Component {
           <UserLogoutButton foxbox={this.foxbox}/>
         </header>
         <h2>General</h2>
-        <ServiceList services={this.state.services} foxbox={this.foxbox}/>
+        <ServicesList services={this.state.services} foxbox={this.foxbox}/>
         <Modal visible={this.state.isModalVisible} title={this.state.title} body={this.state.body} dismiss={this.dismissModal.bind(this)}/>
         <FooterMenu/>
       </div>

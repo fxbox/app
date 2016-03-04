@@ -2,11 +2,11 @@
 
 import { Controller } from 'components/fxos-mvc/dist/mvc';
 
-import ServicePage from 'js/views/service-page';
+import Service from 'js/views/service';
 
 export default class ServiceController extends Controller {
   main(id) {
-    ReactDOM.render(React.createElement(ServicePage, {
+    ReactDOM.render(React.createElement(Service, {
       id: id,
       foxbox: this.foxbox
     }), this.mountNode);
