@@ -12,7 +12,7 @@ const FINGERPRINT_PART = 0;
 export default class Qr {
   constructor() {
     if (cordova && cordova.plugins &&
-        cordova.plugins.barcodeScanner &&
+        cordova.plugins.zeroconf &&
         cordovaHTTP && cordovaHTTP.acceptHss) {
       this.supported = true;
     } else {
@@ -51,26 +51,5 @@ export default class Qr {
         console.log('this.hosts now', this.hosts);
       }
     }.bind(this));
-  }
-
-  scanQR(cb) {
-    if (!cb) {
-      cb = function(result) {
-        console.log(result);
-      };
-    }
-    if (!this.supported) {
-      console.warn('QR code based discovery disabled (Cordova plugins not available)');
-      return;
-    }
-    cordova.plugins.barcodeScanner.scan(function(result) {
-      if (result.cancelled) {
-        console.error('Scanning cancelled');
-        return;
-      }
-      this.connectTo(result.text, cb);
-    }.bind(this), function (error) {
-      console.error('Scanning failed: ' + error);
-    });
   }
 }

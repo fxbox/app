@@ -153,7 +153,6 @@ gulp.task('cordova-setup', function(cb) {
 
 addTask('cordova-android', 'dist/cordova', [
   'cordova plugin add https://github.com/michielbdejong/SecureHTTP.git',
-  'cordova plugin add phonegap-plugin-barcodescanner',
   'cordova plugin add cordova-plugin-zeroconf',
   'cordova platform add android@5.1.0',
   'cordova build android',
