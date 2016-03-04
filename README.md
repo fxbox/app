@@ -1,6 +1,6 @@
 # ![Foxbox Client](https://raw.githubusercontent.com/fxbox/app/master/app/img/icons/32.png "Foxbox Client") Foxbox Client
 
-> A client for Foxbox
+> A web client for Foxbox (with support for emulating the server component in the meantime).
 
 ## Prerequisites
 
