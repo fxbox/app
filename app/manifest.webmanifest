@@ -1,6 +1,6 @@
 {
-  "name": "Foxbox Client",
-  "short_name": "Foxbox",
+  "name": "Project Link app",
+  "short_name": "Project Link",
   "lang": "en",
   "scope": "/",
   "start_url": "/index.html",

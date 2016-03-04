@@ -1,6 +1,6 @@
-# ![Foxbox Client](https://raw.githubusercontent.com/fxbox/app/master/app/img/icons/32.png "Foxbox Client") Foxbox Client
+# ![Project Link app](https://raw.githubusercontent.com/fxbox/app/master/app/img/icons/32.png "Project Link app") Project Link app
 
-> A client for Foxbox
+> An app for [Project Link](https://wiki.mozilla.org/Project_Link)
 
 ## Prerequisites
 

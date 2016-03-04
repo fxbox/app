@@ -1,8 +1,8 @@
 {
-  "name": "Foxbox Client",
-  "short_name": "Foxbox",
+  "name": "Project Link app",
+  "short_name": "Project Link",
   "default_locale": "en",
-  "description": "A client for Foxbox",
+  "description": "An app for Project Link",
   "version": "1.0.0",
   "type": "privileged",
   "launch_path": "/index.html",
