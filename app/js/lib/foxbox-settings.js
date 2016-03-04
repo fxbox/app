@@ -5,6 +5,7 @@ import { Model } from 'components/fxos-mvc/dist/mvc';
 const DEFAULT_SCHEME = 'http';
 const DEFAULT_HOSTNAME = 'localhost';
 const DEFAULT_PORT = 3000;
+const REGISTRATION_SERVICE = 'http://knilxof.org:4242/ping';
 
 export default class FoxboxSettings extends Model {
   constructor() {
@@ -12,7 +13,8 @@ export default class FoxboxSettings extends Model {
       _scheme: localStorage.getItem('foxbox-scheme') || DEFAULT_SCHEME,
       _hostname: localStorage.getItem('foxbox-hostname') || DEFAULT_HOSTNAME,
       _port: localStorage.getItem('foxbox-port') || DEFAULT_PORT,
-      _session: localStorage.getItem('session')
+      _session: localStorage.getItem('session'),
+      _skipDiscovery: localStorage.getItem('foxbox-skipDiscovery') === 'true'
     });
   }
 
@@ -58,5 +60,19 @@ export default class FoxboxSettings extends Model {
       this._session = session;
       localStorage.setItem('session', this._session);
     }
+  }
+
+  get registrationService() {
+    return REGISTRATION_SERVICE;
+  }
+
+  get skipDiscovery() {
+    return this._skipDiscovery;
+  }
+
+  set skipDiscovery(value) {
+    value = !!value;
+    this._skipDiscovery = value;
+    localStorage.setItem('foxbox-skipDiscovery', value);
   }
 }
