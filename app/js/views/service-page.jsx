@@ -7,16 +7,21 @@ import TagList from 'js/views/tag-list';
 export default class ServicePage extends React.Component {
   constructor(props) {
     super(props);
-    this.props = props;
     this.state = {
       tags: [],
-      name: props.data.name
+      data: {}
     };
 
     this.foxbox = props.foxbox;
   }
 
   componentDidMount() {
+    this.foxbox.getService(this.props.id)
+      .then(service => {
+        this.setState(service);
+      })
+      .catch(console.error.bind(console));
+
     this.populateTags();
   }
 
@@ -24,7 +29,7 @@ export default class ServicePage extends React.Component {
     this.foxbox.getTags()
       .then(tags => {
         tags.forEach(tag => {
-          tag.data.checked = !!(this.props.data.tags && this.props.data.tags.includes(tag.id));
+          tag.data.checked = !!(this.state.data.tags && this.state.data.tags.includes(tag.id));
         });
 
         this.setState({ tags: tags });
@@ -49,8 +54,8 @@ export default class ServicePage extends React.Component {
     return (
       <div>
         <header>
-          <h1>{this.state.name}</h1>
-          <UserLogoutButton foxbox={this.props.foxbox}/>
+          <h1>{this.state.data.name}</h1>
+          <UserLogoutButton foxbox={this.foxbox}/>
           <!--<img className="rename" src="css/icons/rename.svg" alt="Rename"/>-->
         </header>
         <h2>Tags</h2>

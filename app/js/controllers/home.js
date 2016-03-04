@@ -9,26 +9,7 @@ export default class HomeController extends Controller {
     this.foxbox.addEventListener('message', this.showMessage.bind(this));
     this.foxbox.addEventListener('dismiss-message', this.hideMessage.bind(this));
 
-    this.view = ReactDOM.render(React.createElement(HomeView, {
-      services: [],
-      foxbox: this.foxbox
-    }), this.mountNode);
-
-    this.foxbox.getServices()
-      .then(services => {
-        console.log(services);
-        this.view = ReactDOM.render(React.createElement(HomeView, {
-          services: services,
-          foxbox: this.foxbox
-        }), this.mountNode);
-      })
-      .catch(console.error.bind(console));
-
-    this.foxbox.getTags()
-      .then(tags => {
-        console.log(tags);
-      })
-      .catch(console.error.bind(console));
+    this.view = ReactDOM.render(React.createElement(HomeView, { foxbox: this.foxbox }), this.mountNode);
   }
 
   teardown() {
@@ -38,13 +19,13 @@ export default class HomeController extends Controller {
 
   showMessage(message) {
     this.view.setState({
-      visible: true,
+      isModalVisible: true,
       title: message.title,
       body: message.body
     });
   }
 
   hideMessage() {
-    this.view.setState({ visible: false });
+    this.view.setState({ isModalVisible: false });
   }
 }
