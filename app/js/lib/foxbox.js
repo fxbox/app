@@ -60,11 +60,36 @@ const fetchJSON = function(url, method = 'GET', body = undefined, extraHeaders =
 
 export default class Foxbox extends Service {
   init() {
+    this.discover();
     return db.init();
   }
 
   get origin() {
     return `${settings.scheme}://${settings.hostname}:${settings.port}`;
+  }
+
+  discover() {
+    // For development purposes if you want to skip the
+    // discovery phase set the 'foxbox-skipDiscovery' variable to
+    // 'true'.
+    if (settings.skipDiscovery) {
+      return Promise.resolve();
+    }
+
+    return fetchJSON(settings.registrationService).then(boxes => {
+      if (!Array.isArray(boxes) || boxes.length === 0) {
+        return;
+      }
+
+      // Multi box setup out of the scope so far.
+      const box = boxes[0];
+
+      // Check if we have a recent registry.
+      const now = Math.floor(Date.now() / 1000);
+      if ((now - box.timestamp) < 60 ) {
+        settings.hostname = box.hostname || box.local_ip;
+      }
+    });
   }
 
   get isLoggedIn() {
