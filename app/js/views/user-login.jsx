@@ -46,7 +46,7 @@ export default class UserLogin extends React.Component {
           <h1>Project Link</h1>
         </header>
         <form className="user-login" onSubmit={this.handleOnSubmit.bind(this)}>
-          <label><span>User</span><input type="text" value={this.state.username}
+          <label><span>User</span><input type="text" value={this.state.username} autoFocus
             onChange={this.handleOnChange.bind(this, 'username')}/></label>
           <label><span>Password</span><input type="password" value={this.state.password}
             onChange={this.handleOnChange.bind(this, 'password')}/></label>
