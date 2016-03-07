@@ -21,7 +21,9 @@ export default class UserLogin extends React.Component {
     this.setState({ [state]: evt.target.value });
   }
 
-  handleOnSubmit() {
+  handleOnSubmit(evt) {
+    evt.preventDefault(); // Avoid redirection to /?#services.
+
     this.foxbox.login(this.state.username, this.state.password)
       .then(() => {
         window.location.hash = '#services';
