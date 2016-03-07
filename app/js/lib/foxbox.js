@@ -86,7 +86,7 @@ export default class Foxbox extends Service {
 
       // Check if we have a recent registry.
       const now = Math.floor(Date.now() / 1000);
-      if ((now - box.timestamp) < 60 ) {
+      if ((now - box.timestamp) < 60) {
         settings.hostname = box.hostname || box.local_ip;
       }
     });
@@ -152,11 +152,17 @@ export default class Foxbox extends Service {
             .then(states => {
               services.forEach((service, id) => service.state = states[id]);
 
-              // Clear the services db.
-              db.clearServices()
-                .then(() => {
-                  // Populate the db with the latest services.
+              // Get all the services from the db.
+              db.getServices()
+                .then(storedServices => {
                   services.forEach(service => {
+                    // Merge the data from the db with the updated one.
+                    const storedService = storedServices.find(s => s.data.id === service.id);
+                    if (storedService !== undefined) {
+                      service = Object.assign(storedService.data, service);
+                    }
+
+                    // Populate the db with the latest service.
                     db.setService(service);
                   });
                 });

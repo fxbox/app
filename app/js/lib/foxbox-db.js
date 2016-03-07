@@ -46,7 +46,7 @@ export default class FoxboxDb {
   }
 
   getServices() {
-    return this.getAll(DB_SERVICE_STORE).call(this);
+    return getAll(DB_SERVICE_STORE).call(this);
   }
 
   getTags() {
