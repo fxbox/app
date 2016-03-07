@@ -143,9 +143,6 @@ export default class Foxbox extends Service {
     return new Promise((resolve, reject) => {
       fetchJSON(`${this.origin}/services/list.json`)
         .then(services => {
-          // Let's remove the dummy services here.
-          services = services.filter(service => service.name !== 'dummy service');
-
           const promises =
             services.map(service => fetchJSON(`http://localhost:3000/services/${service.id}/state`));
           Promise.all(promises)
