@@ -143,9 +143,8 @@ export default class Foxbox extends Service {
     return new Promise((resolve, reject) => {
       fetchJSON(`${this.origin}/services/list`)
         .then(services => {
-          const promises =
-            services.map(service => fetchJSON(`${this.origin}/services/${service.id}/state`));
-          Promise.all(promises)
+          // Get the state of each service.
+          Promise.all(services.map(service => this.getServiceState(service.id)))
             .then(states => {
               services.forEach((service, id) => service.state = states[id]);
 
@@ -166,6 +165,25 @@ export default class Foxbox extends Service {
 
               return resolve(services);
             });
+        });
+    });
+  }
+
+  /**
+   * Fetch the state of a service from the box.
+   *
+   * @param {string} id The ID of the service.
+   * @return {Promise}
+   */
+  getServiceState(id) {
+    return new Promise((resolve, reject) => {
+      fetchJSON(`${this.origin}/services/${id}/state`)
+        .then(res => {
+          if (!res) {
+            return reject(new Error(`The action couldn't be performed.`));
+          }
+
+          return resolve(res);
         });
     });
   }
