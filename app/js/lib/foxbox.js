@@ -1,5 +1,3 @@
-/* global Headers */
-
 'use strict';
 
 import { Service } from 'components/fxos-mvc/dist/mvc';
@@ -24,21 +22,21 @@ const fetchJSON = function(url, method = 'GET', body = undefined, extraHeaders =
 
   const req = {
     method,
-    headers: new Headers({
+    headers: {
       'Accept': 'application/json'
-    }),
+    },
     cache: 'no-store'
   };
 
   if (method === 'POST' || method === 'PUT') {
-    req.headers.append('Content-Type', 'application/json;charset=UTF-8');
+    req.headers['Content-Type'] = 'application/json;charset=UTF-8';
   }
   for (let header in extraHeaders) {
-    req.headers.append(header, extraHeaders[header]);
+    req.headers[header] = extraHeaders[header];
   }
-  if (!extraHeaders.Authorization && !!settings.session) {
+  if (!req.headers.Authorization && !!settings.session) {
     // The user is logged in, we authenticate the request.
-    req.headers.append('Authorization', `Bearer ${settings.session}`);
+    req.headers.Authorization = `Bearer ${settings.session}`;
   }
 
   if (method === 'GET' || method === 'HEAD') {
