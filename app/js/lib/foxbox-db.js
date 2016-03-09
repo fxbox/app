@@ -20,7 +20,18 @@ export default class FoxboxDb {
       req.onupgradeneeded = this.upgradeSchema;
       req.onsuccess = evt => {
         this.db = evt.target.result;
-        return resolve();
+
+        // Prepopulate the tags with common values.
+        this.getTags()
+          .then(tags => {
+            if (!tags || !tags.length) {
+              this.setTag({ name: 'Kitchen' });
+              this.setTag({ name: 'Bedroom' });
+              this.setTag({ name: 'Living room' });
+            }
+
+            return resolve();
+          });
       };
       req.onerror = (e) => {
         console.error('Error opening database:', e);
