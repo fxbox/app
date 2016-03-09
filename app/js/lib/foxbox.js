@@ -177,7 +177,7 @@ export default class Foxbox extends Service {
    * @param {Object} state An object containing pairs of key/value.
    * @return {Promise}
    */
-  changeServiceState(id, state) {
+  setServiceState(id, state) {
     return new Promise((resolve, reject) => {
       fetchJSON(`${this.origin}/services/${id}/state`, 'PUT', state)
         .then(res => {

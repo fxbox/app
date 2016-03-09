@@ -13,7 +13,7 @@ export default class ServicesListItem extends React.Component {
     // No optimistic update because some network issues can't be caught.
     let value = evt.target.checked;
 
-    this.foxbox.changeServiceState(this.props.id, { on: value })
+    this.foxbox.setServiceState(this.props.id, { on: value })
       .then(() => {
         this.setState({ on: value });
       })
