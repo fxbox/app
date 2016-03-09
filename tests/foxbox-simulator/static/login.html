@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FoxBox</title>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <h1>Foxbox Simulator<h1>
+    <div id="signin">
+      <input type="password" id="signin-pwd">
+      <input id="signin-button" type="submit">
+    </div>
+  </body>
+  <script>
+  var submitButton = document.getElementById('signin-button');
+
+  submitButton.addEventListener('click', function() {
+    var password = document.getElementById('signin-pwd').value;
+
+    if (password !== '12345678') {
+      alert("Wrong password");
+      return;
+    }
+
+    var token = 'integration-test-fake-token'
+    localStorage.setItem('session', token);
+    window.location.replace("http://localhost:8000/?session_token=" + token);
+  });
+  </script>
+
+</html>

@@ -58,3 +58,17 @@ cordova plugin remove com.synconset.cordovaHTTP
 cordova plugin add /path/to/local/SecureHTTP
 cordova run android
 ```
+
+## Tests
+
+### All regular tests
+
+Run `npm test`.
+
+### Run end-to-end tests (e2e)
+
+Steps (to be scripted soon):
+1. Clone [foxbox](https://github.com/fxbox/foxbox/)
+2. Run it with `cargo run`
+3. With a browser, perform the first time setup by going to [http://localhost:3000](http://localhost:3000/)
+4. Run `npm test-e2e`
