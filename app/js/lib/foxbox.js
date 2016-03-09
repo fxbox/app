@@ -144,7 +144,7 @@ export default class Foxbox extends Service {
       fetchJSON(`${this.origin}/services/list`)
         .then(services => {
           const promises =
-            services.map(service => fetchJSON(`http://localhost:3000/services/${service.id}/state`));
+            services.map(service => fetchJSON(`${this.origin}/services/${service.id}/state`));
           Promise.all(promises)
             .then(states => {
               services.forEach((service, id) => service.state = states[id]);
