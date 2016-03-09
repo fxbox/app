@@ -10,14 +10,21 @@ const DEFAULT_HOSTNAME = 'localhost';
 const DEFAULT_PORT = 3000;
 const REGISTRATION_SERVICE = 'http://knilxof.org:4242/ping';
 
+// Not all browsers have localStorage supported or activated.
+const storage = localStorage ? localStorage : {
+  getItem: () => undefined,
+  setItem: () => {},
+  removeItem: () => {}
+};
+
 export default class FoxboxSettings extends Model {
   constructor() {
     super({
-      _scheme: localStorage.getItem(`${PREFIX}scheme`) || DEFAULT_SCHEME,
-      _hostname: localStorage.getItem(`${PREFIX}hostname`) || DEFAULT_HOSTNAME,
-      _port: localStorage.getItem(`${PREFIX}port`) || DEFAULT_PORT,
-      _session: localStorage.getItem(`${PREFIX}session`),
-      _skipDiscovery: localStorage.getItem(`${PREFIX}skipDiscovery`) === 'true'
+      _scheme: storage.getItem(`${PREFIX}scheme`) || DEFAULT_SCHEME,
+      _hostname: storage.getItem(`${PREFIX}hostname`) || DEFAULT_HOSTNAME,
+      _port: storage.getItem(`${PREFIX}port`) || DEFAULT_PORT,
+      _session: storage.getItem(`${PREFIX}session`),
+      _skipDiscovery: storage.getItem(`${PREFIX}skipDiscovery`) === 'true'
     });
   }
 
@@ -28,7 +35,7 @@ export default class FoxboxSettings extends Model {
   set scheme(scheme) {
     scheme = String(scheme) || DEFAULT_SCHEME;
     this._scheme = scheme;
-    localStorage.setItem(`${PREFIX}scheme`, this._scheme);
+    storage.setItem(`${PREFIX}scheme`, this._scheme);
   }
 
   get hostname() {
@@ -38,7 +45,7 @@ export default class FoxboxSettings extends Model {
   set hostname(hostname) {
     hostname = String(hostname) || DEFAULT_HOSTNAME;
     this._hostname = hostname.replace(/\/$/, ''); // Trailing slash.
-    localStorage.setItem(`${PREFIX}hostname`, this._hostname);
+    storage.setItem(`${PREFIX}hostname`, this._hostname);
   }
 
   get port() {
@@ -48,7 +55,7 @@ export default class FoxboxSettings extends Model {
   set port(port) {
     port = parseInt(port, 10) || DEFAULT_PORT;
     this._port = port;
-    localStorage.setItem(`${PREFIX}port`, this._port);
+    storage.setItem(`${PREFIX}port`, this._port);
   }
 
   get session() {
@@ -58,10 +65,10 @@ export default class FoxboxSettings extends Model {
   set session(session) {
     if (session === undefined) {
       this._session = undefined;
-      localStorage.removeItem(`${PREFIX}session`);
+      storage.removeItem(`${PREFIX}session`);
     } else {
       this._session = session;
-      localStorage.setItem(`${PREFIX}session`, this._session);
+      storage.setItem(`${PREFIX}session`, this._session);
     }
   }
 
@@ -76,6 +83,6 @@ export default class FoxboxSettings extends Model {
   set skipDiscovery(value) {
     value = !!value;
     this._skipDiscovery = value;
-    localStorage.setItem(`${PREFIX}skipDiscovery`, value);
+    storage.setItem(`${PREFIX}skipDiscovery`, value);
   }
 }
