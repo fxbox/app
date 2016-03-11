@@ -71,7 +71,8 @@ export default class Foxbox extends Service {
 
         if (searchParams.has('session_token')) {
           // There is a session token in the URL, let's remember it.
-          settings.session = searchParams.get('session_token');
+          // @todo Find a better way to handle URL escape.
+          settings.session = searchParams.get('session_token').replace(/ /g, '+');
 
           // Remove the session param from the current location.
           searchParams.delete('session_token');
