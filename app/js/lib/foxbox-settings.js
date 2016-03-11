@@ -8,7 +8,7 @@ const PREFIX = 'foxbox-';
 const DEFAULT_SCHEME = 'http';
 const DEFAULT_HOSTNAME = 'localhost';
 const DEFAULT_PORT = 3000;
-const REGISTRATION_SERVICE = 'http://knilxof.org:4242/ping';
+const REGISTRATION_SERVICE = 'https://knilxof.org:4243/ping';
 
 // Not all browsers have localStorage supported or activated.
 const storage = localStorage ? localStorage : {
