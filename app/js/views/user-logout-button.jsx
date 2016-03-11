@@ -6,11 +6,10 @@ export default class UserLogoutButton extends React.Component {
   }
 
   handleOnClick() {
-    this.foxbox.logout()
-      .then(() => {
-        // Once logged out, we redirect to the login page.
-        window.location.hash = '#users/login';
-      });
+    this.foxbox.logout();
+
+    // Once logged out, we redirect to the login page.
+    location.hash = '#users/login';
   }
 
   render() {

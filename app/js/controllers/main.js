@@ -15,7 +15,7 @@ export default class MainController extends RoutingController {
 
     const usersController = new UsersController(options);
     super({
-      'users': usersController,
+      '': usersController,
       'users/(.+)': usersController,
       'services': new ServicesController(options),
       'services/(.+)': new ServiceController(options)
@@ -32,14 +32,17 @@ export default class MainController extends RoutingController {
   }
 
   main() {
-    window.location.hash = '';
     this.foxbox.init()
       .then(() => {
         if (this.foxbox.isLoggedIn) {
-          window.location.hash = '#services';
+          if (location.hash === '') {
+            location.hash = '#services';
+          }
         } else {
-          window.location.hash = '#users/login';
+          location.hash = '#users/login';
         }
+
+        this.route();
       });
   }
 }

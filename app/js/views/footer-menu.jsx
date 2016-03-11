@@ -8,7 +8,7 @@ export default class FooterMenu extends React.Component {
   }
 
   render() {
-    let route = window.location.hash.substr(1).split('/').shift();
+    let route = location.hash.substr(1).split('/').shift();
     let menuNodes = [
       ['services', 'Home'],
       ['themes', 'Themes'],

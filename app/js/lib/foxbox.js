@@ -1,3 +1,5 @@
+/* global URLSearchParams */
+
 'use strict';
 
 import { Service } from 'components/fxos-mvc/dist/mvc';
@@ -34,7 +36,7 @@ const fetchJSON = function(url, method = 'GET', body = undefined, extraHeaders =
   for (let header in extraHeaders) {
     req.headers[header] = extraHeaders[header];
   }
-  if (!req.headers.Authorization && !!settings.session) {
+  if (settings.session) {
     // The user is logged in, we authenticate the request.
     req.headers.Authorization = `Bearer ${settings.session}`;
   }
@@ -58,8 +60,31 @@ const fetchJSON = function(url, method = 'GET', body = undefined, extraHeaders =
 
 export default class Foxbox extends Service {
   init() {
-    this.discover();
-    return db.init();
+    return this.discover()
+      .then(() => {
+        if (this.isLoggedIn) {
+          return;
+        }
+
+        const queryString = location.search.substring(1);
+        const searchParams = new URLSearchParams(queryString);
+
+        if (searchParams.has('session_token')) {
+          // There is a session token in the URL, let's remember it.
+          settings.session = searchParams.get('session_token');
+
+          // Remove the session param from the current location.
+          searchParams.delete('session_token');
+          location.search = searchParams.toString();
+
+          // Throwing here to abort the promise chain.
+          throw(new Error('Redirecting to a URL without session'));
+        }
+      })
+      .then(() => {
+        // The DB is only initialised if there's no redirection to the box.
+        return db.init();
+      });
   }
 
   get origin() {
@@ -74,20 +99,21 @@ export default class Foxbox extends Service {
       return Promise.resolve();
     }
 
-    return fetchJSON(settings.registrationService).then(boxes => {
-      if (!Array.isArray(boxes) || boxes.length === 0) {
-        return;
-      }
+    return fetchJSON(settings.registrationService)
+      .then(boxes => {
+        if (!Array.isArray(boxes) || boxes.length === 0) {
+          return;
+        }
 
-      // Multi box setup out of the scope so far.
-      const box = boxes[0];
+        // Multi box setup out of the scope so far.
+        const box = boxes[0];
 
-      // Check if we have a recent registry.
-      const now = Math.floor(Date.now() / 1000);
-      if ((now - box.timestamp) < 60) {
-        settings.hostname = box.hostname || box.local_ip;
-      }
-    });
+        // Check if we have a recent registry.
+        const now = Math.floor(Date.now() / 1000);
+        if ((now - box.timestamp) < 60) {
+          settings.hostname = box.hostname || box.local_ip;
+        }
+      });
   }
 
   get isLoggedIn() {
@@ -95,41 +121,22 @@ export default class Foxbox extends Service {
   }
 
   /**
-   * Log in a user given her credentials.
-   *
-   * @param {string} username
-   * @param {string} password
-   * @return {Promise}
+   * Redirect the user to the box to get authenticated if she isn't already.
    */
-  login(username, password) {
-    if (!username) {
-      return Promise.reject(new Error('Specify a user name.'));
-    }
-    if (!password) {
-      return Promise.reject(new Error('Specify a password.'));
+  login() {
+    if (this.isLoggedIn) {
+      return;
     }
 
-    const header = {
-      Authorization: `Basic ${btoa(`${username}:${password}`)}`
-    };
-    return fetchJSON(`${this.origin}/users/login`, 'POST', undefined, header)
-      .then(res => {
-        if (!res.session_token) {
-          throw(new Error('Token is missing.'));
-        }
-
-        settings.session = res.session_token;
-      });
+    const redirectUrl = encodeURIComponent(location);
+    location.replace(`${this.origin}/?redirect_url=${redirectUrl}`);
   }
 
   /**
    * Log out the user.
-   *
-   * @return {Promise} A promise that resolves once the user is logged out.
    */
   logout() {
     settings.session = undefined;
-    return Promise.resolve();
   }
 
   /**

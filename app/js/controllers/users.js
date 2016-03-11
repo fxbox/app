@@ -30,10 +30,9 @@ export default class UsersController extends Controller {
   }
 
   logout() {
-    this.foxbox.logout()
-      .then(() => {
-        // Once logged out, we redirect to the login page.
-        window.location.hash = '#users/login';
-      });
+    this.foxbox.logout();
+
+    // Once logged out, we redirect to the login page.
+    location.hash = '#users/login';
   }
 }
