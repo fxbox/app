@@ -10,7 +10,7 @@ import Qr from 'js/lib/qr';
 export default class MainController extends RoutingController {
   constructor() {
     const foxbox = new Foxbox();
-    const mountNode = document.getElementById('main');
+    const mountNode = document.querySelector('.app-view-container');
     const options = { foxbox, mountNode };
 
     const usersController = new UsersController(options);

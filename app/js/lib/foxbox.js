@@ -466,15 +466,12 @@ export default class Foxbox extends Service {
    * @return {Promise}
    */
   getServiceState(id) {
-    return new Promise((resolve, reject) => {
-      fetchJSON(`${this.origin}/services/${id}/state`)
-        .then(res => {
-          if (!res) {
-            return reject(new Error(`The action couldn't be performed.`));
-          }
+    return fetchJSON(`${this.origin}/services/${id}/state`).then(res => {
+      if (!res) {
+        throw new Error(`The action couldn't be performed.`);
+      }
 
-          return resolve(res);
-        });
+      return res;
     });
   }
 
@@ -496,6 +493,32 @@ export default class Foxbox extends Service {
           return resolve();
         });
     });
+  }
+
+  /**
+   * Don't use, method is deprecated and will be removed soon.
+   * @deprecated
+   */
+  performServiceCommand(id, command, method = 'GET', state = undefined) {
+    console.warn(
+      '"performServiceCommand" method is deprecated and will be removed soon'
+    );
+    return fetchJSON(`${this.origin}/services/${id}/${command}`, method, state);
+  }
+
+  getAuthenticatedURL(sourceURL) {
+    if (!sourceURL) {
+      throw new Error('Source URL should be non-empty string!');
+    }
+
+    let url = new URL(sourceURL);
+    if (url.searchParams.has(settings.queryStringAuthTokenName)) {
+      return sourceURL;
+    }
+
+    url.searchParams.set(settings.queryStringAuthTokenName, settings.session);
+
+    return url.href;
   }
 
   getTags() {

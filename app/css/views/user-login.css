@@ -1,37 +1,31 @@
-header.white {
-  background-color: white;
-  color: #2F99CD;
-  text-align: center;
-  border-bottom: 1px solid #2F99CD;
-}
-
 .user-login {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  height: 100%;
 }
 
-.user-login img {
+.user-login__logo {
   width: 50%;
   margin: 0 auto;
   min-height: 0;
 }
 
-.user-login button {
+.user-login__login-button {
   margin: 0 1rem;
   min-height: 5rem;
+
   color: white;
   background: #2F99CD;
   border: none;
 }
 
-.box-selector {
+.user-login__box-selector {
+  margin: 1rem;
+  padding: 1rem;
+
   border: .2rem solid #2F99CD;
   border-radius: .2rem;
   font-size: 2rem;
-  margin: 1rem;
-  padding: 1rem;
   background: #2F99CD;
   color: white;
 }

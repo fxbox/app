@@ -38,19 +38,17 @@ export default class ServicesListItem extends React.Component {
     return `hsla(${h},${s}%,50%,${l})`;
   }
 
-  render() {
-    let serviceType = 'Unknown service';
-    let icon = 'unknown';
-
-    switch (this.props.type) {
-      case 'Extended color light':
-        serviceType = 'Light';
-        icon = 'light';
-        break;
+  renderLightService() {
+    let isConnected = false;
+    if (this.state.available !== undefined) {
+      isConnected = this.state.available;
     }
 
-    if (this.props.modelid !== undefined) {
-      switch (this.props.modelid) {
+    let serviceType = 'Light';
+    let icon = 'light';
+
+    if (this.props.model !== undefined) {
+      switch (this.props.model) {
         case 'BSB002':
           icon = 'bridge_v2';
           break;
@@ -149,21 +147,42 @@ export default class ServicesListItem extends React.Component {
       }
     }
 
-    let isConnected = false;
-    if (this.state.available !== undefined) {
-      isConnected = this.state.available;
-    }
-
     return (
-      <li data-icon={icon} data-connected={isConnected}>
-        <a href={`#services/${this.props.id}`}>
+      <li className="service-list__item" data-icon={icon} data-connected={isConnected}>
+        <a className="service-list__item-link" href={`#services/${this.props.id}`}>
           {serviceType}
           <small>{` (${this.props.name})`}</small>
         </a>
-        <div className="colour-picker" style={{ background: this.getBulbColour.call(this) }}></div>
-        <input type="checkbox" checked={this.state.on} disabled={!isConnected}
-          onChange={this.handleLightOnChange.bind(this)}/>
+        <div className="service-list__item-color-picker"
+             style={{ background: this.getBulbColour.call(this) }}>
+        </div>
+        <label>
+          <input className="service-list__on-off-toggle" type="checkbox"
+                 checked={this.state.on} disabled={!isConnected}
+                 onChange={this.handleLightOnChange.bind(this)} />
+        </label>
       </li>
     );
+  }
+
+  renderGenericService(type = 'Unknown service', icon = 'unknown') {
+    return (
+      <li className="service-list__item" data-icon={icon} data-connected="true">
+        <a className="service-list__item-link" href={`#services/${this.props.id}`}>
+          {type} <small>{` (${this.props.name})`}</small>
+        </a>
+      </li>
+    );
+  }
+
+  render() {
+    switch (this.props.type) {
+      case 'Extended color light':
+        return this.renderLightService();
+      case 'ipcamera':
+        return this.renderGenericService('Camera', 'ip-camera');
+      default:
+        return this.renderGenericService();
+    }
   }
 }

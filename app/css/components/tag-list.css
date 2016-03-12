@@ -1,0 +1,20 @@
+.tag-list {
+  padding: 0 3rem;
+}
+
+.tag-list__item {
+  position: relative;
+  padding-left: 4rem;
+}
+
+.tag-list__item-checkbox {
+  position: absolute;
+  right: 0;
+  top: 1.5rem;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+
+  border-radius: .2rem;
+  border: 1px solid black;
+}

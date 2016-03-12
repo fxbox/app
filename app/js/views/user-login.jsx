@@ -1,7 +1,5 @@
 /* global React */
 
-import Modal from 'js/views/modal';
-
 export default class UserLogin extends React.Component {
   constructor(props) {
     this.state = {
@@ -40,21 +38,22 @@ export default class UserLogin extends React.Component {
       });
 
       boxes = (<select
-        className="box-selector"
+        className="user-login__box-selector"
         value={value}
         onChange={this.handleOnChange.bind(this)}
       >{options}</select>);
     }
 
     return (
-      <div>
-        <header className="white">
+      <div className="app-view">
+        <header className="app-view__header app-view__header--white">
           <h1>Project Link</h1>
         </header>
-        <form className="user-login" onSubmit={this.handleOnSubmit.bind(this)}>
-          <img src="img/icon.svg"/>
+        <form className="app-view__body user-login"
+              onSubmit={this.handleOnSubmit.bind(this)}>
+          <img className="user-login__logo" src="img/icon.svg"/>
           {boxes}
-          <button>Log in</button>
+          <button className="user-login__login-button">Log in</button>
         </form>
       </div>
     );

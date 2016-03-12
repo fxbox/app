@@ -14,6 +14,15 @@ const ONLINE_CHECKING_INTERVAL = 5000;
 const ONLINE_CHECKING_LONG_INTERVAL = 1000 * 60 * 5;
 const REGISTRATION_SERVICE = 'http://knilxof.org:4242/ping';
 
+/**
+ * Name of the query string parameter that should be presented in URLs pointing
+ * to box endpoints (eg. streams, event sources etc.) if authorisation HTTP
+ * header can't be attached.
+ * @type {string}
+ * @const
+ */
+const QUERY_STRING_AUTH_TOKEN_NAME = 'auth';
+
 // Not all browsers have localStorage supported or activated.
 const storage = localStorage ? localStorage : {
   getItem: () => undefined,
@@ -177,5 +186,9 @@ export default class FoxboxSettings extends Model {
 
   get onlineCheckingLongInterval() {
     return ONLINE_CHECKING_LONG_INTERVAL;
+  }
+
+  get queryStringAuthTokenName() {
+    return QUERY_STRING_AUTH_TOKEN_NAME;
   }
 }

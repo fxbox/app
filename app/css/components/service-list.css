@@ -1,0 +1,44 @@
+.service-list {
+  padding: 0 3rem;
+}
+
+.service-list__item {
+  display: flex;
+  padding: 0;
+  position: relative;
+}
+
+.service-list__item[data-icon] {
+  padding-left: 4rem;
+
+  background-size: 2.5rem;
+  background-position: left 1rem;
+  background-repeat: no-repeat;
+}
+
+.service-list__item[data-connected="false"] {
+  opacity: 0.25;
+}
+
+.service-list__item-link {
+  width: 100%;
+
+  color: #000;
+  text-decoration: none;
+}
+
+
+/** Light service item styles **/
+
+.service-list__item-color-picker,
+.service-list__on-off-toggle {
+  width: 2.5rem;
+  height: 2rem;
+  margin: 1.5rem 0 0 1rem;
+
+  border-radius: .2rem;
+}
+
+.service-list__on-off-toggle {
+  border: 1px solid black;
+}

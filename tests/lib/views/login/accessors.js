@@ -9,7 +9,7 @@ function LoginAccessors() {
 LoginAccessors.prototype = Object.assign({
 
   get startLoginButton() {
-    return this.waitForElement(By.css('.user-login button'));
+    return this.waitForElement(By.css('.user-login__login-button'));
   },
 
   get passwordField() {

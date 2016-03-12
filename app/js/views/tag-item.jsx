@@ -34,12 +34,14 @@ export default class TagItem extends React.Component {
 
   render() {
     return (
-      <li>
-        <label><input
-          type="checkbox"
-          checked={this.state.checked}
-          onChange={this.handleSetTag.bind(this)}/>
-        {this.props.name}</label>
+      <li className="tag-list__item">
+        <label>
+          <input className="tag-list__item-checkbox"
+                 type="checkbox"
+                 checked={this.state.checked}
+                 onChange={this.handleSetTag.bind(this)} />
+          {this.props.name}
+        </label>
       </li>
     );
   }

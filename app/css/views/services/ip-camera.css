@@ -1,0 +1,63 @@
+.camera-controls {
+  display: flex;
+  flex-direction: column;
+}
+
+.camera-controls__preview {
+  display: none;
+
+  flex-grow: 1;
+  width: 100%;
+}
+
+.camera-controls__empty-preview {
+  flex-grow: 1;
+  padding-top: 2rem;
+
+  color: #393536;
+  text-align: center;
+}
+
+.camera-controls__snapshot-tools {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  padding: 2rem;
+}
+
+.camera-controls__snapshot-btn {
+  padding: 2rem;
+
+  background-color: #40acb3;
+
+  box-shadow: 0 0 0 0.4rem #40acb3;
+  border: 0.4rem solid #fff;
+  border-radius: 50%;
+}
+
+.camera-controls__snapshot-btn::-moz-focus-inner {
+  padding: 0;
+  border: 0
+}
+
+.camera-controls__previous-snapshot {
+  display: none;
+
+  position: absolute;
+  right: 2rem;
+  top: 20%;
+
+  width: 5rem;
+  height: 60%;
+
+  border: 0.1rem solid #393536;
+}
+
+.camera-controls--has-preview .camera-controls__empty-preview {
+  display: none;
+}
+
+.camera-controls--has-preview .camera-controls__preview,
+.camera-controls--has-previous-snapshot .camera-controls__previous-snapshot {
+  display: block;
+}

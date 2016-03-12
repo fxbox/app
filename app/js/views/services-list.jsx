@@ -11,7 +11,7 @@ export default class ServicesList extends React.Component {
           name={service.name}
           type={service.properties.type}
           manufacturer={service.properties.manufacturer}
-          modelid={service.properties.model}
+          model={service.properties.model}
           state={service.state}
           foxbox={this.props.foxbox}/>
       )
