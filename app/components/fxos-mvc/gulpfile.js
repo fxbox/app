@@ -18,7 +18,7 @@ gulp.task('to5', function () {
 					.pipe(concat('shim.js')),
 				gulp
 					.src([
-						'./node_modules/sanitizer/sanitizer.js'
+						'./node_modules/fxos-sanitizer/sanitizer.js'
 					])
 					.pipe(wrapper({
 						header: '(function(){var define,exports;',

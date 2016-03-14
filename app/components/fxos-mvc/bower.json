@@ -1,7 +1,7 @@
 {
   "name": "fxos-mvc",
-  "version": "0.0.8",
-  "homepage": "https://github.com/fxos/mvc",
+  "version": "0.0.9",
+  "homepage": "https://github.com/fxos-eng/mvc",
   "license": "MPL",
   "main": "mvc.js",
   "ignore": [

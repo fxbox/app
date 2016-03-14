@@ -1322,16 +1322,12 @@
      */
     escapeHTML: function (strings) {
       var result = '';
-      var _len = arguments.length;
-      var values = new Array(_len > 1 ? _len - 1 : 0);
-      for (var _key = 1; _key < _len; _key++) {
-        values[_key - 1] = arguments[_key];
-      }
 
       for (var i = 0; i < strings.length; i++) {
         result += strings[i];
-        if (i < values.length) {
-          result += String(values[i]).replace(Sanitizer._entity,
+        if (i + 1 < arguments.length) {
+          var value = arguments[i + 1] || '';
+          result += String(value).replace(Sanitizer._entity,
             Sanitizer.getEntity);
         }
       }
@@ -1485,7 +1481,7 @@ define(["exports"], function (exports) {
         innerHTML = this.template();
       }
 
-      this.el.innerHTML = this.layout(innerHTML);
+      this.el.innerHTML = Sanitizer.escapeHTML(this.layout(innerHTML));
     };
 
     View.prototype.template = function () {
