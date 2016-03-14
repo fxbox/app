@@ -13,10 +13,6 @@ export default class UserLogin extends React.Component {
     this.foxbox.login();
   }
 
-  dismissModal() {
-    this.setState({ isModalVisible: false });
-  }
-
   render() {
     return (
       <div>
