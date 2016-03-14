@@ -16,10 +16,9 @@ const db = new FoxboxDb();
  * @param {string} url The URL to send the request to.
  * @param {string} method The HTTP method (defaults to "GET").
  * @param {!Object} body An object of key/value.
- * @param {!Object} extraHeaders Any additional headers to include in the request.
  * @return {Promise}
  */
-const fetchJSON = function(url, method = 'GET', body = undefined, extraHeaders = {}) {
+const fetchJSON = function(url, method = 'GET', body = undefined) {
   method = method.toUpperCase();
 
   const req = {
@@ -32,9 +31,6 @@ const fetchJSON = function(url, method = 'GET', body = undefined, extraHeaders =
 
   if (method === 'POST' || method === 'PUT') {
     req.headers['Content-Type'] = 'application/json;charset=UTF-8';
-  }
-  for (let header in extraHeaders) {
-    req.headers[header] = extraHeaders[header];
   }
   if (settings.session) {
     // The user is logged in, we authenticate the request.
