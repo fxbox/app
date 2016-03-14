@@ -54,6 +54,25 @@ const fetchJSON = function(url, method = 'GET', body = undefined) {
     });
 };
 
+/**
+ * Compare 2 objects. Returns true if all properties of object A have the same
+ * value in object B. Extraneous properties in object B are ignored.
+ * Properties order is not important.
+ *
+ * @param {Object} objectA
+ * @param {Object} objectB
+ * @return {boolean}
+ */
+const isSimilar = (objectA, objectB) => {
+  for (let prop in objectA) {
+    if (!(prop in objectB) || objectA[prop] !== objectB[prop]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 export default class Foxbox extends Service {
   init() {
     return this.discover()
@@ -81,6 +100,13 @@ export default class Foxbox extends Service {
       .then(() => {
         // The DB is only initialised if there's no redirection to the box.
         return db.init();
+      })
+      .then(() => {
+        // Start polling.
+        settings.on('pollingEnabled', () => {
+          this.togglePolling(settings.pollingEnabled);
+        });
+        this.togglePolling(settings.pollingEnabled);
       });
   }
 
@@ -137,38 +163,120 @@ export default class Foxbox extends Service {
   }
 
   /**
+   * Start or stop polling.
+   *
+   * @param {boolean} pollingEnabled
+   */
+  togglePolling(pollingEnabled = settings.pollingEnabled) {
+    if (pollingEnabled) {
+      this.pollingInterval = setInterval(this.refreshServicesByPolling.bind(this),
+        settings.pollingInterval);
+
+      // We immediately sync the data with the box.
+      this.refreshServicesByPolling();
+    } else {
+      clearInterval(this.pollingInterval);
+    }
+  }
+
+  /**
+   * Detect changes in the services:
+   * * Emits a `service-change` event if a service is connected/disconnected.
+   * * Emits a `service-state-change` event if the state of a service changes.
+   *
+   * @return {Promise}
+   */
+  refreshServicesByPolling() {
+    if (!this.isLoggedIn) {
+      return Promise.reject();
+    }
+
+    return new Promise((resolve, reject) => {
+      let hasChanged = false;
+
+      Promise.all([
+          this.getServices(),
+          fetchJSON(`${this.origin}/services/list`)
+        ])
+        .then(res => {
+          // Detect newly connected/disconnected services.
+          const storedServices = res[0];
+          const fetchedServices = res[1];
+
+          // Any newly connected devices?
+          fetchedServices.some(serviceA => {
+            const service = storedServices.find(serviceB => serviceA.id === serviceB.id);
+            if (!service) {
+              hasChanged = true;
+              return true;
+            }
+          });
+
+          // Any newly disconnected devices?
+          storedServices.some(serviceA => {
+            const service = fetchedServices.find(serviceB => serviceA.id === serviceB.id);
+            if (!service) {
+              hasChanged = true;
+              return true;
+            }
+          });
+
+          return [storedServices, fetchedServices];
+        })
+        .then(res => {
+          // Detect change in service states.
+          const storedServices = res[0];
+          const fetchedServices = res[1];
+
+          Promise.all(fetchedServices.map(service => this.getServiceState(service.id)))
+            .then(states => {
+              fetchedServices.forEach((fetchedService, id) => {
+                // Populate the service objects with states.
+                fetchedService.state = states[id];
+
+                const storedService = storedServices.find(s => s.id === fetchedService.id);
+
+                if (!storedService) {
+                  this._dispatchEvent('service-state-change', fetchedService);
+
+                  // Populate the db with the latest service.
+                  db.setService(fetchedService);
+
+                  return;
+                }
+
+                if (!isSimilar(fetchedService.state, storedService.state)) {
+                  fetchedService = Object.assign(storedService, fetchedService);
+
+                  this._dispatchEvent('service-state-change', fetchedService);
+
+                  // Populate the db with the latest service.
+                  db.setService(fetchedService);
+                }
+              });
+
+              if (hasChanged) {
+                // The state of the services changes.
+                this._dispatchEvent('service-change', fetchedServices);
+              }
+
+              return resolve(fetchedServices);
+            });
+        });
+    });
+  }
+
+  /**
    * Retrieve the list of the services available.
+   * Use the database as a source of truth.
    *
    * @return {Promise} A promise that resolves with an array of objects.
    */
   getServices() {
-    return new Promise((resolve, reject) => {
-      fetchJSON(`${this.origin}/services/list`)
-        .then(services => {
-          // Get the state of each service.
-          Promise.all(services.map(service => this.getServiceState(service.id)))
-            .then(states => {
-              services.forEach((service, id) => service.state = states[id]);
-
-              // Get all the services from the db.
-              db.getServices()
-                .then(storedServices => {
-                  services.forEach(service => {
-                    // Merge the data from the db with the updated one.
-                    const storedService = storedServices.find(s => s.data.id === service.id);
-                    if (storedService !== undefined) {
-                      service = Object.assign(storedService.data, service);
-                    }
-
-                    // Populate the db with the latest service.
-                    db.setService(service);
-                  });
-                });
-
-              return resolve(services);
-            });
-        });
-    });
+    return db.getServices()
+      .then(services => {
+        return services.map(service => service.data);
+      });
   }
 
   /**

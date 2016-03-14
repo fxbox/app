@@ -9,6 +9,10 @@ export default class ServicesListItem extends React.Component {
     this.foxbox = props.foxbox;
   }
 
+  componentWillReceiveProps(props) {
+    this.setState(props.state);
+  }
+
   handleLightOnChange(evt) {
     // No optimistic update because some network issues can't be caught.
     let value = evt.target.checked;

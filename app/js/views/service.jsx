@@ -8,21 +8,33 @@ export default class Service extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      tags: [],
-      data: {}
+      data: {},
+      tags: []
     };
 
     this.foxbox = props.foxbox;
+
+    this.updateServiceState = this.updateServiceState.bind(this);
   }
 
   componentDidMount() {
     this.foxbox.getService(this.props.id)
       .then(service => {
-        this.setState(service);
+        this.updateServiceState(service.data);
       })
       .catch(console.error.bind(console));
 
     this.populateTags();
+
+    this.foxbox.addEventListener('service-state-change', this.updateServiceState);
+  }
+
+  componentWillUnmount() {
+    this.foxbox.removeEventListener('service-state-change', this.updateServiceState);
+  }
+
+  updateServiceState(state) {
+    this.setState({ data: state });
   }
 
   populateTags() {

@@ -8,6 +8,8 @@ const PREFIX = 'foxbox-';
 const DEFAULT_SCHEME = 'http';
 const DEFAULT_HOSTNAME = 'localhost';
 const DEFAULT_PORT = 3000;
+const DEFAULT_POLLING_ENABLED = true;
+const POLLING_INTERVAL = 2000;
 const REGISTRATION_SERVICE = 'https://knilxof.org:4243/ping';
 
 // Not all browsers have localStorage supported or activated.
@@ -24,8 +26,17 @@ export default class FoxboxSettings extends Model {
       _hostname: storage.getItem(`${PREFIX}hostname`) || DEFAULT_HOSTNAME,
       _port: storage.getItem(`${PREFIX}port`) || DEFAULT_PORT,
       _session: storage.getItem(`${PREFIX}session`),
-      _skipDiscovery: storage.getItem(`${PREFIX}skipDiscovery`) === 'true'
+      _skipDiscovery: storage.getItem(`${PREFIX}skipDiscovery`) === 'true',
+      _pollingEnabled: storage.getItem(`${PREFIX}pollingEnabled`) !== null ?
+      storage.getItem(`${PREFIX}pollingEnabled`) === 'true' : DEFAULT_POLLING_ENABLED
     });
+  }
+
+  on(property, handler) {
+    const prototype = Object.getPrototypeOf(this);
+    const parent = Object.getPrototypeOf(prototype);
+
+    parent.on.call(this, `_${property}`, handler);
   }
 
   get scheme() {
@@ -84,5 +95,19 @@ export default class FoxboxSettings extends Model {
     value = !!value;
     this._skipDiscovery = value;
     storage.setItem(`${PREFIX}skipDiscovery`, value);
+  }
+
+  get pollingEnabled() {
+    return this._pollingEnabled;
+  }
+
+  set pollingEnabled(value) {
+    value = !!value;
+    this._pollingEnabled = value;
+    storage.setItem(`${PREFIX}pollingEnabled`, value);
+  }
+
+  get pollingInterval() {
+    return POLLING_INTERVAL;
   }
 }
