@@ -8,10 +8,10 @@ export default class ServicesList extends React.Component {
         <ServicesListItem
           key={service.id}
           id={service.id}
-          type={service.type}
           name={service.name}
-          manufacturer={service.manufacturername}
-          modelid={service.modelid}
+          type={service.properties.type}
+          manufacturer={service.properties.manufacturer}
+          modelid={service.properties.model}
           state={service.state}
           foxbox={this.props.foxbox}/>
       )
