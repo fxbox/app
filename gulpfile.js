@@ -90,8 +90,11 @@ gulp.task('rename', function() {
     .pipe(gulp.dest(DIST_APP_ROOT + 'js/'));
 });
 
-gulp.task('del-jsx', function(cb) {
-  del(DIST_APP_ROOT + 'js/views/*.jsx', cb);
+gulp.task('remove-useless', function(cb) {
+  del([
+    DIST_APP_ROOT + 'js/views/*.jsx',
+    DIST_APP_ROOT + '**/*.md'
+  ], cb);
 });
 
 /**
@@ -113,7 +116,7 @@ gulp.task('travis', ['lint', 'loader-polyfill', 'to5']);
  */
 gulp.task('build', function(cb) {
   runSequence(['clobber'], ['loader-polyfill', 'copy-app'], ['to5'],
-    ['rename', 'lint'], ['del-jsx'], cb);
+    ['rename', 'lint'], ['remove-useless'], cb);
 });
 
 /**
