@@ -122,21 +122,30 @@ export default class Foxbox extends Service {
       return Promise.resolve();
     }
 
-    return fetchJSON(settings.registrationService)
-      .then(boxes => {
-        if (!Array.isArray(boxes) || boxes.length === 0) {
-          return;
-        }
+    return new Promise((resolve, reject) => {
+      fetchJSON(settings.registrationService)
+        .then(boxes => {
+          if (!Array.isArray(boxes) || boxes.length === 0) {
+            return resolve();
+          }
 
-        // Multi box setup out of the scope so far.
-        const box = boxes[0];
+          // Multi box setup out of the scope so far.
+          const box = boxes[0];
 
-        // Check if we have a recent registry.
-        const now = Math.floor(Date.now() / 1000);
-        if ((now - box.timestamp) < 60) {
-          settings.hostname = box.hostname || box.local_ip;
-        }
-      });
+          // Check if we have a recent registry.
+          const now = Math.floor(Date.now() / 1000);
+          if ((now - box.timestamp) < 60) {
+            settings.hostname = box.hostname || box.local_ip;
+          }
+
+          resolve();
+        })
+        .catch(() => {
+          // When something goes wrong, we still want to resolve the promise so
+          // that a hostname set previously is reused.
+          resolve();
+        });
+    });
   }
 
   get isLoggedIn() {
@@ -188,7 +197,7 @@ export default class Foxbox extends Service {
    */
   refreshServicesByPolling() {
     if (!this.isLoggedIn) {
-      return Promise.reject();
+      return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {
