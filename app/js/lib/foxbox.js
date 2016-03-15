@@ -75,27 +75,9 @@ const isSimilar = (objectA, objectB) => {
 
 export default class Foxbox extends Service {
   init() {
-    return this.discover()
+    return this._discover()
       .then(() => {
-        if (this.isLoggedIn) {
-          return;
-        }
-
-        const queryString = location.search.substring(1);
-        const searchParams = new URLSearchParams(queryString);
-
-        if (searchParams.has('session_token')) {
-          // There is a session token in the URL, let's remember it.
-          // @todo Find a better way to handle URL escape.
-          settings.session = searchParams.get('session_token').replace(/ /g, '+');
-
-          // Remove the session param from the current location.
-          searchParams.delete('session_token');
-          location.search = searchParams.toString();
-
-          // Throwing here to abort the promise chain.
-          throw(new Error('Redirecting to a URL without session'));
-        }
+        return this._processUserSession();
       })
       .then(() => {
         // The DB is only initialised if there's no redirection to the box.
@@ -114,7 +96,16 @@ export default class Foxbox extends Service {
     return `${settings.scheme}://${settings.hostname}:${settings.port}`;
   }
 
-  discover() {
+  /**
+   * Get the IP address of the box on the local network using the registration
+   * server.
+   * If it fails, we fallback to the previously set hostname.
+   * It there isn't, it falls back to localhost.
+   *
+   * @returns {Promise}
+   * @private
+   */
+  _discover() {
     // For development purposes if you want to skip the
     // discovery phase set the 'foxbox-skipDiscovery' variable to
     // 'true'.
@@ -146,6 +137,33 @@ export default class Foxbox extends Service {
           resolve();
         });
     });
+  }
+
+  /**
+   * Detect a session token in the URL and process it if present.
+   *
+   * @private
+   */
+  _processUserSession() {
+    if (this.isLoggedIn) {
+      return;
+    }
+
+    const queryString = location.search.substring(1);
+    const searchParams = new URLSearchParams(queryString);
+
+    if (searchParams.has('session_token')) {
+      // There is a session token in the URL, let's remember it.
+      // @todo Find a better way to handle URL escape.
+      settings.session = searchParams.get('session_token').replace(/ /g, '+');
+
+      // Remove the session param from the current location.
+      searchParams.delete('session_token');
+      location.search = searchParams.toString();
+
+      // Throwing here to abort the promise chain.
+      throw(new Error('Redirecting to a URL without session'));
+    }
   }
 
   get isLoggedIn() {
