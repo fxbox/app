@@ -19,10 +19,15 @@ var del = require(buildModules + 'del');
 var runSequence = require(buildModules + 'run-sequence').use(gulp);
 var webserver = require(buildModules + 'gulp-webserver');
 var exec = require('child_process').exec;
+var mocha = require('gulp-mocha');
+var gls = require('gulp-live-server');
 
 const APP_ROOT = './app/';
 const DIST_ROOT = './dist/';
 const DIST_APP_ROOT = './dist/app/';
+
+var webserverStream;
+var foxboxSimulator;
 
 /**
  * runs jslint on all javascript files found in the app dir.
@@ -176,7 +181,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('webserver', function() {
-  gulp.src('dist/app')
+  webserverStream = gulp.src('dist/app')
     .pipe(webserver({
       port: process.env.PORT || 8000,
       host: process.env.HOSTNAME || 'localhost',
@@ -184,6 +189,10 @@ gulp.task('webserver', function() {
       directoryListing: false,
       open: false
     }));
+});
+
+gulp.task('stop-webserver', function() {
+  webserverStream.emit('kill');
 });
 
 /**
@@ -215,4 +224,35 @@ gulp.task('clean', function(cb) {
     'node_modules/',
     'gulpfile.js'
   ], cb);
+});
+
+gulp.task('start-foxbox-simulator', function() {
+  foxboxSimulator = gls.new('tests/foxbox-simulator/http-server.js');
+  foxboxSimulator.start();
+});
+
+gulp.task('stop-foxbox-simulator', function() {
+  foxboxSimulator.stop();
+});
+
+gulp.task('run-test-integration', function() {
+  return gulp.src('./tests/{common,integration}/**/*_test.js', {read: false}).pipe(mocha());
+});
+
+
+gulp.task('test-integration', function(cb) {
+  return runSequence('start-foxbox-simulator', 'run-test-integration', 'stop-foxbox-simulator', cb);
+});
+
+gulp.task('run-test-e2e', function () {
+	return gulp.src('./tests/{common,e2e}/**/*_test.js', {read: false}).pipe(mocha());
+});
+
+gulp.task('test', function() {
+  runSequence('build', 'webserver', 'test-integration', 'stop-webserver');
+});
+
+// TODO: Should be included in 'test' once less manual steps are required
+gulp.task('test-e2e', function() {
+  runSequence('build', 'webserver', 'run-test-e2e', 'stop-webserver');
 });

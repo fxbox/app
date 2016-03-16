@@ -1,0 +1,9 @@
+{
+  "extends": "../.jshintrc",
+  "predef": [
+    "require"
+  ],
+  "mocha": true,
+  "node": true,
+  "-W030": true
+}
