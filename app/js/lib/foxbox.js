@@ -75,6 +75,7 @@ const isSimilar = (objectA, objectB) => {
 
 export default class Foxbox extends Service {
   init() {
+    window.foxbox = this;
     return this._discover()
       .then(() => {
         return this._processUserSession();
@@ -90,6 +91,14 @@ export default class Foxbox extends Service {
         });
         this.togglePolling(settings.pollingEnabled);
       });
+  }
+
+  /**
+   * Clear all data/settings stored on the browser. Use with caution.
+   */
+  clear() {
+    const promises = [settings.clear(), db.clear()];
+    return Promise.all(promises);
   }
 
   get origin() {

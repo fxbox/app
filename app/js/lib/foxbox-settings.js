@@ -32,6 +32,14 @@ export default class FoxboxSettings extends Model {
     });
   }
 
+  clear() {
+    return new Promise(resolve => {
+      // @todo Remove only the items set here.
+      storage.clear();
+      resolve();
+    });
+  }
+
   on(property, handler) {
     const prototype = Object.getPrototypeOf(this);
     const parent = Object.getPrototypeOf(prototype);
