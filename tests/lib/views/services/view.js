@@ -9,4 +9,14 @@ function ServicesView() {
   this.accessors.logOutButton; // Wait until it appears
 }
 
+ServicesView.prototype = Object.assign({
+
+  logoutSuccess: function(password) {
+    return this.accessors.logOutButton.click().then(() => {
+      var LoginView = require('../login/view');
+      return new LoginView(this.driver);
+    });
+  }
+
+}, View.prototype);
 module.exports = ServicesView;

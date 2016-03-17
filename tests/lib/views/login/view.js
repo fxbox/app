@@ -5,6 +5,8 @@ var LoginAccessors = require('./accessors');
 function LoginView() {
   [].push.call(arguments, LoginAccessors);
   View.apply(this, arguments);
+  
+  this.accessors.startLoginButton;
 }
 
 LoginView.prototype = Object.assign({
@@ -14,7 +16,8 @@ LoginView.prototype = Object.assign({
       this.accessors.passwordField.sendKeys(password);
       this.accessors.submitButton.click();
     }).then(() => {
-      return new require('../services/view')(this.driver);
+      var ServicesView = require('../services/view');
+      return new ServicesView(this.driver);
     });
   }
 
