@@ -1,3 +1,5 @@
+/* global indexedDB */
+
 'use strict';
 
 // The name of the db.
@@ -16,7 +18,7 @@ export default class FoxboxDb {
 
   init() {
     return new Promise((resolve, reject) => {
-      let req = window.indexedDB.open(DB_NAME, DB_VERSION);
+      let req = indexedDB.open(DB_NAME, DB_VERSION);
       req.onupgradeneeded = this.upgradeSchema;
       req.onsuccess = evt => {
         this.db = evt.target.result;
@@ -60,7 +62,7 @@ export default class FoxboxDb {
     return new Promise((resolve, reject) => {
       this.db.close();
 
-      var req = window.indexedDB.deleteDatabase(DB_NAME);
+      var req = indexedDB.deleteDatabase(DB_NAME);
       req.onsuccess = resolve;
       req.onerror = reject;
       req.onblocked = reject;

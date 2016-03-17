@@ -10,6 +10,15 @@ import FoxboxDb from './foxbox-db';
 const settings = new FoxboxSettings();
 const db = new FoxboxDb();
 
+// Whether or not the SSL tunneling can be used.
+let _tunnelConfigured = false;
+// Whether we can connect to the box via a local connection.
+let _local = false;
+// Whether we can connect to the box via a remote connection.
+let _remote = false;
+// A reference to the interval to get the online status.
+let _onlineInterval = null;
+
 /**
  * Request a JSON from a specified URL.
  *
@@ -55,6 +64,19 @@ const fetchJSON = function(url, method = 'GET', body = undefined) {
 };
 
 /**
+ * Get a URL but don't process the response.
+ *
+ * @param {string} url The URL to send the request to.
+ * @return {Promise}
+ */
+const ping = function(url) {
+  return fetch(url, { cache: 'no-store' })
+    .then(res => {
+      return res.ok;
+    });
+};
+
+/**
  * Compare 2 objects. Returns true if all properties of object A have the same
  * value in object B. Extraneous properties in object B are ignored.
  * Properties order is not important.
@@ -76,9 +98,13 @@ const isSimilar = (objectA, objectB) => {
 export default class Foxbox extends Service {
   init() {
     window.foxbox = this;
-    return this._discover()
+
+    return this._initUserSession()
       .then(() => {
-        return this._processUserSession();
+        return this._initDiscovery();
+      })
+      .then(() => {
+        return this._initNetwork();
       })
       .then(() => {
         // The DB is only initialised if there's no redirection to the box.
@@ -102,7 +128,35 @@ export default class Foxbox extends Service {
   }
 
   get origin() {
-    return `${settings.scheme}://${settings.hostname}:${settings.port}`;
+    if (_local) {
+      return this.localOrigin;
+    } else if (_remote) {
+      return this.tunnelOrigin;
+    }
+
+    console.error('The box is out of reach.');
+    return this.localOrigin;
+  }
+
+  get localOrigin() {
+    return `${settings.localScheme}://${settings.localHostname}:${settings.localPort}`;
+  }
+
+  get tunnelOrigin() {
+    return `${settings.tunnelScheme}://${settings.tunnelHostname}:${settings.tunnelPort}`;
+  }
+
+  get connected() {
+    return _local || _remote;
+  }
+
+  get connection() {
+    if (_local) {
+      return 'local';
+    } else if (_remote) {
+      return 'remote';
+    }
+    return 'unknown';
   }
 
   /**
@@ -114,7 +168,7 @@ export default class Foxbox extends Service {
    * @returns {Promise}
    * @private
    */
-  _discover() {
+  _initDiscovery() {
     // For development purposes if you want to skip the
     // discovery phase set the 'foxbox-skipDiscovery' variable to
     // 'true'.
@@ -135,7 +189,11 @@ export default class Foxbox extends Service {
           // Check if we have a recent registry.
           const now = Math.floor(Date.now() / 1000);
           if ((now - box.timestamp) < 60) {
-            settings.hostname = box.hostname || box.local_ip;
+            settings.localHostname = box.local_ip;
+            if (box.tunnel_url) {
+              settings.tunnelHostname = box.tunnel_url;
+              _tunnelConfigured = true;
+            }
           }
 
           resolve();
@@ -151,11 +209,12 @@ export default class Foxbox extends Service {
   /**
    * Detect a session token in the URL and process it if present.
    *
+   * @return {Promise}
    * @private
    */
-  _processUserSession() {
+  _initUserSession() {
     if (this.isLoggedIn) {
-      return;
+      return Promise.resolve();
     }
 
     const queryString = location.search.substring(1);
@@ -172,6 +231,58 @@ export default class Foxbox extends Service {
 
       // Throwing here to abort the promise chain.
       throw(new Error('Redirecting to a URL without session'));
+    }
+
+    return Promise.resolve();
+  }
+
+  /**
+   * Attach event listeners related to the connection status.
+   *
+   * @return {Promise}
+   * @private
+   */
+  _initNetwork() {
+    window.addEventListener('online', this.pingBox.bind(this));
+    window.addEventListener('offline', this.pingBox.bind(this));
+
+    if ('connection' in navigator && 'onchange' in navigator.connection) {
+      navigator.connection.addEventListener('change', this.pingBox.bind(this));
+
+      // We also ping the box every few minutes to make sure it's still there.
+      _onlineInterval = setInterval(this.pingBox.bind(this),
+        settings.onlineCheckingLongInterval);
+    } else {
+      // If the Network Information API is not implemented, fallback to polling.
+      _onlineInterval = setInterval(this.pingBox.bind(this),
+        settings.onlineCheckingInterval);
+    }
+
+    this.pingBox();
+
+    return Promise.resolve();
+  }
+
+  /**
+   * Ping the box to detect whether we connect locally or remotely.
+   */
+  pingBox() {
+    ping(`${this.localOrigin}/ping`)
+      .then(() => {
+        _local = true;
+      })
+      .catch(() => {
+        _local = false;
+      });
+
+    if (_tunnelConfigured) {
+      ping(`${this.tunnelOrigin}/ping`)
+        .then(() => {
+          _remote = true;
+        })
+        .catch(() => {
+          _remote = false;
+        });
     }
   }
 
