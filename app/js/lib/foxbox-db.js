@@ -56,6 +56,17 @@ export default class FoxboxDb {
     }
   }
 
+  clear() {
+    return new Promise((resolve, reject) => {
+      this.db.close();
+
+      var req = window.indexedDB.deleteDatabase(DB_NAME);
+      req.onsuccess = resolve;
+      req.onerror = reject;
+      req.onblocked = reject;
+    });
+  }
+
   getServices() {
     return getAll(DB_SERVICE_STORE).call(this);
   }
