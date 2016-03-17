@@ -19,7 +19,7 @@ let _remote = false;
 // A reference to the interval to get the online status.
 let _onlineInterval = null;
 
-const priv = {
+const privateMembers = {
   isPollingEnabled: Symbol('isPollingEnabled'),
   nextPollTimeout: Symbol('nextPollTimeout')
 };
@@ -321,14 +321,14 @@ export default class Foxbox extends Service {
    * be started or stopped.
    */
   togglePolling(pollingEnabled) {
-    this[priv.isPollingEnabled] = pollingEnabled;
+    this[privateMembers.isPollingEnabled] = pollingEnabled;
 
     if (pollingEnabled) {
       this.schedulePoll();
     } else {
       // Cancel next poll attempt if it has been scheduled.
-      clearTimeout(this[priv.nextPollTimeout]);
-      this[priv.nextPollTimeout] = null;
+      clearTimeout(this[privateMembers.nextPollTimeout]);
+      this[privateMembers.nextPollTimeout] = null;
     }
   }
 
@@ -339,18 +339,21 @@ export default class Foxbox extends Service {
    */
   schedulePoll() {
     // Return early if polling is not enabled or it has already been scheduled.
-    if (!this[priv.isPollingEnabled] || this[priv.nextPollTimeout]) {
+    if (!this[privateMembers.isPollingEnabled] ||
+        this[privateMembers.nextPollTimeout]) {
       return;
     }
 
-    this[priv.nextPollTimeout] = setTimeout(() => {
-      this.refreshServicesByPolling().catch((e) => {
-        console.error('Polling has failed, scheduling one more attempt: ', e);
-      }).then(() => {
-        this[priv.nextPollTimeout] = null;
+    this[privateMembers.nextPollTimeout] = setTimeout(() => {
+      this.refreshServicesByPolling()
+        .catch((e) => {
+          console.error('Polling has failed, scheduling one more attempt: ', e);
+        })
+        .then(() => {
+          this[privateMembers.nextPollTimeout] = null;
 
-        this.schedulePoll();
-      });
+          this.schedulePoll();
+        });
     }, settings.pollingInterval);
   }
 
@@ -366,58 +369,56 @@ export default class Foxbox extends Service {
       return Promise.resolve();
     }
 
-    let fetchedServicesPromise = fetchJSON(`${this.origin}/services/list`).then(
-      (services) => {
-        // TODO: We should ask for state only for services that actually support
+    const fetchedServicesPromise = fetchJSON(`${this.origin}/services/list`)
+      .then((services) => {
+        // @todo We should ask for state only for services that actually support
         // it.
         return Promise.all(
           services.map((service) => {
             // Use empty state if service failed to return actual state.
-            return this.getServiceState(service.id).catch(() => ({})).then(
-              (state) => service.state = state
-            );
+            return this.getServiceState(service.id)
+              .catch(() => ({}))
+              .then((state) => service.state = state);
           })
         ).then(() => services);
-      }
-    );
+      });
 
-    return Promise.all([
-      this.getServices(),
-      fetchedServicesPromise
-    ]).then(([storedServices, fetchedServices]) => {
-      let hasNewServices = fetchedServices.reduce(
-        (hasNewServices, fetchedService) => {
-          const storedService = storedServices.find(
-            s => s.id === fetchedService.id
-          );
+    return Promise.all([this.getServices(), fetchedServicesPromise])
+      .then(([storedServices, fetchedServices]) => {
+        let hasNewServices = fetchedServices.reduce(
+          (hasNewServices, fetchedService) => {
+            const storedService = storedServices.find(
+              s => s.id === fetchedService.id
+            );
 
-          const isExistingService = !!storedService;
+            const isExistingService = !!storedService;
 
-          if (isExistingService &&
-              isSimilar(fetchedService.state, storedService.state)) {
-            return hasNewServices;
-          }
+            if (isExistingService &&
+                isSimilar(fetchedService.state, storedService.state)) {
+              return hasNewServices;
+            }
 
-          fetchedService = isExistingService ?
-            Object.assign(storedService, fetchedService) : fetchedService;
+            fetchedService = isExistingService ?
+              Object.assign(storedService, fetchedService) : fetchedService;
 
-          this._dispatchEvent('service-state-change', fetchedService);
+            this._dispatchEvent('service-state-change', fetchedService);
 
-          // Populate the db with the latest service.
-          db.setService(fetchedService);
+            // Populate the db with the latest service.
+            db.setService(fetchedService);
 
-          return hasNewServices || !isExistingService;
-        },
-        false /* hasNewServices */
-      );
+            return hasNewServices || !isExistingService;
+          },
+          false /* hasNewServices */
+        );
 
-      if (hasNewServices || fetchedServices.length !== storedServices.length) {
-        // The state of the services changes.
-        this._dispatchEvent('service-change', fetchedServices);
-      }
+        if (hasNewServices ||
+            fetchedServices.length !== storedServices.length) {
+          // The state of the services changes.
+          this._dispatchEvent('service-change', fetchedServices);
+        }
 
-      return fetchedServices;
-    });
+        return fetchedServices;
+      });
   }
 
   /**
