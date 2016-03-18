@@ -29,6 +29,7 @@ const DIST_APP_ROOT = './dist/app/';
 
 var webserverStream;
 var foxboxSimulator;
+var registrationServerSimulator;
 
 /**
  * runs jslint on all javascript files found in the app dir.
@@ -237,13 +238,17 @@ gulp.task('clean', function(cb) {
   ], cb);
 });
 
-gulp.task('start-foxbox-simulator', function() {
-  foxboxSimulator = gls.new('tests/foxbox-simulator/http-server.js');
+gulp.task('start-simulators', function() {
+  foxboxSimulator = gls('tests/foxbox-simulator/http-server.js', undefined, false);
   foxboxSimulator.start();
+
+  registrationServerSimulator = gls('tests/registration-server-simulator/http-server.js', undefined, false);
+  registrationServerSimulator.start();
 });
 
-gulp.task('stop-foxbox-simulator', function() {
+gulp.task('stop-simulators', function() {
   foxboxSimulator.stop();
+  registrationServerSimulator.stop();
 });
 
 gulp.task('run-test-integration', function() {
@@ -252,7 +257,7 @@ gulp.task('run-test-integration', function() {
 
 
 gulp.task('test-integration', function(cb) {
-  return runSequence('start-foxbox-simulator', 'run-test-integration', 'stop-foxbox-simulator', cb);
+  return runSequence('start-simulators', 'run-test-integration', 'stop-simulators', cb);
 });
 
 gulp.task('run-test-e2e', function () {

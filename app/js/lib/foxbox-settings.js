@@ -24,12 +24,15 @@ const storage = localStorage ? localStorage : {
 export default class FoxboxSettings extends Model {
   constructor() {
     super({
+      _configured: storage.getItem(`${PREFIX}configured`) !== null ?
+      storage.getItem(`${PREFIX}configured`) === 'true' : false,
+
       _localScheme: storage.getItem(`${PREFIX}localScheme`) || DEFAULT_SCHEME,
       _localHostname: storage.getItem(`${PREFIX}localHostname`) || DEFAULT_HOSTNAME,
       _localPort: storage.getItem(`${PREFIX}localPort`) || DEFAULT_PORT,
 
       _tunnelScheme: storage.getItem(`${PREFIX}tunnelScheme`) || DEFAULT_SCHEME,
-      _tunnelHostname: storage.getItem(`${PREFIX}tunnelHostname`) || DEFAULT_HOSTNAME,
+      _tunnelHostname: storage.getItem(`${PREFIX}tunnelHostname`) || '',
       _tunnelPort: storage.getItem(`${PREFIX}tunnelPort`) || DEFAULT_PORT,
 
       _session: storage.getItem(`${PREFIX}session`),
@@ -52,6 +55,16 @@ export default class FoxboxSettings extends Model {
     const parent = Object.getPrototypeOf(prototype);
 
     parent.on.call(this, `_${property}`, handler);
+  }
+
+  get configured() {
+    return this._configured;
+  }
+
+  set configured(value) {
+    value = !!value;
+    this._configured = value;
+    storage.setItem(`${PREFIX}configured`, value);
   }
 
   get localScheme() {
@@ -150,7 +163,8 @@ export default class FoxboxSettings extends Model {
 
   // Getters only.
   get registrationService() {
-    return REGISTRATION_SERVICE;
+    return localStorage.registrationServer ||
+      REGISTRATION_SERVICE;
   }
 
   get pollingInterval() {
