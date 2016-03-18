@@ -19,7 +19,7 @@ let _remote = false;
 // A reference to the interval to get the online status.
 let _onlineInterval = null;
 
-const privateMembers = {
+const _private = {
   isPollingEnabled: Symbol('isPollingEnabled'),
   nextPollTimeout: Symbol('nextPollTimeout')
 };
@@ -321,14 +321,14 @@ export default class Foxbox extends Service {
    * be started or stopped.
    */
   togglePolling(pollingEnabled) {
-    this[privateMembers.isPollingEnabled] = pollingEnabled;
+    this[_private.isPollingEnabled] = pollingEnabled;
 
     if (pollingEnabled) {
       this.schedulePoll();
     } else {
       // Cancel next poll attempt if it has been scheduled.
-      clearTimeout(this[privateMembers.nextPollTimeout]);
-      this[privateMembers.nextPollTimeout] = null;
+      clearTimeout(this[_private.nextPollTimeout]);
+      this[_private.nextPollTimeout] = null;
     }
   }
 
@@ -339,18 +339,18 @@ export default class Foxbox extends Service {
    */
   schedulePoll() {
     // Return early if polling is not enabled or it has already been scheduled.
-    if (!this[privateMembers.isPollingEnabled] ||
-        this[privateMembers.nextPollTimeout]) {
+    if (!this[_private.isPollingEnabled] ||
+        this[_private.nextPollTimeout]) {
       return;
     }
 
-    this[privateMembers.nextPollTimeout] = setTimeout(() => {
+    this[_private.nextPollTimeout] = setTimeout(() => {
       this.refreshServicesByPolling()
         .catch((e) => {
           console.error('Polling has failed, scheduling one more attempt: ', e);
         })
         .then(() => {
-          this[privateMembers.nextPollTimeout] = null;
+          this[_private.nextPollTimeout] = null;
 
           this.schedulePoll();
         });
