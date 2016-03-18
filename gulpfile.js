@@ -21,6 +21,7 @@ var webserver = require(buildModules + 'gulp-webserver');
 var exec = require('child_process').exec;
 var mocha = require('gulp-mocha');
 var gls = require('gulp-live-server');
+var gsww = require('gulp-sww');
 
 const APP_ROOT = './app/';
 const DIST_ROOT = './dist/';
@@ -208,6 +209,16 @@ gulp.task('default', function() {
  */
 gulp.task('clobber', function(cb) {
   del('dist/', cb);
+});
+
+/**
+ * Add ServiceWorker support and cache all application
+ * assets.
+ */
+gulp.task('offline', ['build'], function() {
+  gulp.src(['**/*'], {cwd: DIST_APP_ROOT})
+    .pipe(gsww())
+    .pipe(gulp.dest(DIST_APP_ROOT));
 });
 
 /**
