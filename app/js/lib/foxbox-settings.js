@@ -10,6 +10,8 @@ const DEFAULT_HOSTNAME = 'localhost';
 const DEFAULT_PORT = 3000;
 const DEFAULT_POLLING_ENABLED = true;
 const POLLING_INTERVAL = 2000;
+const ONLINE_CHECKING_INTERVAL = 5000;
+const ONLINE_CHECKING_LONG_INTERVAL = 1000 * 60 * 5;
 const REGISTRATION_SERVICE = 'http://knilxof.org:4242/ping';
 
 // Not all browsers have localStorage supported or activated.
@@ -22,9 +24,14 @@ const storage = localStorage ? localStorage : {
 export default class FoxboxSettings extends Model {
   constructor() {
     super({
-      _scheme: storage.getItem(`${PREFIX}scheme`) || DEFAULT_SCHEME,
-      _hostname: storage.getItem(`${PREFIX}hostname`) || DEFAULT_HOSTNAME,
-      _port: storage.getItem(`${PREFIX}port`) || DEFAULT_PORT,
+      _localScheme: storage.getItem(`${PREFIX}localScheme`) || DEFAULT_SCHEME,
+      _localHostname: storage.getItem(`${PREFIX}localHostname`) || DEFAULT_HOSTNAME,
+      _localPort: storage.getItem(`${PREFIX}localPort`) || DEFAULT_PORT,
+
+      _tunnelScheme: storage.getItem(`${PREFIX}tunnelScheme`) || DEFAULT_SCHEME,
+      _tunnelHostname: storage.getItem(`${PREFIX}tunnelHostname`) || DEFAULT_HOSTNAME,
+      _tunnelPort: storage.getItem(`${PREFIX}tunnelPort`) || DEFAULT_PORT,
+
       _session: storage.getItem(`${PREFIX}session`),
       _skipDiscovery: storage.getItem(`${PREFIX}skipDiscovery`) === 'true',
       _pollingEnabled: storage.getItem(`${PREFIX}pollingEnabled`) !== null ?
@@ -47,34 +54,64 @@ export default class FoxboxSettings extends Model {
     parent.on.call(this, `_${property}`, handler);
   }
 
-  get scheme() {
-    return this._scheme;
+  get localScheme() {
+    return this._localScheme;
   }
 
-  set scheme(scheme) {
+  set localScheme(scheme) {
     scheme = String(scheme) || DEFAULT_SCHEME;
-    this._scheme = scheme;
-    storage.setItem(`${PREFIX}scheme`, this._scheme);
+    this._localScheme = scheme;
+    storage.setItem(`${PREFIX}localScheme`, this._localScheme);
   }
 
-  get hostname() {
-    return this._hostname;
+  get localHostname() {
+    return this._localHostname;
   }
 
-  set hostname(hostname) {
+  set localHostname(hostname) {
     hostname = String(hostname) || DEFAULT_HOSTNAME;
-    this._hostname = hostname.replace(/\/$/, ''); // Trailing slash.
-    storage.setItem(`${PREFIX}hostname`, this._hostname);
+    this._localHostname = hostname.replace(/\/$/, ''); // Trailing slash.
+    storage.setItem(`${PREFIX}localHostname`, this._localHostname);
   }
 
-  get port() {
-    return this._port;
+  get localPort() {
+    return this._localPort;
   }
 
-  set port(port) {
+  set localPort(port) {
     port = parseInt(port, 10) || DEFAULT_PORT;
-    this._port = port;
-    storage.setItem(`${PREFIX}port`, this._port);
+    this._localPort = port;
+    storage.setItem(`${PREFIX}localPort`, this._localPort);
+  }
+
+  get tunnelScheme() {
+    return this._tunnelScheme;
+  }
+
+  set tunnelScheme(scheme) {
+    scheme = String(scheme) || DEFAULT_SCHEME;
+    this._tunnelScheme = scheme;
+    storage.setItem(`${PREFIX}tunnelScheme`, this._tunnelScheme);
+  }
+
+  get tunnelHostname() {
+    return this._tunnelHostname;
+  }
+
+  set tunnelHostname(hostname) {
+    hostname = String(hostname) || DEFAULT_HOSTNAME;
+    this._tunnelHostname = hostname.replace(/\/$/, ''); // Trailing slash.
+    storage.setItem(`${PREFIX}tunnelHostname`, this._tunnelHostname);
+  }
+
+  get tunnelPort() {
+    return this._tunnelPort;
+  }
+
+  set tunnelPort(port) {
+    port = parseInt(port, 10) || DEFAULT_PORT;
+    this._tunnelPort = port;
+    storage.setItem(`${PREFIX}tunnelPort`, this._tunnelPort);
   }
 
   get session() {
@@ -89,10 +126,6 @@ export default class FoxboxSettings extends Model {
       this._session = session;
       storage.setItem(`${PREFIX}session`, this._session);
     }
-  }
-
-  get registrationService() {
-    return REGISTRATION_SERVICE;
   }
 
   get skipDiscovery() {
@@ -115,7 +148,20 @@ export default class FoxboxSettings extends Model {
     storage.setItem(`${PREFIX}pollingEnabled`, value);
   }
 
+  // Getters only.
+  get registrationService() {
+    return REGISTRATION_SERVICE;
+  }
+
   get pollingInterval() {
     return POLLING_INTERVAL;
+  }
+
+  get onlineCheckingInterval() {
+    return ONLINE_CHECKING_INTERVAL;
+  }
+
+  get onlineCheckingLongInterval() {
+    return ONLINE_CHECKING_LONG_INTERVAL;
   }
 }
