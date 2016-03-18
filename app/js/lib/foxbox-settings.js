@@ -163,7 +163,8 @@ export default class FoxboxSettings extends Model {
 
   // Getters only.
   get registrationService() {
-    return REGISTRATION_SERVICE;
+    return localStorage.registrationServer ||
+      REGISTRATION_SERVICE;
   }
 
   get pollingInterval() {
