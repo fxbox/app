@@ -11,6 +11,12 @@ function App(driver, url) {
 App.prototype = {
   init: function() {
     return this.driver.get(this.url)
+      .then(() => {
+        // Always set the fake registration server
+        this.driver.executeScript(() => {
+          localStorage.registrationServer = 'http://localhost:4455/ping';
+        });
+      })
       .then(() => this.defaultView);
   },
 
