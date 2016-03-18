@@ -146,6 +146,10 @@ export default class Foxbox extends Service {
     return `${settings.tunnelScheme}://${settings.tunnelHostname}:${settings.tunnelPort}`;
   }
 
+  get localHostname() {
+    return settings.localHostname;
+  }
+
   get connected() {
     return _local || _remote;
   }
@@ -183,19 +187,13 @@ export default class Foxbox extends Service {
             return resolve();
           }
 
-          // Multi box setup out of the scope so far.
-          const box = boxes[0];
-
-          // Check if we have a recent registry.
+          // We filter out boxes registered more than 5 minutes ago.
           const now = Math.floor(Date.now() / 1000);
-          if ((now - box.timestamp) < 60) {
-            settings.localHostname = box.local_ip;
-            if (box.tunnel_url) {
-              settings.tunnelHostname = box.tunnel_url;
-              _tunnelConfigured = true;
-            }
-          }
+          this.boxes = boxes.filter(box => now - box.timestamp < 60 * 5);
 
+          if (!settings.configured) {
+            this.selectBox();
+          }
           resolve();
         })
         .catch(() => {
@@ -204,6 +202,33 @@ export default class Foxbox extends Service {
           resolve();
         });
     });
+  }
+
+  /**
+   * Change the currently selected box.
+   *
+   * @param {number} index The index of the box in the boxes array.
+   */
+  selectBox(index = 0) {
+    if (index >= this.boxes.length) {
+      settings.configured = false;
+      console.error('Index out of range.');
+
+      return;
+    }
+
+    const box = this.boxes[index];
+
+    settings.localHostname = box.local_ip;
+    if (box.tunnel_url) {
+      settings.tunnelHostname = box.tunnel_url;
+      _tunnelConfigured = true;
+    } else {
+      settings.tunnelHostname = '';
+      _tunnelConfigured = false;
+    }
+
+    settings.configured = true;
   }
 
   /**

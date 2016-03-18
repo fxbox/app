@@ -22,6 +22,16 @@ header.white {
   margin: 0 1rem;
   min-height: 5rem;
   color: white;
-  background-color: #2F99CD;
+  background: #2F99CD;
   border: none;
+}
+
+.box-selector {
+  border: .2rem solid #2F99CD;
+  border-radius: .2rem;
+  font-size: 2rem;
+  margin: 1rem;
+  padding: 1rem;
+  background: #2F99CD;
+  color: white;
 }
