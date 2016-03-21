@@ -5,14 +5,12 @@ var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 
-var app = express();
+var foxbox_resp_path = '../json/foxbox_services.json';
 
+var app = express();
 app.use(morgan('dev'));
 
 var services_list = express.Router();
-
-var foxbox_resp_path = '../json/foxbox_services.json';
-
 services_list.use(bodyParser.json());
 
 services.route('/')
