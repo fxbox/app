@@ -1,19 +1,25 @@
-'use strict';
-
 var express = require('express');
-var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 
 var app = express();
 
-app.use(morgan('dev'));
-
 var service = express.Router();
 
-var foxbox_resp_path = '../json/...json';
+var state = '../json/state.json';
+var light_status;
 
 service.use(bodyParser.json());
+
+function turnOnLight(on) {
+	console.log('On');
+	light_status = true;
+}
+
+function turnOffLight(on) {
+	console.log('Off');
+	light_status = false;
+}
 
 service.route('/')
 .all(function(req,res,next) {
@@ -22,13 +28,19 @@ service.route('/')
 })
 
 .get(function(req,res,next){
-	var readable = fs.createReadStream(foxbox_resp_path);
+	var readable = fs.createReadStream(state);
        readable.pipe(res);
-})
 
+})
 .put(function(req, res, next){
-    //change the state of a light
-       
+   if (req.body.on) {
+          console.log(req.body.on + ' ' + 'so turn off');
+          turnOffLight(req.params.on);
+        }
+        else {
+          console.log(req.body.on + ' ' + 'so turn on');  
+          turnOnLight(req.params.on);    
+    }
 });
 
 app.use('/services/:serviceId/state', service);

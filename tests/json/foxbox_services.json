@@ -10,33 +10,5 @@
             "model":"LST002",
             "type":"Extended color light"
             }
- },
-
- {
-  "id":"9d769533099444ae87826a6bddb4eb2b",
-  "name":"dummy service",
-  "description":"really nothing to see",
-  "http_url":"http://localhost/3000/services/9d769533099444ae87826a6bddb4eb2b/",
-  "ws_url":"ws://:::4000/services/9d769533099444ae87826a6bddb4eb2b/",
-  "properties":
-            {
-            "manufacturer":"Philips",
-            "model":"LST002",
-            "type":"Extended color light"
-            }
- },
-
- {
-  "id":"de7663421f654333a27838b55d8422ca",
-  "name":"philips hue service",
-  "description":"Service for Philips Hue Light",
-  "http_url":"http://localhost/3000/services/de7663421f654333a27838b55d8422ca/",
-  "ws_url":"ws://:::4000/services/de7663421f654333a27838b55d8422ca/",
-  "properties":
-            {
-            "manufacturer":"Philips",
-            "model":"LST002",
-            "type":"Extended color light"
-            }
-  }]
+ }]
   
