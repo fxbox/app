@@ -1,0 +1,5 @@
+{"type": "device/light/colorlight", 
+    "hue": 45.3, "sat": 0.3, 
+    "val": 1.0, 
+    "on": false, 
+    "available": true}
