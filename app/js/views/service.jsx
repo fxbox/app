@@ -34,6 +34,10 @@ export default class Service extends React.Component {
   }
 
   updateServiceState(state) {
+    if (state.id !== this.props.id) {
+      return;
+    }
+
     this.setState({ data: state });
   }
 
