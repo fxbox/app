@@ -41,6 +41,18 @@ describe('Lights tests', function() {
       });
   });
 
+  it('the light should be available', () => {
+      return chakram.get(config.get('foxbox.url') + '/services/' + lightId + '/state')
+        .then(function(statusResponse) {
+          expect(statusResponse).to.have.status(200);
+          lightinfo = statusResponse.body;
+
+          expect(lightinfo.available).equals(true);
+          console.log(lightinfo);
+          return;
+        });
+      });
+
   it('should turn a light on', () => {
       return chakram.put(config.get('foxbox.url') + '/services/' + lightId + '/state', {'on': true})
         .then(function(statusResponse) {
