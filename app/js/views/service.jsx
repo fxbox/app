@@ -1,86 +1,35 @@
 /* global React */
-
-import UserLogoutButton from 'js/views/user-logout-button';
-import FooterMenu from 'js/views/footer-menu';
-import TagList from 'js/views/tag-list';
+import CameraService from 'js/views/services/camera';
+import DefaultService from 'js/views/services/default';
 
 export default class Service extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      data: {},
-      tags: []
-    };
 
+    this.state = {};
     this.foxbox = props.foxbox;
-
-    this.updateServiceState = this.updateServiceState.bind(this);
   }
 
   componentDidMount() {
-    this.foxbox.getService(this.props.id)
-      .then(service => {
-        this.updateServiceState(service.data);
-      })
-      .catch(console.error.bind(console));
-
-    this.populateTags();
-
-    this.foxbox.addEventListener('service-state-change', this.updateServiceState);
-  }
-
-  componentWillUnmount() {
-    this.foxbox.removeEventListener('service-state-change', this.updateServiceState);
-  }
-
-  updateServiceState(state) {
-    if (state.id !== this.props.id) {
-      return;
-    }
-
-    this.setState({ data: state });
-  }
-
-  populateTags() {
-    this.foxbox.getTags()
-      .then(tags => {
-        tags.forEach(tag => {
-          tag.data.checked = !!(this.state.data.tags && this.state.data.tags.includes(tag.id));
-        });
-
-        this.setState({ tags: tags });
-      });
-  }
-
-  handleAddTag() {
-    let tagName = prompt('Enter new tag name');
-
-    if (!tagName || !tagName.trim()) {
-      return;
-    }
-
-    tagName = tagName.trim();
-    this.foxbox.setTag({ name: tagName })
-      .then(() => {
-        this.populateTags(); // Needed to get the newly added tag ID.
-      });
+    this.foxbox.getService(this.props.id).then((service) => {
+      this.setState({ service: service.data });
+    }).catch((e) => {
+      console.error('Error occurred while retrieving service: ', e);
+    });
   }
 
   render() {
-    return (
-      <div>
-        <header>
-          <h1>{this.state.data.name}</h1>
-          <UserLogoutButton foxbox={this.foxbox}/>
-          <!--<img className="rename" src="css/icons/rename.svg" alt="Rename"/>-->
-        </header>
-        <h2>Tags</h2>
-        <TagList tags={this.state.tags} serviceId={this.props.id} foxbox={this.foxbox}/>
-        <div className="add">
-          <span onClick={this.handleAddTag.bind(this)}>Create a new tag</span>
-        </div>
-        <FooterMenu/>
-      </div>
-    );
+    if (!this.state.service) {
+      return false;
+    }
+
+    switch(this.state.service.properties.type) {
+      case 'ipcamera':
+        return (<CameraService service={this.state.service}
+                               foxbox={this.foxbox} />);
+      default:
+        return (<DefaultService service={this.state.service}
+                                foxbox={this.foxbox} />);
+    }
   }
 }

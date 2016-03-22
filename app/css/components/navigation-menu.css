@@ -1,0 +1,52 @@
+/* Footer menu */
+.navigation-menu {
+  display: flex;
+
+  width: 100%;
+  height: 100%;
+}
+
+.navigation-menu__item {
+  flex-grow: 1;
+  margin: .1rem;
+
+  opacity: 0.5;
+
+  text-align: center;
+  background: grey;
+}
+
+.navigation-menu__item-link {
+  display: block;
+  height: 15vmin;
+
+  opacity: 0.5;
+
+  color: #fff;
+  text-decoration: none;
+  font-size: 0;
+  background: url(../menu-icons/home.svg) center center no-repeat;
+  background-size: 7.5vmin;
+}
+
+.navigation-menu__item--active,
+.navigation-menu__item--active .navigation-menu__item-link {
+  opacity: 1;
+  background-color: #2f99cd;
+}
+
+.navigation-menu__item-link[href~="#home"] {
+  background-image: url(../menu-icons/home.svg);
+}
+
+.navigation-menu__item-link[href~="#themes"] {
+  background-image: url(../menu-icons/themes.svg);
+}
+
+.navigation-menu__item-link[href~="#mr-fox"] {
+  background-image: url(../menu-icons/mr-fox.svg);
+}
+
+.navigation-menu__item-link[href~="#settings"] {
+  background-image: url(../menu-icons/settings.svg);
+}

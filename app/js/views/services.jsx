@@ -1,7 +1,7 @@
 /* global React */
 
 import UserLogoutButton from 'js/views/user-logout-button';
-import FooterMenu from 'js/views/footer-menu';
+import NavigationMenu from 'js/views/navigation-menu';
 import ServicesList from 'js/views/services-list';
 import Modal from 'js/views/modal';
 
@@ -65,15 +65,19 @@ export default class Services extends React.Component {
 
   render() {
     return (
-      <div>
-        <header>
+      <div className="app-view">
+        <header className="app-view__header">
           <h1>My Home</h1>
           <UserLogoutButton foxbox={this.foxbox}/>
         </header>
-        <h2>General</h2>
-        <ServicesList services={this.state.services} foxbox={this.foxbox}/>
+        <section className="app-view__body">
+          <h2>General</h2>
+          <ServicesList services={this.state.services} foxbox={this.foxbox}/>
+        </section>
+        <footer className="app-view__footer">
+          <NavigationMenu />
+        </footer>
         <Modal visible={this.state.isModalVisible} title={this.state.title} body={this.state.body} dismiss={this.dismissModal.bind(this)}/>
-        <FooterMenu/>
       </div>
     );
   }
