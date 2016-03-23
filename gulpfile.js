@@ -21,6 +21,7 @@ var exec = require('child_process').exec;
 var mocha = require('gulp-mocha');
 var gls = require('gulp-live-server');
 var gsww = require('gulp-sww');
+var package = require('./package.json');
 
 const APP_ROOT = './app/';
 const TESTS_UNIT_ROOT = './tests/unit/';
@@ -191,8 +192,11 @@ gulp.task('clobber-tests', function() {
  * assets.
  */
 gulp.task('offline', ['build'], function() {
-  gulp.src(['**/*'], { cwd: DIST_APP_ROOT })
-    .pipe(gsww())
+  gulp.src(['**/*'], {cwd: DIST_APP_ROOT})
+    .pipe(gsww({
+      version: package.version,
+      hookSW: 'hookSW.js'
+    }))
     .pipe(gulp.dest(DIST_APP_ROOT));
 });
 
