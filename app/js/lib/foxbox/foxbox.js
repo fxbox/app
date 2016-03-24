@@ -429,7 +429,7 @@ export default class Foxbox extends Service {
                 id: 'setter:resource.webpush@link.mozilla.org'
               }], {
                 Json: {
-                  resources: ['general', 'camera', 'lights', 'temperature', 'movement']
+                  resources: ['res1']
                 }
               }
 
