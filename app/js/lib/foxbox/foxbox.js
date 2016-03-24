@@ -97,8 +97,12 @@ export default class Foxbox extends Service {
     return Promise.all(promises);
   }
 
-  get localHostname() {
-    return this[p.settings].localHostname;
+  get localOrigin() {
+    return this[p.settings].localOrigin;
+  }
+
+  get clientId() {
+    return this[p.settings].clientId;
   }
 
   get boxes() {
@@ -106,8 +110,7 @@ export default class Foxbox extends Service {
   }
 
   /**
-   * Get the IP address of the box on the local network using the registration
-   * server.
+   * Get the URL of the box using the registration server.
    * If it fails, we fallback to the previously set hostname.
    * It there isn't, it falls back to localhost.
    *
@@ -134,7 +137,17 @@ export default class Foxbox extends Service {
           this[p.boxes] = Object.freeze(
             boxes
               .filter(box => box.timestamp - now >= 0)
-              .map(box => Object.freeze(box))
+              .map(box => {
+                  // NOTE(sgiles): There is consideration to allow
+                  // only "local_origin" and "tunnel_origin", removing the need
+                  // to parse message - this merges the relevant message fields
+                  // into the main object
+                  const { local_origin, tunnel_origin } =
+                    JSON.parse(box.message);
+                  box.local_origin  = local_origin;
+                  box.tunnel_origin = tunnel_origin;
+                  return Object.freeze(box);
+              })
           );
 
           if (!this[p.settings].configured) {
@@ -172,13 +185,14 @@ export default class Foxbox extends Service {
 
     const box = this[p.boxes][index];
 
-    this[p.settings].localHostname = box.local_ip;
-    if (box.tunnel_url) {
-      this[p.settings].tunnelHostname = box.tunnel_url;
+    this[p.settings].localOrigin = box.local_origin;
+    if (box.tunnel_origin) {
+      this[p.settings].tunnelOrigin = box.tunnel_origin;
     } else {
-      this[p.settings].tunnelHostname = '';
+      this[p.settings].tunnelOrigin = '';
     }
 
+    this[p.settings].clientId = box.client;
     this[p.settings].configured = true;
   }
 
