@@ -1,6 +1,5 @@
 /* global React */
 
-import UserLogoutButton from 'js/views/user-logout-button';
 import NavigationMenu from 'js/views/navigation-menu';
 
 export default class CameraService extends React.Component {
@@ -65,7 +64,6 @@ export default class CameraService extends React.Component {
       <div className="app-view">
         <header className="app-view__header">
           <h1>{this.service.name}</h1>
-          <UserLogoutButton foxbox={this.foxbox}/>
         </header>
         <div className={cameraControlsClass}>
           <img ref="snapshotPreview"
@@ -84,7 +82,7 @@ export default class CameraService extends React.Component {
           </section>
         </div>
         <footer className="app-view__footer">
-          <NavigationMenu />
+          <NavigationMenu foxbox={this.foxbox}/>
         </footer>
       </div>
     );

@@ -1,10 +1,18 @@
 /* global React */
 
 export default class NavigationMenu extends React.Component {
+  constructor(props) {
+    this.foxbox = props.foxbox;
+  }
+
   shouldComponentUpdate() {
     // We never need to update this component as it is being recreated each time
     // the route changes.
     return false;
+  }
+
+  handleOnClick() {
+    this.foxbox.logout();
   }
 
   render() {
@@ -12,8 +20,7 @@ export default class NavigationMenu extends React.Component {
     let menuNodes = [
       ['services', 'Home'],
       ['themes', 'Themes'],
-      ['mr-fox', 'Mr. Fox'],
-      ['settings', 'Settings']
+      ['mr-fox', 'Mr. Fox']
     ].map((menu) => {
       let className = 'navigation-menu__item';
       if (route === menu[0]) {
@@ -29,6 +36,15 @@ export default class NavigationMenu extends React.Component {
       );
     });
 
-    return (<ul className="navigation-menu">{menuNodes}</ul>);
+    return (
+      <ul className="navigation-menu">
+        {menuNodes}
+        <li className="navigation-menu__item">
+          <a href="#users/login" className="navigation-menu__item-link user-logout-button" onClick={this.handleOnClick.bind(this)}>
+            Log out
+          </a>
+        </li>
+      </ul>
+    );
   }
 }
