@@ -1,6 +1,5 @@
 /* global React */
 
-import UserLogoutButton from 'js/views/user-logout-button';
 import NavigationMenu from 'js/views/navigation-menu';
 import TagList from 'js/views/tag-list';
 
@@ -71,7 +70,6 @@ export default class Service extends React.Component {
       <div className="app-view">
         <header className="app-view__header">
           <h1>{this.service.name}</h1>
-          <UserLogoutButton foxbox={this.foxbox}/>
           <!--<img className="rename" src="css/icons/rename.svg" alt="Rename"/>-->
         </header>
         <section className="app-view__body">
@@ -83,7 +81,7 @@ export default class Service extends React.Component {
           Create a new tag
         </button>
         <footer className="app-view__footer">
-          <NavigationMenu />
+          <NavigationMenu foxbox={this.foxbox}/>
         </footer>
       </div>
     );
