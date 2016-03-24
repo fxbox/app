@@ -78,6 +78,7 @@ select {
 .app-view__header {
   display: flex;
   flex: 0 0 auto;
+  align-items: center;
   padding: 1rem 3rem;
 
   background-color: #2f99cd;
@@ -93,6 +94,7 @@ select {
 
 .app-view__body {
   flex: 1;
+  position: relative;
 
   overflow-y: auto;
 }

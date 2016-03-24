@@ -1,0 +1,64 @@
+.new-theme {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: stretch;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 4rem;
+  background: #ceedec;
+}
+
+.new-theme__header {
+  padding: 0;
+}
+
+.new-theme__header--hidden {
+  visibility: hidden;
+}
+
+.app-view__header > :first-child {
+  margin-left: 0;
+}
+
+.app-view__header > :last-child {
+  margin-right: 0;
+}
+
+.app-view__action {
+  color: white;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  text-decoration: none;
+  margin: 0 1rem;
+  padding: 0;
+}
+
+.app-view__action.app-view__action--disabled {
+  opacity: .5;
+}
+
+.new-theme__select {
+  border: none;
+  font-size: 2rem;
+  background: transparent url(../icons/drop-down-arrow.svg) no-repeat center right;
+  background-size: 1.75rem 1.75rem;
+}
+
+.new-theme__select--hidden {
+  visibility: hidden;
+}
+
+.new-theme__select--selected {
+  color: #00b5c0;
+  background-image: url(../icons/drop-down-arrow-selected.svg);
+}
+
+.new-theme__select option {
+  color: #00b5c0;
+  background: #ceedec;
+}

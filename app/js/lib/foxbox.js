@@ -18,6 +18,25 @@ let _local = false;
 let _remote = false;
 // A reference to the interval to get the online status.
 let _onlineInterval = null;
+// Fixtures for some rules.
+let themes = [
+  {
+    name: 'When the door opens, take a picture.',
+    conditionServiceId: 123,
+    conditionProp: true,
+    actionServiceId: 456,
+    actionProp: true,
+    enabled: true
+  },
+  {
+    name: 'When a presence is detected, take a picture.',
+    conditionServiceId: 123,
+    conditionProp: true,
+    actionServiceId: 456,
+    actionProp: true,
+    enabled: false
+  }
+];
 
 const _private = {
   isPollingEnabled: Symbol('isPollingEnabled'),
@@ -365,7 +384,7 @@ export default class Foxbox extends Service {
   schedulePoll() {
     // Return early if polling is not enabled or it has already been scheduled.
     if (!this[_private.isPollingEnabled] ||
-        this[_private.nextPollTimeout]) {
+      this[_private.nextPollTimeout]) {
       return;
     }
 
@@ -419,7 +438,7 @@ export default class Foxbox extends Service {
             const isExistingService = !!storedService;
 
             if (isExistingService &&
-                isSimilar(fetchedService.state, storedService.state)) {
+              isSimilar(fetchedService.state, storedService.state)) {
               return hasNewServices;
             }
 
@@ -437,7 +456,7 @@ export default class Foxbox extends Service {
         );
 
         if (hasNewServices ||
-            fetchedServices.length !== storedServices.length) {
+          fetchedServices.length !== storedServices.length) {
           // The state of the services changes.
           this._dispatchEvent('service-change', fetchedServices);
         }
@@ -536,5 +555,24 @@ export default class Foxbox extends Service {
 
   setTag() {
     return db.setTag.apply(db, arguments);
+  }
+
+  getRecipes() {
+    return Promise.resolve(themes);
+  }
+
+  addRecipe(recipe) {
+    themes.push(recipe);
+    return Promise.resolve(themes);
+  }
+
+  removeRecipe(id) {
+    themes.splice(id, 1);
+    return Promise.resolve(themes);
+  }
+
+  toggleRecipe(id, value = true) {
+    themes[id].enabled = value;
+    return Promise.resolve(themes);
   }
 }

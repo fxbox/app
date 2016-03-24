@@ -1,0 +1,45 @@
+.themes__new-link {
+  width: 3rem;
+  height: 3rem;
+  padding-left: 1rem;
+}
+
+.themes-list {
+  padding: 0 3rem;
+}
+
+.themes-list__item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 0.1rem solid grey;
+}
+
+.themes-list__item--deactivated .themes-list__name {
+  opacity: .25;
+}
+
+.themes-list__toggle {
+  border: 1px solid black;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 1rem 0 0;
+  border-radius: .2rem;
+}
+
+.themes-list__name {
+  font-size: 1.4rem;
+  line-height: 2.8rem;
+  width: 100%;
+}
+
+.themes-list__remove {
+  background: url(../icons/clear.svg) no-repeat center center;
+  border: none;
+  width: 4rem;
+  height: 3rem;
+  margin: 0 0 0 1rem;
+  padding: 0;
+  right: 0;
+}
