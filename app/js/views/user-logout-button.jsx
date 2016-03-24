@@ -2,6 +2,8 @@
 
 export default class UserLogoutButton extends React.Component {
   constructor(props) {
+    super(props);
+
     this.foxbox = props.foxbox;
   }
 

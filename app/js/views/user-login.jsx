@@ -2,6 +2,8 @@
 
 export default class UserLogin extends React.Component {
   constructor(props) {
+    super(props);
+
     this.state = {
       boxes: props.foxbox.boxes,
       value: null

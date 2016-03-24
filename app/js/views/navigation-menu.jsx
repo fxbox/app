@@ -2,6 +2,8 @@
 
 export default class NavigationMenu extends React.Component {
   constructor(props) {
+    super(props);
+
     this.foxbox = props.foxbox;
   }
 

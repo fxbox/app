@@ -5,6 +5,7 @@ import NavigationMenu from 'js/views/navigation-menu';
 export default class Themes extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       themes: []
     };

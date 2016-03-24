@@ -7,6 +7,7 @@ import Modal from 'js/views/modal';
 export default class Services extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       services: [],
 

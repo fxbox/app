@@ -5,6 +5,7 @@ import NavigationMenu from 'js/views/navigation-menu';
 export default class CameraService extends React.Component {
   constructor(props) {
     super(props);
+
     this.foxbox = props.foxbox;
     this.service = props.service;
 
