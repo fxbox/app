@@ -49,7 +49,10 @@ export default class Settings extends Model {
 
       _session: storage.getItem(`${PREFIX}session`),
       _skipDiscovery: storage.getItem(`${PREFIX}skipDiscovery`) === 'true',
-      _pollingEnabled: pollingEnabled
+      _pollingEnabled: pollingEnabled,
+
+      _pushEndpoint: storage.getItem(`${PREFIX}push_endpoint`) || null,
+      _pushPubKey: storage.getItem(`${PREFIX}push_pubKey`) || null
     });
   }
 
@@ -140,6 +143,24 @@ export default class Settings extends Model {
     value = !!value;
     this._pollingEnabled = value;
     storage.setItem(`${PREFIX}pollingEnabled`, value);
+  }
+
+  get pushEndpoint() {
+    return this._pushEndpoint;
+  }
+
+  set pushEndpoint(value) {
+    this._pushEndpoint = value;
+    storage.setItem(`${PREFIX}push_endpoint`, value);
+  }
+
+  get pushPubKey() {
+    return this._pushPubKey;
+  }
+
+  set pushPubKey(value) {
+    this._pushPubKey = value;
+    storage.setItem(`${PREFIX}push_pubKey`, value);
   }
 
   // Getters only.
