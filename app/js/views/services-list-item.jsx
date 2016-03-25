@@ -3,6 +3,7 @@
 export default class ServicesListItem extends React.Component {
   constructor(props) {
     super(props);
+
     this.props = props;
     this.state = props.state;
 

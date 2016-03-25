@@ -11,7 +11,7 @@ var gulp = require('gulp');
 
 var buildModules = __dirname + '/node_modules/fxos-build/node_modules/';
 var concat = require(buildModules + 'gulp-concat');
-var to5 = require(buildModules + 'gulp-6to5');
+var babel = require(buildModules + 'gulp-babel');
 var rename = require('gulp-rename');
 var jshint = require(buildModules + 'gulp-jshint');
 var zip = require(buildModules + 'gulp-zip');
@@ -47,7 +47,7 @@ gulp.task('lint', function() {
 });
 
 /**
- * copies necessary files for the 6to5 amd loader to the app.
+ * copies necessary files for the Babel amd loader to the app.
  */
 gulp.task('loader-polyfill', function() {
   return gulp.src(['./node_modules/fxos-build/app_files/loader_polyfill/*.js'])
@@ -69,7 +69,7 @@ gulp.task('copy-app', function() {
 /**
  * converts javascript to es5. this allows us to use harmony classes and modules.
  */
-gulp.task('to5', function() {
+gulp.task('babel', function() {
   var files = [
     APP_ROOT + 'js/**/*.js',
     APP_ROOT + 'js/**/*.jsx'
@@ -77,29 +77,19 @@ gulp.task('to5', function() {
 
   try {
     return gulp.src(files)
-      .pipe(to5({
-          modules: 'amd'
-        }).on('error', function(e) {
-          console.log('error running 6to5', e);
+      .pipe(babel().on('error', function(e) {
+          console.log('error running Babel', e);
         })
       )
       .pipe(gulp.dest(DIST_APP_ROOT + 'js/'));
   } catch (e) {
-    console.log('Got error in 6to5', e);
+    console.log('Got error in Babel', e);
   }
-});
-
-gulp.task('rename', function() {
-  return gulp.src(DIST_APP_ROOT + 'js/**/*.jsx')
-    .pipe(rename(function(path) {
-      path.extname = ".js";
-    }))
-    .pipe(gulp.dest(DIST_APP_ROOT + 'js/'));
 });
 
 gulp.task('remove-useless', function(cb) {
   del([
-    DIST_APP_ROOT + 'js/views/*.jsx',
+    DIST_APP_ROOT + 'js/**/*.jsx',
     DIST_APP_ROOT + '**/*.md'
   ], cb);
 });
@@ -116,14 +106,14 @@ gulp.task('zip', function() {
 /**
  * Runs travis tests
  */
-gulp.task('travis', ['lint', 'loader-polyfill', 'to5']);
+gulp.task('travis', ['lint', 'loader-polyfill', 'babel']);
 
 /**
  * Build the app.
  */
 gulp.task('build', function(cb) {
-  runSequence(['clobber'], ['loader-polyfill', 'copy-app'], ['to5'],
-    ['rename', 'lint'], ['remove-useless'], cb);
+  runSequence(['clobber'], ['loader-polyfill', 'copy-app'], ['babel'],
+    ['lint'], ['remove-useless'], cb);
 });
 
 /**
@@ -217,7 +207,7 @@ gulp.task('clobber', function(cb) {
  * assets.
  */
 gulp.task('offline', ['build'], function() {
-  gulp.src(['**/*'], {cwd: DIST_APP_ROOT})
+  gulp.src(['**/*'], { cwd: DIST_APP_ROOT })
     .pipe(gsww())
     .pipe(gulp.dest(DIST_APP_ROOT));
 });
@@ -252,7 +242,7 @@ gulp.task('stop-simulators', function() {
 });
 
 gulp.task('run-test-integration', function() {
-  return gulp.src('./tests/{common,integration}/**/*_test.js', {read: false}).pipe(mocha());
+  return gulp.src('./tests/{common,integration}/**/*_test.js', { read: false }).pipe(mocha());
 });
 
 
@@ -260,8 +250,8 @@ gulp.task('test-integration', function(cb) {
   return runSequence('start-simulators', 'run-test-integration', 'stop-simulators', cb);
 });
 
-gulp.task('run-test-e2e', function () {
-	return gulp.src('./tests/{common,e2e}/**/*_test.js', {read: false}).pipe(mocha());
+gulp.task('run-test-e2e', function() {
+  return gulp.src('./tests/{common,e2e}/**/*_test.js', { read: false }).pipe(mocha());
 });
 
 gulp.task('test', function() {

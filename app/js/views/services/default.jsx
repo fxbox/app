@@ -6,6 +6,7 @@ import TagList from 'js/views/tag-list';
 export default class Service extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       data: props.service.tags,
       tags: []
@@ -70,7 +71,6 @@ export default class Service extends React.Component {
       <div className="app-view">
         <header className="app-view__header">
           <h1>{this.service.properties.name}</h1>
-          <!--<img className="rename" src="css/icons/rename.svg" alt="Rename"/>-->
         </header>
         <section className="app-view__body">
           <h2>Tags</h2>

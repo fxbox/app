@@ -5,6 +5,7 @@ import TagItem from 'js/views/tag-item';
 export default class TagList extends React.Component {
   constructor(props) {
     super(props);
+
     this.foxbox = props.foxbox;
   }
 

@@ -3,6 +3,7 @@
 export default class TagItem extends React.Component {
   constructor(props) {
     super(props);
+
     this.props = props;
     this.state = {
       checked: props.checked
