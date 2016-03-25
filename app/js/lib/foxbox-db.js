@@ -146,14 +146,15 @@ function getById(store) {
 function set(store) {
   return function set(data) {
     return new Promise((resolve, reject) => {
+      const id = data.id;
       let txn = this.db.transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       try {
-        if (data.id) {
-          txn.objectStore(store).put({ id: data.id, data: data });
+        if (id) {
+          txn.objectStore(store).put({ id, data });
         } else {
-          txn.objectStore(store).put({ data: data });
+          txn.objectStore(store).put({ data });
         }
       } catch (e) {
         console.error(`Error putting data in ${DB_NAME}:`, e);

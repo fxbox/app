@@ -67,7 +67,7 @@ export default class ThemesNew extends React.Component {
   }
 
   handlePropertySelection(evt) {
-    let property = evt.target.value;
+    const property = evt.target.value;
     if (property !== '0') {
       this.setState({ property });
     } else {
@@ -92,7 +92,7 @@ export default class ThemesNew extends React.Component {
   }
 
   handleActionPropertySelection(evt) {
-    let actionProperty = evt.target.value;
+    const actionProperty = evt.target.value;
     if (actionProperty !== '0') {
       this.setState({ actionProperty });
     } else {
@@ -108,12 +108,6 @@ export default class ThemesNew extends React.Component {
     }
 
     const selects = document.querySelectorAll('select');
-
-    console.dir(selects[0]);
-    console.dir(selects[0].options);
-    console.dir(selects[0].selectedIndex);
-    console.dir(selects[0].options[selects[0].selectedIndex]);
-    console.dir(selects[0].options[selects[0].selectedIndex].label);
 
     const service = selects[0].options[selects[0].selectedIndex].label;
     const property = selects[1].options[selects[1].selectedIndex].label

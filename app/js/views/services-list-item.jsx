@@ -15,11 +15,11 @@ export default class ServicesListItem extends React.Component {
 
   handleLightOnChange(evt) {
     // No optimistic update because some network issues can't be caught.
-    let value = evt.target.checked;
+    const on = evt.target.checked;
 
-    this.foxbox.setServiceState(this.props.id, { on: value })
+    this.foxbox.setServiceState(this.props.id, { on })
       .then(() => {
-        this.setState({ on: value });
+        this.setState({ on });
       })
       .catch(console.error.bind(console));
   }
@@ -159,7 +159,7 @@ export default class ServicesListItem extends React.Component {
         <label>
           <input className="service-list__on-off-toggle" type="checkbox"
                  checked={this.state.on} disabled={!isConnected}
-                 onChange={this.handleLightOnChange.bind(this)} />
+                 onChange={this.handleLightOnChange.bind(this)}/>
         </label>
       </li>
     );

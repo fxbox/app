@@ -47,19 +47,19 @@ export default class Service extends React.Component {
           tag.data.checked = !!(this.state.data && this.state.data.includes(tag.id));
         });
 
-        this.setState({ tags: tags });
+        this.setState({ tags });
       });
   }
 
   handleAddTag() {
-    let tagName = prompt('Enter new tag name');
+    let name = prompt('Enter new tag name');
 
-    if (!tagName || !tagName.trim()) {
+    if (!name || !name.trim()) {
       return;
     }
 
-    tagName = tagName.trim();
-    this.foxbox.setTag({ name: tagName })
+    name = name.trim();
+    this.foxbox.setTag({ name })
       .then(() => {
         this.populateTags(); // Needed to get the newly added tag ID.
       });
