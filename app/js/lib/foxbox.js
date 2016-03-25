@@ -21,7 +21,7 @@ let _onlineInterval = null;
 // Fixtures for some rules.
 let themes = [
   {
-    name: 'When the door opens, take a picture.',
+    name: 'When front door opens, front door camera sends me a picture.',
     conditionServiceId: 123,
     conditionProp: true,
     actionServiceId: 456,
@@ -29,7 +29,7 @@ let themes = [
     enabled: true
   },
   {
-    name: 'When a presence is detected, take a picture.',
+    name: 'When a motion sensor detects presence, living room light turns on.',
     conditionServiceId: 123,
     conditionProp: true,
     actionServiceId: 456,
