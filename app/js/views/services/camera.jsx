@@ -14,20 +14,31 @@ export default class CameraService extends React.Component {
     };
   }
 
-  getPreviewURL(fileName) {
-    let serviceId = this.service.id;
-    return this.foxbox.getAuthenticatedURL(
-      `${this.foxbox.origin}/services/${serviceId}/get?filename=${fileName}`
-    );
+  getOperationByAlias(operations, alias) {
+    let operationKey = Object.keys(operations).find((key) => {
+      let operation = operations[key];
+      return operation.kind && operation.kind.kind == alias;
+    });
+
+    return operations[operationKey];
+  }
+
+  getSetOperation(alias) {
+    return this.getOperationByAlias(this.service.setters, alias);
+  }
+
+  getGetOperation(alias) {
+    return this.getOperationByAlias(this.service.getters, alias);
   }
 
   takeSnapshot() {
-    this.foxbox.performServiceCommand(this.service.id, 'snapshot').then(
-      (response) => {
-        if (!response.filename) {
-          throw new Error('Service did not return snapshot name!');
-        }
-
+    this.foxbox.performSetOperation(this.getSetOperation('snapshot'), "")
+      .then(() => {
+        return this.foxbox.performGetOperation(
+          this.getGetOperation('image_newest')
+        )
+      })
+      .then((image) => {
         let previousSnapshot = this.refs.snapshotPreview.src;
 
         let newState = {
@@ -35,18 +46,23 @@ export default class CameraService extends React.Component {
           hasPreviousSnapshot: false
         };
 
-        this.refs.snapshotPreview.src = this.getPreviewURL(response.filename);
+        this.refs.snapshotPreview.src = URL.createObjectURL(image);
 
         if (previousSnapshot) {
           newState.hasPreviousSnapshot = true;
+
+          if (this.refs.previousSnapshot.src) {
+            URL.revokeObjectURL(this.refs.previousSnapshot.src);
+          }
+
           this.refs.previousSnapshot.src = previousSnapshot;
         }
 
         this.setState(newState);
-      }
-    ).catch((e) => {
-      console.error('Error occurred while making a snapshot: ', e);
-    });
+      })
+      .catch((e) => {
+        console.error('Error occurred while making a snapshot: ', e);
+      });
   }
 
   render() {
@@ -63,7 +79,7 @@ export default class CameraService extends React.Component {
     return (
       <div className="app-view">
         <header className="app-view__header">
-          <h1>{this.service.name}</h1>
+          <h1>{this.service.properties.name}</h1>
         </header>
         <div className={cameraControlsClass}>
           <img ref="snapshotPreview"

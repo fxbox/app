@@ -179,7 +179,7 @@ export default class ServicesListItem extends React.Component {
     switch (this.props.type) {
       case 'Extended color light':
         return this.renderLightService();
-      case 'ipcamera':
+      case 'ip-camera@link.mozilla.org':
         return this.renderGenericService('Camera', 'ip-camera');
       default:
         return this.renderGenericService();

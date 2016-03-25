@@ -23,8 +23,8 @@ export default class Service extends React.Component {
       return false;
     }
 
-    switch(this.state.service.properties.type) {
-      case 'ipcamera':
+    switch(this.state.service.type) {
+      case 'ip-camera@link.mozilla.org':
         return (<CameraService service={this.state.service}
                                foxbox={this.foxbox} />);
       default:
