@@ -102,9 +102,3 @@ select {
 .app-view__footer {
   flex: 0 0 auto;
 }
-
-/* User Logout Button */
-.user-logout-button {
-  font: normal 1rem/2rem "Fira Sans", Arial;
-  white-space: nowrap;
-}
