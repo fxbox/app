@@ -69,7 +69,7 @@ export default class Service extends React.Component {
     return (
       <div className="app-view">
         <header className="app-view__header">
-          <h1>{this.service.name}</h1>
+          <h1>{this.service.properties.name}</h1>
           <!--<img className="rename" src="css/icons/rename.svg" alt="Rename"/>-->
         </header>
         <section className="app-view__body">

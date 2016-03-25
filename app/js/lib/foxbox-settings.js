@@ -13,6 +13,7 @@ const POLLING_INTERVAL = 2000;
 const ONLINE_CHECKING_INTERVAL = 5000;
 const ONLINE_CHECKING_LONG_INTERVAL = 1000 * 60 * 5;
 const REGISTRATION_SERVICE = 'http://knilxof.org:4242/ping';
+const API_VERSION = 1;
 
 /**
  * Name of the query string parameter that should be presented in URLs pointing
@@ -190,5 +191,9 @@ export default class FoxboxSettings extends Model {
 
   get queryStringAuthTokenName() {
     return QUERY_STRING_AUTH_TOKEN_NAME;
+  }
+
+  get apiVersion() {
+    return API_VERSION;
   }
 }

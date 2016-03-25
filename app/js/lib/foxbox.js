@@ -40,51 +40,85 @@ let themes = [
 
 const _private = {
   isPollingEnabled: Symbol('isPollingEnabled'),
-  nextPollTimeout: Symbol('nextPollTimeout')
+  nextPollTimeout: Symbol('nextPollTimeout'),
+
+  fetchServices: Symbol('fetchServices')
 };
 
 /**
- * Request a JSON from a specified URL.
+ * Request a content of the specified type from a specified URL.
  *
  * @param {string} url The URL to send the request to.
- * @param {string} method The HTTP method (defaults to "GET").
- * @param {!Object} body An object of key/value.
+ * @param {string} contentType The content mime type (eg. image/jpeg).
+ * @param {string} [method=GET] The HTTP method (defaults to "GET").
+ * @param {Object} [body] An object of key/value.
  * @return {Promise}
  */
-const fetchJSON = function(url, method = 'GET', body = undefined) {
+const fetchContent = function(
+  url, contentType, method = 'GET', body = undefined
+) {
   method = method.toUpperCase();
 
   const req = {
     method,
-    headers: {
-      'Accept': 'application/json'
-    },
+    headers: { Accept: contentType },
     cache: 'no-store'
   };
 
   if (method === 'POST' || method === 'PUT') {
     req.headers['Content-Type'] = 'application/json;charset=UTF-8';
   }
+
   if (settings.session) {
     // The user is logged in, we authenticate the request.
     req.headers.Authorization = `Bearer ${settings.session}`;
   }
 
-  if (method === 'GET' || method === 'HEAD') {
-    body = undefined;
-  }
   if (body !== undefined) {
     req.body = JSON.stringify(body);
   }
 
   return fetch(url, req)
     .then(res => {
-      if (res.ok) {
-        return res.json();
+      if (!res.ok) {
+        throw new TypeError(
+          `The response returned a ${res.status} HTTP status code.`
+        );
       }
 
-      throw new TypeError(`The response returned a ${res.status} HTTP status code.`);
+      return res;
+    })
+    .catch((e) => {
+      console.error('Error occurred while fetching content: ', e);
+      throw e;
     });
+};
+
+/**
+ * Request a Blob from a specified URL.
+ *
+ * @param {string} url The URL to send the request to.
+ * @param {string} blobType The Blob mime type (eg. image/jpeg).
+ * @param {string} [method=GET] The HTTP method (defaults to "GET").
+ * @param {Object} [body] An object of key/value.
+ * @return {Promise<Blob>}
+ */
+const fetchBlob = function(url, blobType, method, body) {
+  return fetchContent(url, blobType, method, body)
+    .then((response) => response.blob());
+};
+
+/**
+ * Request a JSON from a specified URL.
+ *
+ * @param {string} url The URL to send the request to.
+ * @param {string} [method=GET] The HTTP method (defaults to "GET").
+ * @param {Object} [body] An object of key/value.
+ * @return {Promise}
+ */
+const fetchJSON = function(url, method, body) {
+  return fetchContent(url, 'application/json', method, body)
+    .then((response) => response.json());
 };
 
 /**
@@ -413,7 +447,7 @@ export default class Foxbox extends Service {
       return Promise.resolve();
     }
 
-    const fetchedServicesPromise = fetchJSON(`${this.origin}/services/list`)
+    /*const fetchedServicesPromise = fetchJSON(`${this.origin}/services/list`)
       .then((services) => {
         // @todo We should ask for state only for services that actually support
         // it.
@@ -425,9 +459,9 @@ export default class Foxbox extends Service {
               .then((state) => service.state = state);
           })
         ).then(() => services);
-      });
+      });*/
 
-    return Promise.all([this.getServices(), fetchedServicesPromise])
+    return Promise.all([this.getServices(), this[_private.fetchServices]()])
       .then(([storedServices, fetchedServices]) => {
         let hasNewServices = fetchedServices.reduce(
           (hasNewServices, fetchedService) => {
@@ -514,32 +548,6 @@ export default class Foxbox extends Service {
     });
   }
 
-  /**
-   * Don't use, method is deprecated and will be removed soon.
-   * @deprecated
-   */
-  performServiceCommand(id, command, method = 'GET', state = undefined) {
-    console.warn(
-      '"performServiceCommand" method is deprecated and will be removed soon'
-    );
-    return fetchJSON(`${this.origin}/services/${id}/${command}`, method, state);
-  }
-
-  getAuthenticatedURL(sourceURL) {
-    if (!sourceURL) {
-      throw new Error('Source URL should be non-empty string!');
-    }
-
-    let url = new URL(sourceURL);
-    if (url.searchParams.has(settings.queryStringAuthTokenName)) {
-      return sourceURL;
-    }
-
-    url.searchParams.set(settings.queryStringAuthTokenName, settings.session);
-
-    return url.href;
-  }
-
   getTags() {
     return db.getTags.apply(db, arguments);
   }
@@ -574,5 +582,47 @@ export default class Foxbox extends Service {
   toggleRecipe(id, value = true) {
     themes[id].enabled = value;
     return Promise.resolve(themes);
+  }
+
+  performSetOperation(operation, value) {
+    return fetchJSON(
+      `${this.origin}/api/v${settings.apiVersion}/channels/set`,
+      'PUT',
+      // Query operation by id.
+      [[{ id: operation.id }, { [operation.kind.typ]: value }]]
+    );
+  }
+
+  performGetOperation(operation) {
+    let payload = { id: operation.id };
+
+    if (operation.kind.typ === 'Binary') {
+      return fetchBlob(
+        `${this.origin}/api/v${settings.apiVersion}/channels/get`,
+        // For now we only support JPEG blobs.
+        'image/jpeg',
+        'PUT',
+        payload
+      );
+    }
+
+    return fetchJSON(
+      `${this.origin}/api/v${settings.apiVersion}/channels/get`, 'PUT', payload
+    );
+  }
+
+  [_private.fetchServices]() {
+    return fetchJSON(`${this.origin}/api/v${settings.apiVersion}/services`)
+      .then((services) => {
+        return services.map((service) => {
+          return {
+            id: service.id,
+            type: service.adapter,
+            getters: service.getters,
+            setters: service.setters,
+            properties: service.properties
+          };
+        });
+      });
   }
 }
