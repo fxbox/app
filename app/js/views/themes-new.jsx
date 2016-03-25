@@ -34,6 +34,24 @@ export default class ThemesNew extends React.Component {
   }
 
   updateServices(services = []) {
+    services = [
+      {
+        id: 1,
+        name: 'living room light'
+      },
+      {
+        id: 2,
+        name: 'front door camera'
+      },
+      {
+        id: 3,
+        name: 'motion sensor'
+      },
+      {
+        id: 4,
+        name: 'front door'
+      }
+    ];
     this.setState({ services });
 
     this.validateSelectedId();
@@ -45,8 +63,8 @@ export default class ThemesNew extends React.Component {
   validateSelectedId(service = this.state.service) {
     if (service === '0') {
       service = null;
-    } else if (!this.state.services.find(s => s.id === service)) {
-      service = null;
+    /*} else if (!this.state.services.find(s => s.id === service)) {
+      service = null;*/
     }
 
     if (service === null) {
@@ -110,11 +128,9 @@ export default class ThemesNew extends React.Component {
     const selects = document.querySelectorAll('select');
 
     const service = selects[0].options[selects[0].selectedIndex].label;
-    const property = selects[1].options[selects[1].selectedIndex].label
-      .toLowerCase();
+    const property = selects[1].options[selects[1].selectedIndex].label;
     const actionService = selects[2].options[selects[2].selectedIndex].label;
-    const actionProperty = selects[3].options[selects[3].selectedIndex].label
-      .toLowerCase();
+    const actionProperty = selects[3].options[selects[3].selectedIndex].label;
 
     this.foxbox.addRecipe({
         name: `When a ${service} ${property}, ${actionService} ${actionProperty}.`,
@@ -159,8 +175,8 @@ export default class ThemesNew extends React.Component {
                 onChange={this.handlePropertySelection.bind(this)}
                 className={className}>
           <option value="0">Select a property</option>
-          <option key="1" value="1">Is opened</option>
-          <option key="2" value="2">Is closed</option>
+          <option key="1" value="1">detects presence</option>
+          <option key="2" value="2">detects no presence</option>
         </select>
       );
     }
@@ -197,8 +213,8 @@ export default class ThemesNew extends React.Component {
                 onChange={this.handleActionPropertySelection.bind(this)}
                 className={className}>
           <option key="0" value="0">Select a property</option>
-          <option key="1" value="1">Take a picture</option>
-          <option key="2" value="2">Record a video</option>
+          <option key="1" value="1">sends me a picture</option>
+          <option key="2" value="2">records a video</option>
         </select>
       );
     }
