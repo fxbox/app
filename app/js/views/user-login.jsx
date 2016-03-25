@@ -12,7 +12,8 @@ export default class UserLogin extends React.Component {
 
   handleOnChange(evt) {
     const value = evt.target.selectedIndex;
-    this.setState({ value: value });
+
+    this.setState({ value });
     this.foxbox.selectBox(value);
   }
 
@@ -40,8 +41,7 @@ export default class UserLogin extends React.Component {
       boxes = (<select
         className="user-login__box-selector"
         value={value}
-        onChange={this.handleOnChange.bind(this)}
-      >{options}</select>);
+        onChange={this.handleOnChange.bind(this)}>{options}</select>);
     }
 
     return (

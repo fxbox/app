@@ -44,8 +44,8 @@ export default class Services extends React.Component {
     this.foxbox.removeEventListener('service-state-change', this.updateServiceState);
   }
 
-  updateService(services) {
-    this.setState({ services: services });
+  updateService(services = []) {
+    this.setState({ services });
   }
 
   updateServiceState(state) {
@@ -55,7 +55,7 @@ export default class Services extends React.Component {
 
     // Update the new state.
     services[serviceId] = state;
-    this.setState({ services: services });
+    this.setState({ services });
   }
 
   dismissModal() {
