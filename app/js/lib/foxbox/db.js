@@ -11,7 +11,7 @@ const DB_VERSION = 1;
 const DB_SERVICE_STORE = 'services';
 const DB_TAG_STORE = 'tags';
 
-export default class FoxboxDb {
+export default class Db {
   constructor() {
     this.db = null;
   }

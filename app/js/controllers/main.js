@@ -5,7 +5,7 @@ import ServicesController from 'js/controllers/services';
 import ServiceController from 'js/controllers/service';
 import ThemesController from 'js/controllers/themes';
 
-import Foxbox from 'js/lib/foxbox';
+import Foxbox from 'js/lib/foxbox/foxbox';
 import Qr from 'js/lib/qr';
 
 export default class MainController extends RoutingController {
