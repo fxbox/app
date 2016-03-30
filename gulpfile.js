@@ -24,21 +24,25 @@ var gls = require('gulp-live-server');
 var gsww = require('gulp-sww');
 
 const APP_ROOT = './app/';
+const TESTS_UNIT_ROOT = './tests/unit/';
+
 const DIST_ROOT = './dist/';
 const DIST_APP_ROOT = './dist/app/';
+const DIST_TESTS_UNIT_ROOT = './dist/tests/unit/';
 
 var webserverStream;
 var foxboxSimulator;
 var registrationServerSimulator;
 
 /**
- * runs jslint on all javascript files found in the app dir.
+ * runs jslint on all javascript files found in the app and unit tests dirs.
  */
 gulp.task('lint', function() {
-  // Note: To have the process exit with an error code (1) on
-  //  lint error, return the stream and pipe to failOnError last.
+  // Note: To have the process exit with an error code (1) on lint error, return
+  // the stream and pipe to failOnError last.
   return gulp.src([
       './app/js/**/*.js',
+      './tests/unit/**/*.js',
       '!./app/js/components/**/*.js'
     ])
     .pipe(jshint())
@@ -66,10 +70,16 @@ gulp.task('copy-app', function() {
     .pipe(gulp.dest(DIST_APP_ROOT));
 });
 
+gulp.task('copy-unit-tests', function() {
+  return gulp
+    .src([TESTS_UNIT_ROOT + 'test-main.js'])
+    .pipe(gulp.dest(DIST_TESTS_UNIT_ROOT));
+});
+
 /**
  * converts javascript to es5. this allows us to use harmony classes and modules.
  */
-gulp.task('babel', function() {
+gulp.task('babel-app', function() {
   var files = [
     APP_ROOT + 'js/**/*.js',
     APP_ROOT + 'js/**/*.jsx'
@@ -84,6 +94,26 @@ gulp.task('babel', function() {
       .pipe(gulp.dest(DIST_APP_ROOT + 'js/'));
   } catch (e) {
     console.log('Got error in Babel', e);
+  }
+});
+
+/**
+ * Process unit test files with Babel.
+ */
+gulp.task('babel-unit-tests', function() {
+  try {
+    return gulp.src([
+        TESTS_UNIT_ROOT + '**/*.js',
+        '!' + TESTS_UNIT_ROOT + 'test-main.js'
+      ])
+      .pipe(
+        babel().on('error', function(e) {
+          console.error('Error occurred while running Babel', e);
+        })
+      )
+      .pipe(gulp.dest(DIST_TESTS_UNIT_ROOT));
+  } catch (e) {
+    console.error('Error occurred while process unit test files with Babel', e);
   }
 });
 
@@ -106,14 +136,21 @@ gulp.task('zip', function() {
 /**
  * Runs travis tests
  */
-gulp.task('travis', ['lint', 'loader-polyfill', 'babel']);
+gulp.task('travis', ['lint', 'loader-polyfill', 'babel-app']);
 
 /**
  * Build the app.
  */
 gulp.task('build', function(cb) {
-  runSequence(['clobber'], ['loader-polyfill', 'copy-app'], ['babel'],
+  runSequence(['clobber-app'], ['loader-polyfill', 'copy-app'], ['babel-app'],
     ['lint'], ['remove-useless'], cb);
+});
+
+/**
+ * Build unit tests.
+ */
+gulp.task('build-unit-tests', function(cb) {
+  runSequence('clobber-tests', 'copy-unit-tests', 'babel-unit-tests', cb);
 });
 
 /**
@@ -198,8 +235,12 @@ gulp.task('default', function() {
 /**
  * Remove the distributable files.
  */
-gulp.task('clobber', function(cb) {
-  del('dist/', cb);
+gulp.task('clobber-app', function(cb) {
+  del('dist/app', cb);
+});
+
+gulp.task('clobber-tests', function(cb) {
+  del('dist/tests', cb);
 });
 
 /**
@@ -223,8 +264,7 @@ gulp.task('clean', function(cb) {
     '.jshintrc',
     'dist/',
     'app/components',
-    'node_modules/',
-    'gulpfile.js'
+    'node_modules/'
   ], cb);
 });
 
@@ -241,10 +281,19 @@ gulp.task('stop-simulators', function() {
   registrationServerSimulator.stop();
 });
 
+gulp.task('run-unit-tests', function (cb) {
+  runSequence('build-unit-tests', function() {
+    var Server = require('karma').Server;
+
+    (new Server(
+      { configFile: __dirname + '/karma.conf.js', singleRun: true }, cb
+    )).start();
+  });
+});
+
 gulp.task('run-test-integration', function() {
   return gulp.src('./tests/{common,integration}/**/*_test.js', { read: false }).pipe(mocha());
 });
-
 
 gulp.task('test-integration', function(cb) {
   return runSequence('start-simulators', 'run-test-integration', 'stop-simulators', cb);
@@ -255,7 +304,13 @@ gulp.task('run-test-e2e', function() {
 });
 
 gulp.task('test', function() {
-  runSequence('build', 'webserver', 'test-integration', 'stop-webserver');
+  runSequence(
+    'build',
+    'run-unit-tests',
+    'webserver',
+    'test-integration',
+    'stop-webserver'
+  );
 });
 
 // TODO: Should be included in 'test' once less manual steps are required

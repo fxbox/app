@@ -1,0 +1,9 @@
+{
+  "extends": "../.jshintrc",
+  "predef": [
+    "assert",
+    "sinon",
+    "React",
+    "ReactDOM"
+  ]
+}
