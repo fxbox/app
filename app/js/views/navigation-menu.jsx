@@ -42,7 +42,9 @@ export default class NavigationMenu extends React.Component {
       <ul className="navigation-menu">
         {menuNodes}
         <li className="navigation-menu__item">
-          <a href="#users/login" className="navigation-menu__item-link user-logout-button" onClick={this.handleOnClick.bind(this)}>
+          <a href="#users/login"
+             className="navigation-menu__item-link user-logout-button"
+             onClick={this.handleOnClick.bind(this)}>
             Log out
           </a>
         </li>
@@ -50,3 +52,7 @@ export default class NavigationMenu extends React.Component {
     );
   }
 }
+
+NavigationMenu.propTypes = {
+  foxbox: React.PropTypes.object.isRequired
+};

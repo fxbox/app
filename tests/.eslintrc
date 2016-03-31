@@ -1,0 +1,12 @@
+{
+  "extends": "../.eslintrc",
+
+  "rules": {
+    "no-var": ["off"]
+  },
+
+  "env": {
+    "mocha": true,
+    "node": true
+  }
+}

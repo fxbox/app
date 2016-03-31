@@ -22,12 +22,14 @@ export default class Qr {
 
   connectTo(url, cb) {
     if (!this.supported) {
-      console.warn('QR code based discovery disabled (Cordova plugins not available)');
+      console.warn(
+        'QR code based discovery disabled (Cordova plugins not available)'
+      );
       return;
     }
     cordovaHTTP.acceptHss(true, function() {
-      var urlParts = url.substring('https://'.length).split('.');
-      var fingerprint = urlParts[FINGERPRINT_PART];
+      let urlParts = url.substring('https://'.length).split('.');
+      let fingerprint = urlParts[FINGERPRINT_PART];
       cordovaHTTP.get(url, { fingerprint: fingerprint }, { }, cb, cb);
     }, function(e) {
       console.error('Error setting acceptHss', e);
@@ -41,7 +43,9 @@ export default class Qr {
       };
     }
     if (!this.supported) {
-      console.warn('QR code based discovery disabled (Cordova plugins not available)');
+      console.warn(
+        'QR code based discovery disabled (Cordova plugins not available)'
+      );
       return;
     }
     cordova.plugins.barcodeScanner.scan(function(result) {

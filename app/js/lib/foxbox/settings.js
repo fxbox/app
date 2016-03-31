@@ -33,12 +33,19 @@ const storage = localStorage ? localStorage : {
 
 export default class Settings extends Model {
   constructor() {
+    const localHostName = storage.getItem(`${PREFIX}localHostname`) ||
+      DEFAULT_HOSTNAME;
+
+    const pollingEnabled = storage.getItem(`${PREFIX}pollingEnabled`) !== null ?
+      storage.getItem(`${PREFIX}pollingEnabled`) === 'true' :
+      DEFAULT_POLLING_ENABLED;
+
     super({
       _configured: storage.getItem(`${PREFIX}configured`) !== null ?
       storage.getItem(`${PREFIX}configured`) === 'true' : false,
 
       _localScheme: storage.getItem(`${PREFIX}localScheme`) || DEFAULT_SCHEME,
-      _localHostname: storage.getItem(`${PREFIX}localHostname`) || DEFAULT_HOSTNAME,
+      _localHostname: localHostName,
       _localPort: storage.getItem(`${PREFIX}localPort`) || DEFAULT_PORT,
 
       _tunnelScheme: storage.getItem(`${PREFIX}tunnelScheme`) || DEFAULT_SCHEME,
@@ -47,8 +54,7 @@ export default class Settings extends Model {
 
       _session: storage.getItem(`${PREFIX}session`),
       _skipDiscovery: storage.getItem(`${PREFIX}skipDiscovery`) === 'true',
-      _pollingEnabled: storage.getItem(`${PREFIX}pollingEnabled`) !== null ?
-      storage.getItem(`${PREFIX}pollingEnabled`) === 'true' : DEFAULT_POLLING_ENABLED
+      _pollingEnabled: pollingEnabled
     });
   }
 

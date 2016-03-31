@@ -121,7 +121,7 @@ export default class Foxbox extends Service {
       return Promise.resolve();
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this[p.net].fetchJSON(this[p.settings].registrationService)
         .then(boxes => {
           if (!Array.isArray(boxes) || boxes.length === 0) {
@@ -355,7 +355,7 @@ export default class Foxbox extends Service {
     return this[p.net].fetchJSON(`${this[p.net].origin}/services/${id}/state`)
       .then(res => {
         if (!res) {
-          throw new Error(`The action couldn't be performed.`);
+          throw new Error('The action couldn\'t be performed.');
         }
 
         return res;
@@ -375,7 +375,7 @@ export default class Foxbox extends Service {
         'PUT', state)
         .then(res => {
           if (!res || !res.result || res.result !== 'success') {
-            return reject(new Error(`The action couldn't be performed.`));
+            return reject(new Error('The action couldn\'t be performed.'));
           }
 
           return resolve();
@@ -434,7 +434,7 @@ export default class Foxbox extends Service {
     if (operation.kind.typ === 'Binary') {
       return this[p.net].fetchBlob(
         `${this[p.net].origin}/api/v${this[p.settings].apiVersion}` +
-        `/channels/get`,
+        '/channels/get',
         // For now we only support JPEG blobs.
         'image/jpeg',
         'PUT',

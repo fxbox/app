@@ -5,7 +5,6 @@ var App = require('../lib/app');
 describe('Logout', function() {
   var app;
   var loginView;
-  var servicesView;
   this.timeout(30000);
 
   before(() => {

@@ -62,7 +62,7 @@ export default class Db {
     return new Promise((resolve, reject) => {
       this.db.close();
 
-      var req = indexedDB.deleteDatabase(DB_NAME);
+      let req = indexedDB.deleteDatabase(DB_NAME);
       req.onsuccess = resolve;
       req.onerror = reject;
       req.onblocked = reject;
@@ -183,7 +183,7 @@ function remove(store) {
 function clear(store) {
   return function clear() {
     return new Promise((resolve, reject) => {
-      var txn = this.db.transaction([store], 'readwrite');
+      let txn = this.db.transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       txn.objectStore(store).clear();

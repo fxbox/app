@@ -33,3 +33,8 @@ export default class Service extends React.Component {
     }
   }
 }
+
+Service.propTypes = {
+  foxbox: React.PropTypes.object.isRequired,
+  id: React.PropTypes.string.isRequired
+};

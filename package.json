@@ -33,6 +33,7 @@
     "gulp-live-server": "0.0.29",
     "gulp-mocha": "^2.2.0",
     "gulp-sww": "0.0.7",
+    "gulp-eslint": "^2.0.0",
     "selenium-webdriver": "^2.52.0",
     "karma": "^0.13.22",
     "karma-chrome-launcher": "^0.2.3",
@@ -48,6 +49,9 @@
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "requirejs": "^2.2.0"
+    "requirejs": "^2.2.0",
+    "eslint": "^2.5.3",
+    "babel-eslint": "^6.0.0",
+    "eslint-plugin-react": "^4.2.3"
   }
 }

@@ -1,3 +1,5 @@
+/* eslint no-var: "off" */
+
 var allTestFiles = [];
 var TEST_REGEXP = /(spec|test)\.js$/i;
 

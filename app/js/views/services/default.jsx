@@ -45,7 +45,8 @@ export default class Service extends React.Component {
     this.foxbox.getTags()
       .then(tags => {
         tags.forEach(tag => {
-          tag.data.checked = !!(this.state.data && this.state.data.includes(tag.id));
+          tag.data.checked = !!(this.state.data &&
+            this.state.data.includes(tag.id));
         });
 
         this.setState({ tags });
@@ -74,7 +75,8 @@ export default class Service extends React.Component {
         </header>
         <section className="app-view__body">
           <h2>Tags</h2>
-          <TagList tags={this.state.tags} serviceId={this.service.id} foxbox={this.foxbox}/>
+          <TagList tags={this.state.tags} serviceId={this.service.id}
+                   foxbox={this.foxbox}/>
         </section>
         <button className="add-tag-button" type="button"
                 onClick={this.handleAddTag.bind(this)}>
@@ -87,3 +89,9 @@ export default class Service extends React.Component {
     );
   }
 }
+
+Service.propTypes = {
+  foxbox: React.PropTypes.object.isRequired,
+  service: React.PropTypes.object.isRequired,
+  id: React.PropTypes.string.isRequired
+};

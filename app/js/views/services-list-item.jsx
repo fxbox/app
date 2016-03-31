@@ -27,7 +27,8 @@ export default class ServicesListItem extends React.Component {
 
   /**
    * Convert colours from xy space to RGB.
-   * See http://www.developers.meethue.com/documentation/color-conversions-rgb-xy
+   * See details at:
+   * http://www.developers.meethue.com/documentation/color-conversions-rgb-xy
    */
   getBulbColour() {
     let h = this.state.hue;
@@ -149,8 +150,10 @@ export default class ServicesListItem extends React.Component {
     }
 
     return (
-      <li className="service-list__item" data-icon={icon} data-connected={isConnected}>
-        <a className="service-list__item-link" href={`#services/${this.props.id}`}>
+      <li className="service-list__item" data-icon={icon}
+          data-connected={isConnected}>
+        <a className="service-list__item-link"
+           href={`#services/${this.props.id}`}>
           {serviceType}
           <small>{` (${this.props.name})`}</small>
         </a>
@@ -169,7 +172,8 @@ export default class ServicesListItem extends React.Component {
   renderGenericService(type = 'Unknown service', icon = 'unknown') {
     return (
       <li className="service-list__item" data-icon={icon} data-connected="true">
-        <a className="service-list__item-link" href={`#services/${this.props.id}`}>
+        <a className="service-list__item-link"
+           href={`#services/${this.props.id}`}>
           {type} <small>{` (${this.props.name})`}</small>
         </a>
       </li>
@@ -187,3 +191,12 @@ export default class ServicesListItem extends React.Component {
     }
   }
 }
+
+ServicesListItem.propTypes = {
+  foxbox: React.PropTypes.object.isRequired,
+  state: React.PropTypes.object,
+  id: React.PropTypes.string.isRequired,
+  model: React.PropTypes.string,
+  name: React.PropTypes.string.isRequired,
+  type: React.PropTypes.string.isRequired
+};
