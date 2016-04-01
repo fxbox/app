@@ -15,28 +15,63 @@ export default class CameraService extends React.Component {
     };
   }
 
+  /**
+   * Gets service operation with the specified alias.
+   * 
+   * @param {Array<Object>} operations List of available service operations.
+   * @param {string} alias Alias of the operation we're looking for.
+   * @return {Object} Operation associated with the specified alias.
+   *
+   * @private
+   */
   getOperationByAlias(operations, alias) {
     let operationKey = Object.keys(operations).find((key) => {
       let operation = operations[key];
-      return operation.kind && operation.kind.kind == alias;
+
+      if (typeof operation.kind === 'object') {
+        return operation.kind.kind === alias;
+      }
+
+      return operation.kind === alias;
     });
 
     return operations[operationKey];
   }
 
+  /**
+   * Gets service "set" operation with the specified alias.
+   *
+   * @param {string} alias Alias of the operation we're looking for.
+   * @return {Object} Operation associated with the specified alias.
+   *
+   * @private
+   */
   getSetOperation(alias) {
     return this.getOperationByAlias(this.service.setters, alias);
   }
 
+  /**
+   * Gets service "get" operation with the specified alias.
+   *
+   * @param {string} alias Alias of the operation we're looking for.
+   * @return {Object} Operation associated with the specified alias.
+   *
+   * @private
+   */
   getGetOperation(alias) {
     return this.getOperationByAlias(this.service.getters, alias);
   }
 
+  /**
+   * Takes camera snapshot and displays it to the user.
+   *
+   * @private
+   */
   takeSnapshot() {
-    this.foxbox.performSetOperation(this.getSetOperation('snapshot'), '')
+    this.foxbox.performSetOperation(this.getSetOperation('TakeSnapshot'), '')
       .then(() => {
         return this.foxbox.performGetOperation(
-          this.getGetOperation('image_newest')
+          this.getGetOperation('latest image')
         );
       })
       .then((image) => {

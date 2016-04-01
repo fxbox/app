@@ -2,7 +2,7 @@ module.exports = function(config) {
   config.set({
 
     // Base path that will be used to resolve all patterns (eg. files, exclude).
-    basePath: 'dist/app',
+    basePath: '',
 
     frameworks: [
       'mocha', 'requirejs', 'chai', 'chai-as-promised', 'chai-sinon'
@@ -10,9 +10,10 @@ module.exports = function(config) {
 
     // List of files / patterns to load in the browser.
     files: [
-      { pattern: './**/*.js', included: false },
-      { pattern: '../tests/unit/**/*.js', included: false },
-      '../tests/unit/test-main.js'
+      { pattern: 'dist/**/*.js', included: false },
+      { pattern: 'node_modules/react/dist/*.js', included: false },
+      { pattern: 'node_modules/rxjs/bundles/Rx.umd.js', included: false },
+      'tests/unit/test-main.js'
     ],
 
     // Test results reporter to use.
