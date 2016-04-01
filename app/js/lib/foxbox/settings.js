@@ -31,7 +31,7 @@ const storage = localStorage ? localStorage : {
   removeItem: () => {}
 };
 
-export default class FoxboxSettings extends Model {
+export default class Settings extends Model {
   constructor() {
     super({
       _configured: storage.getItem(`${PREFIX}configured`) !== null ?
