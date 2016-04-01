@@ -1,4 +1,4 @@
-/* global React */
+import React from 'components/react';
 
 import NavigationMenu from 'js/views/navigation-menu';
 import ServicesList from 'js/views/services-list';

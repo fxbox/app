@@ -1,6 +1,6 @@
 'use strict';
 
-import { Model } from 'components/fxos-mvc/dist/mvc';
+import { Model } from 'components/mvc';
 
 // Prefix all entries to avoid collisions.
 const PREFIX = 'foxbox-';

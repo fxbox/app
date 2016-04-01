@@ -4,19 +4,12 @@ module.exports = function(config) {
     // Base path that will be used to resolve all patterns (eg. files, exclude).
     basePath: 'dist/app',
 
-    frameworks: ['mocha', 'chai', 'chai-as-promised', 'chai-sinon'],
+    frameworks: [
+      'mocha', 'requirejs', 'chai', 'chai-as-promised', 'chai-sinon'
+    ],
 
     // List of files / patterns to load in the browser.
     files: [
-      'components/react/react.js',
-      'components/react/react-dom.js',
-
-      // We want react libs to be included before RequireJS (as React is defined
-      // as anonymous AMD module that conflicts with RequreJS), so we should
-      // include RequireJS and adapter scripts to the files list manually.
-      '../../node_modules/requirejs/require.js',
-      '../../node_modules/karma-requirejs/lib/adapter.js',
-
       { pattern: './**/*.js', included: false },
       { pattern: '../tests/unit/**/*.js', included: false },
       '../tests/unit/test-main.js'
@@ -51,5 +44,5 @@ module.exports = function(config) {
 
     // Concurrency level, how many browsers can be started simultaneously.
     concurrency: Infinity
-  })
+  });
 };

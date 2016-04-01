@@ -15,5 +15,11 @@ require.config({
   // Karma serves files under /base, which is the basePath from config file.
   baseUrl: '/base',
   deps: allTestFiles,
-  callback: window.__karma__.start
+  callback: window.__karma__.start,
+  // ReactDOM expects "react" module to be defined, but it is not.
+  map: {
+    '*': {
+      'react': 'components/react'
+    }
+  }
 });

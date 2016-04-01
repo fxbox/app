@@ -2,7 +2,7 @@
 
 'use strict';
 
-import { Service } from 'components/fxos-mvc/dist/mvc';
+import { Service } from 'components/mvc';
 
 import Settings from './settings';
 import Db from './db';
@@ -67,6 +67,8 @@ export default class Foxbox extends Service {
     this[p.settings] = new Settings();
     this[p.db] = new Db();
     this[p.net] = new Network(this[p.settings]);
+
+    this.boxes = [];
   }
 
   init() {

@@ -1,3 +1,5 @@
+import React from 'components/react';
+import ReactDOM from 'components/react-dom';
 import ServiceController from 'js/controllers/service';
 import Service from 'js/views/service';
 

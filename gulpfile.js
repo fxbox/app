@@ -9,15 +9,14 @@
 
 var gulp = require('gulp');
 
-var buildModules = __dirname + '/node_modules/fxos-build/node_modules/';
-var concat = require(buildModules + 'gulp-concat');
-var babel = require(buildModules + 'gulp-babel');
+var concat = require('gulp-concat');
+var babel = require('gulp-babel');
 var rename = require('gulp-rename');
 var eslint = require('gulp-eslint');
-var zip = require(buildModules + 'gulp-zip');
-var del = require(buildModules + 'del');
-var runSequence = require(buildModules + 'run-sequence').use(gulp);
-var webserver = require(buildModules + 'gulp-webserver');
+var zip = require('gulp-zip');
+var del = require('del');
+var runSequence = require('run-sequence');
+var webserver = require('gulp-webserver');
 var exec = require('child_process').exec;
 var mocha = require('gulp-mocha');
 var gls = require('gulp-live-server');
@@ -54,7 +53,7 @@ gulp.task('lint', function() {
  * copies necessary files for the Babel amd loader to the app.
  */
 gulp.task('loader-polyfill', function() {
-  return gulp.src(['./node_modules/fxos-build/app_files/loader_polyfill/*.js'])
+  return gulp.src(['./node_modules/alameda/alameda.js', 'app/js/bootstrap.js'])
     .pipe(concat('initapp.js'))
     .pipe(gulp.dest(DIST_APP_ROOT + 'js'));
 });
@@ -117,11 +116,11 @@ gulp.task('babel-unit-tests', function() {
   }
 });
 
-gulp.task('remove-useless', function(cb) {
-  del([
+gulp.task('remove-useless', function() {
+  return del([
     DIST_APP_ROOT + 'js/**/*.jsx',
     DIST_APP_ROOT + '**/*.md'
-  ], cb);
+  ]);
 });
 
 /**
@@ -237,12 +236,12 @@ gulp.task('default', function() {
 /**
  * Remove the distributable files.
  */
-gulp.task('clobber-app', function(cb) {
-  del('dist/app', cb);
+gulp.task('clobber-app', function() {
+  return del('dist/app');
 });
 
-gulp.task('clobber-tests', function(cb) {
-  del('dist/tests', cb);
+gulp.task('clobber-tests', function() {
+  return del('dist/tests');
 });
 
 /**
@@ -258,15 +257,15 @@ gulp.task('offline', ['build'], function() {
 /**
  * Cleans all created files by this gulpfile, and node_modules.
  */
-gulp.task('clean', function(cb) {
-  del([
+gulp.task('clean', function() {
+  return del([
     '.bowerrc',
     '.editorconfig',
     '.git/hooks/pre-commit',
     'dist/',
     'app/components',
     'node_modules/'
-  ], cb);
+  ]);
 });
 
 gulp.task('start-simulators', function() {
@@ -304,13 +303,14 @@ gulp.task('run-test-e2e', function() {
   return gulp.src('./tests/{common,e2e}/**/*_test.js', { read: false }).pipe(mocha());
 });
 
-gulp.task('test', function() {
+gulp.task('test', function(cb) {
   runSequence(
     'build',
     'run-unit-tests',
     'webserver',
     'test-integration',
-    'stop-webserver'
+    'stop-webserver',
+    cb
   );
 });
 

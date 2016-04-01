@@ -1,4 +1,4 @@
-import { RoutingController } from 'components/fxos-mvc/dist/mvc';
+import { RoutingController } from 'components/mvc';
 
 import UsersController from 'js/controllers/users';
 import ServicesController from 'js/controllers/services';
