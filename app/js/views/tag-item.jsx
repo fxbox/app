@@ -22,7 +22,9 @@ export default class TagItem extends React.Component {
           service.data.tags = [];
         }
 
-        service.data.tags = service.data.tags.filter(tag => tag !== this.props.id);
+        service.data.tags = service.data.tags.filter(
+          tag => tag !== this.props.id
+        );
         if (checked) {
           service.data.tags.push(this.props.id);
         }
@@ -49,3 +51,11 @@ export default class TagItem extends React.Component {
     );
   }
 }
+
+TagItem.propTypes = {
+  foxbox: React.PropTypes.object.isRequired,
+  checked: React.PropTypes.bool,
+  id: React.PropTypes.string.isRequired,
+  name: React.PropTypes.string.isRequired,
+  serviceId: React.PropTypes.string.isRequired
+};

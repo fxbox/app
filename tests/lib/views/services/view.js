@@ -11,7 +11,7 @@ function ServicesView() {
 
 ServicesView.prototype = Object.assign({
 
-  logoutSuccess: function(password) {
+  logoutSuccess: function() {
     return this.accessors.logOutButton.click().then(() => {
       var LoginView = require('../login/view');
       return new LoginView(this.driver);

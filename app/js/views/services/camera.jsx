@@ -33,11 +33,11 @@ export default class CameraService extends React.Component {
   }
 
   takeSnapshot() {
-    this.foxbox.performSetOperation(this.getSetOperation('snapshot'), "")
+    this.foxbox.performSetOperation(this.getSetOperation('snapshot'), '')
       .then(() => {
         return this.foxbox.performGetOperation(
           this.getGetOperation('image_newest')
-        )
+        );
       })
       .then((image) => {
         let previousSnapshot = this.refs.snapshotPreview.src;
@@ -105,3 +105,8 @@ export default class CameraService extends React.Component {
     );
   }
 }
+
+CameraService.propTypes = {
+  foxbox: React.PropTypes.object.isRequired,
+  service: React.PropTypes.object.isRequired
+};

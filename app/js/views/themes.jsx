@@ -90,3 +90,7 @@ export default class Themes extends React.Component {
     );
   }
 }
+
+Themes.propTypes = {
+  foxbox: React.PropTypes.object.isRequired
+};

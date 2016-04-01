@@ -13,7 +13,7 @@ var buildModules = __dirname + '/node_modules/fxos-build/node_modules/';
 var concat = require(buildModules + 'gulp-concat');
 var babel = require(buildModules + 'gulp-babel');
 var rename = require('gulp-rename');
-var jshint = require(buildModules + 'gulp-jshint');
+var eslint = require('gulp-eslint');
 var zip = require(buildModules + 'gulp-zip');
 var del = require(buildModules + 'del');
 var runSequence = require(buildModules + 'run-sequence').use(gulp);
@@ -35,19 +35,19 @@ var foxboxSimulator;
 var registrationServerSimulator;
 
 /**
- * runs jslint on all javascript files found in the app and unit tests dirs.
+ * Runs eslint on all javascript files found in the app and tests dirs.
  */
 gulp.task('lint', function() {
   // Note: To have the process exit with an error code (1) on lint error, return
   // the stream and pipe to failOnError last.
   return gulp.src([
-      './app/js/**/*.js',
-      './tests/unit/**/*.js',
-      '!./app/js/components/**/*.js'
+      'app/**/*.{js,jsx}',
+      'tests/**/*.js',
+      '!app/components/**'
     ])
-    .pipe(jshint())
-    .pipe(jshint.reporter('default'))
-    .pipe(jshint.reporter('fail'));
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
 });
 
 /**
@@ -142,8 +142,10 @@ gulp.task('travis', ['lint', 'loader-polyfill', 'babel-app']);
  * Build the app.
  */
 gulp.task('build', function(cb) {
-  runSequence(['clobber-app'], ['loader-polyfill', 'copy-app'], ['babel-app'],
-    ['lint'], ['remove-useless'], cb);
+  runSequence(
+    ['lint'], ['clobber-app'], ['loader-polyfill', 'copy-app'], ['babel-app'],
+    ['remove-useless'], cb
+  );
 });
 
 /**
@@ -261,7 +263,6 @@ gulp.task('clean', function(cb) {
     '.bowerrc',
     '.editorconfig',
     '.git/hooks/pre-commit',
-    '.jshintrc',
     'dist/',
     'app/components',
     'node_modules/'

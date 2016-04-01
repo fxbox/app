@@ -21,3 +21,10 @@ export default class Modal extends React.Component {
     );
   }
 }
+
+Modal.propTypes = {
+  dismiss: React.PropTypes.func.isRequired,
+  visible: React.PropTypes.bool,
+  title: React.PropTypes.string.isRequired,
+  body: React.PropTypes.string.isRequired
+};

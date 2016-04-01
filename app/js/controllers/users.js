@@ -10,7 +10,9 @@ const DEFAULT_ACTION = ALLOWED_ACTIONS[0];
 export default class UsersController extends Controller {
   main(action = DEFAULT_ACTION) {
     if (!ALLOWED_ACTIONS.includes(action)) {
-      console.error(`Bad users route: "${action}". Falling back to ${DEFAULT_ACTION}.`);
+      console.error(
+        `Bad users route: "${action}". Falling back to ${DEFAULT_ACTION}.`
+      );
       action = DEFAULT_ACTION;
     }
 
@@ -26,7 +28,9 @@ export default class UsersController extends Controller {
   }
 
   login() {
-    ReactDOM.render(React.createElement(UserLogin, { foxbox: this.foxbox }), this.mountNode);
+    ReactDOM.render(
+      React.createElement(UserLogin, { foxbox: this.foxbox }), this.mountNode
+    );
   }
 
   logout() {

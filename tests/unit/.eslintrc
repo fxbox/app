@@ -1,0 +1,19 @@
+{
+  "extends": "../.eslintrc",
+
+  "globals": {
+    "assert": true,
+    "require": true,
+    "sinon": true,
+    "React": true,
+    "ReactDOM": true
+  },
+
+  "rules": {
+    "no-var": ["error"]
+  },
+
+  "env": {
+    "node": false
+  }
+}

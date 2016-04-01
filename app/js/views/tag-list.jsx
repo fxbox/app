@@ -26,3 +26,9 @@ export default class TagList extends React.Component {
     );
   }
 }
+
+TagList.propTypes = {
+  foxbox: React.PropTypes.object.isRequired,
+  tags: React.PropTypes.array.isRequired,
+  serviceId: React.PropTypes.string.isRequired
+};

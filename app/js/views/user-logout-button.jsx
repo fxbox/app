@@ -20,7 +20,12 @@ export default class UserLogoutButton extends React.Component {
     }
 
     return (
-      <button className="user-logout-button" onClick={this.handleOnClick.bind(this)}>Log out</button>
+      <button className="user-logout-button"
+              onClick={this.handleOnClick.bind(this)}>Log out</button>
     );
   }
 }
+
+UserLogoutButton.propTypes = {
+  foxbox: React.PropTypes.object.isRequired
+};

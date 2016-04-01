@@ -34,7 +34,8 @@ export default class UserLogin extends React.Component {
         if (box.local_ip === this.foxbox.localHostname) {
           value = index;
         }
-        const label = box.local_ip + (box.tunnel_url ? ` / ${box.tunnel_url}` : '');
+        const label = box.local_ip +
+          (box.tunnel_url ? ` / ${box.tunnel_url}` : '');
         return (
           <option key={box.local_ip} value={index}>{label}</option>
         );
@@ -61,3 +62,7 @@ export default class UserLogin extends React.Component {
     );
   }
 }
+
+UserLogin.propTypes = {
+  foxbox: React.PropTypes.object.isRequired
+};

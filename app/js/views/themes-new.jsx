@@ -134,7 +134,8 @@ export default class ThemesNew extends React.Component {
     const actionProperty = selects[3].options[selects[3].selectedIndex].label;
 
     this.foxbox.addRecipe({
-        name: `When a ${service} ${property}, ${actionService} ${actionProperty}.`,
+        name: `When a ${service} ${property}, ` +
+          `${actionService} ${actionProperty}.`,
         conditionServiceId: this.state.service,
         conditionProp: this.state.property,
         actionServiceId: this.state.actionService,
@@ -169,7 +170,8 @@ export default class ThemesNew extends React.Component {
       className += ' new-theme__select--selected';
     }
     let propertySelector = (
-      <select className="new-theme__select new-theme__select--hidden"></select>);
+      <select className="new-theme__select new-theme__select--hidden"></select>
+    );
     if (this.state.service !== null) {
       propertySelector = (
         <select value={this.state.property}
@@ -187,7 +189,8 @@ export default class ThemesNew extends React.Component {
       className += ' new-theme__select--selected';
     }
     let actionServiceSelector = (
-      <select className="new-theme__select new-theme__select--hidden"></select>);
+      <select className="new-theme__select new-theme__select--hidden"></select>
+    );
     if (this.state.property !== null) {
       const actionServiceNodes = this.state.services.map(service => (
         <option key={service.id} value={service.id}>{service.name}</option>
@@ -207,7 +210,8 @@ export default class ThemesNew extends React.Component {
       className += ' new-theme__select--selected';
     }
     let actionPropertySelector = (
-      <select className="new-theme__select new-theme__select--hidden"></select>);
+      <select className="new-theme__select new-theme__select--hidden"></select>
+    );
     if (this.state.actionService !== null) {
       actionPropertySelector = (
         <select value={this.state.actionProperty}
@@ -257,3 +261,7 @@ export default class ThemesNew extends React.Component {
     );
   }
 }
+
+ThemesNew.propTypes = {
+  foxbox: React.PropTypes.object.isRequired
+};

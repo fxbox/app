@@ -8,7 +8,7 @@ export default class ServicesList extends React.Component {
       (service) => this.isUserFacingService(service)
     );
 
-    let serviceNodes = userFacingServices.map((service, id) => (
+    let serviceNodes = userFacingServices.map((service) => (
         <ServicesListItem
           key={service.id}
           id={service.id}
@@ -35,3 +35,8 @@ export default class ServicesList extends React.Component {
     }
   }
 }
+
+ServicesList.propTypes = {
+  foxbox: React.PropTypes.object.isRequired,
+  services: React.PropTypes.array.isRequired
+};

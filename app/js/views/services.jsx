@@ -37,12 +37,16 @@ export default class Services extends React.Component {
       .catch(console.error.bind(console));
 
     this.foxbox.addEventListener('service-change', this.updateService);
-    this.foxbox.addEventListener('service-state-change', this.updateServiceState);
+    this.foxbox.addEventListener(
+      'service-state-change', this.updateServiceState
+    );
   }
 
   componentWillUnmount() {
     this.foxbox.removeEventListener('service-change', this.updateService);
-    this.foxbox.removeEventListener('service-state-change', this.updateServiceState);
+    this.foxbox.removeEventListener(
+      'service-state-change', this.updateServiceState
+    );
   }
 
   updateService(services = []) {
@@ -51,7 +55,9 @@ export default class Services extends React.Component {
 
   updateServiceState(state) {
     // Find the index of the service which state has changed.
-    const serviceId = this.state.services.findIndex(service => service.id === state.id);
+    const serviceId = this.state.services.findIndex(
+      service => service.id === state.id
+    );
     const services = this.state.services;
 
     // Update the new state.
@@ -76,8 +82,13 @@ export default class Services extends React.Component {
         <footer className="app-view__footer">
           <NavigationMenu foxbox={this.foxbox}/>
         </footer>
-        <Modal visible={this.state.isModalVisible} title={this.state.title} body={this.state.body} dismiss={this.dismissModal.bind(this)}/>
+        <Modal visible={this.state.isModalVisible} title={this.state.title}
+               body={this.state.body} dismiss={this.dismissModal.bind(this)}/>
       </div>
     );
   }
 }
+
+Services.propTypes = {
+  foxbox: React.PropTypes.object.isRequired
+};
