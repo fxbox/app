@@ -1,4 +1,5 @@
-/* global React */
+import React from 'components/react';
+
 import CameraService from 'js/views/services/camera';
 import DefaultService from 'js/views/services/default';
 

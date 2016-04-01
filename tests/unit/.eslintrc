@@ -4,9 +4,7 @@
   "globals": {
     "assert": true,
     "require": true,
-    "sinon": true,
-    "React": true,
-    "ReactDOM": true
+    "sinon": true
   },
 
   "rules": {

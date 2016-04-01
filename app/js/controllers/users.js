@@ -1,6 +1,6 @@
-/* global React, ReactDOM */
-
-import { Controller } from 'components/fxos-mvc/dist/mvc';
+import React from 'components/react';
+import ReactDOM from 'components/react-dom';
+import { Controller } from 'components/mvc';
 
 import UserLogin from 'js/views/user-login';
 

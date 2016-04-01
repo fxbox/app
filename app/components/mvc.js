@@ -1,0 +1,1 @@
+../../node_modules/fxos-mvc/dist/mvc.js

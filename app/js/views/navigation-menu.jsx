@@ -1,4 +1,4 @@
-/* global React */
+import React from 'components/react';
 
 export default class NavigationMenu extends React.Component {
   constructor(props) {

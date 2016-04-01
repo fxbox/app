@@ -1,4 +1,4 @@
-/* global React */
+import React from 'components/react';
 
 import TagItem from 'js/views/tag-item';
 

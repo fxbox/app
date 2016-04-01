@@ -1,4 +1,4 @@
-/* global React */
+import React from 'components/react';
 
 import ServicesListItem from 'js/views/services-list-item';
 
