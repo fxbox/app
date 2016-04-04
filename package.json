@@ -18,7 +18,7 @@
     "iot"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "MPL2",
   "dependencies": {
     "alameda": "^1.0.0",
     "babel-plugin-transform-es2015-modules-amd": "^6.6.5",
