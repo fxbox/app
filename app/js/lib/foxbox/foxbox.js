@@ -10,18 +10,19 @@ import Network from './network';
 import Recipes from './recipes';
 
 // Private members.
-const p = {
+const p = Object.freeze({
   // Private properties.
   settings: Symbol('settings'),
   db: Symbol('db'),
   net: Symbol('net'),
+  boxes: Symbol('boxes'),
   isPollingEnabled: Symbol('isPollingEnabled'),
   nextPollTimeout: Symbol('nextPollTimeout'),
 
   // Private methods.
   fetchServices: Symbol('fetchServices'),
   getOperationValueType: Symbol('getOperationValueType')
-};
+});
 
 /**
  * Compare 2 objects. Returns true if all properties of object A have the same
@@ -46,11 +47,18 @@ export default class Foxbox extends Service {
   constructor() {
     super();
 
+    // Private properties.
     this[p.settings] = new Settings();
     this[p.db] = new Db();
     this[p.net] = new Network(this[p.settings]);
+    this[p.boxes] = Object.freeze([]);
+    this[p.isPollingEnabled] = false;
+    this[p.nextPollTimeout] = null;
 
-    this.boxes = [];
+    // Public properties.
+    this.recipes = null;
+
+    Object.seal(this);
   }
 
   init() {
@@ -93,6 +101,10 @@ export default class Foxbox extends Service {
     return this[p.settings].localHostname;
   }
 
+  get boxes() {
+    return this[p.boxes];
+  }
+
   /**
    * Get the IP address of the box on the local network using the registration
    * server.
@@ -118,8 +130,12 @@ export default class Foxbox extends Service {
           }
 
           // We filter out boxes registered more than 5 minutes ago.
-          const now = Math.floor(Date.now() / 1000);
-          this.boxes = boxes.filter(box => now - box.timestamp < 60 * 5);
+          const now = Math.floor(Date.now() / 1000) - 60 * 5;
+          this[p.boxes] = Object.freeze(
+            boxes
+              .filter(box => box.timestamp - now >= 0)
+              .map(box => Object.freeze(box))
+          );
 
           if (!this[p.settings].configured) {
             this.selectBox();
@@ -140,14 +156,14 @@ export default class Foxbox extends Service {
    * @param {number} index The index of the box in the boxes array.
    */
   selectBox(index = 0) {
-    if (index >= this.boxes.length) {
+    if (index >= this[p.boxes].length) {
       this[p.settings].configured = false;
       console.error('Index out of range.');
 
       return;
     }
 
-    const box = this.boxes[index];
+    const box = this[p.boxes][index];
 
     this[p.settings].localHostname = box.local_ip;
     if (box.tunnel_url) {

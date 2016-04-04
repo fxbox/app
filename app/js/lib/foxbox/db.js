@@ -2,6 +2,20 @@
 
 'use strict';
 
+// Private members.
+const p = Object.freeze({
+  // Private properties.
+  db: Symbol('db'),
+
+  // Private methods.
+  upgradeSchema: Symbol('upgradeSchema'),
+  getAll: Symbol('getAll'),
+  getById: Symbol('getById'),
+  set: Symbol('set'),
+  remove: Symbol('remove'),
+  clearDb: Symbol('clearDb')
+});
+
 // The name of the db.
 const DB_NAME = 'foxbox-db';
 
@@ -13,15 +27,18 @@ const DB_TAG_STORE = 'tags';
 
 export default class Db {
   constructor() {
-    this.db = null;
+    // Private properties.
+    this[p.db] = null;
+
+    Object.seal(this);
   }
 
   init() {
     return new Promise((resolve, reject) => {
       let req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = this.upgradeSchema;
+      req.onupgradeneeded = this[p.upgradeSchema];
       req.onsuccess = evt => {
-        this.db = evt.target.result;
+        this[p.db] = evt.target.result;
 
         // Prepopulate the tags with common values.
         this.getTags()
@@ -42,7 +59,7 @@ export default class Db {
     });
   }
 
-  upgradeSchema(evt) {
+  [p.upgradeSchema](evt) {
     let db = evt.target.result;
     let fromVersion = evt.oldVersion;
     if (fromVersion < 1) {
@@ -60,7 +77,7 @@ export default class Db {
 
   clear() {
     return new Promise((resolve, reject) => {
-      this.db.close();
+      this[p.db].close();
 
       let req = indexedDB.deleteDatabase(DB_NAME);
       req.onsuccess = resolve;
@@ -70,51 +87,49 @@ export default class Db {
   }
 
   getServices() {
-    return getAll(DB_SERVICE_STORE).call(this);
+    return this[p.getAll](DB_SERVICE_STORE);
   }
 
   getTags() {
-    return getAll(DB_TAG_STORE).call(this);
+    return this[p.getAll](DB_TAG_STORE);
   }
 
   getService(id) {
-    return getById(DB_SERVICE_STORE).call(this, id);
+    return this[p.getById](DB_SERVICE_STORE, id);
   }
 
   getTag(id) {
-    return getById(DB_TAG_STORE).call(this, id);
+    return this[p.getById](DB_TAG_STORE, id);
   }
 
   setService(data) {
-    return set(DB_SERVICE_STORE).call(this, data);
+    return this[p.set](DB_SERVICE_STORE, data);
   }
 
   setTag(data) {
-    return set(DB_TAG_STORE).call(this, data);
+    return this[p.set](DB_TAG_STORE, data);
   }
 
   deleteService(data) {
     // Is useful?!
-    return remove(DB_SERVICE_STORE).call(this, data);
+    return this[p.remove](DB_SERVICE_STORE, data);
   }
 
   deleteTag(data) {
-    return remove(DB_TAG_STORE).call(this, data);
+    return this[p.remove](DB_TAG_STORE, data);
   }
 
   clearServices() {
-    return clear(DB_SERVICE_STORE).call(this);
+    return this[p.clearDb](DB_SERVICE_STORE);
   }
 
   clearTags() {
-    return clear(DB_TAG_STORE).call(this);
+    return this[p.clearDb](DB_TAG_STORE);
   }
-}
 
-function getAll(store) {
-  return function getAll() {
+  [p.getAll](store) {
     return new Promise((resolve, reject) => {
-      let txn = this.db.transaction([store], 'readonly');
+      let txn = this[p.db].transaction([store], 'readonly');
       let results = [];
       txn.onerror = reject;
       txn.oncomplete = () => {
@@ -128,26 +143,22 @@ function getAll(store) {
         }
       };
     });
-  };
-}
+  }
 
-function getById(store) {
-  return function getById(id) {
+  [p.getById](store, id) {
     return new Promise((resolve, reject) => {
-      let txn = this.db.transaction([store], 'readonly');
+      let txn = this[p.db].transaction([store], 'readonly');
       txn.onerror = reject;
       txn.objectStore(store).get(id).onsuccess = evt => {
         resolve(evt.target.result);
       };
     });
-  };
-}
+  }
 
-function set(store) {
-  return function set(data) {
+  [p.set](store, data) {
     return new Promise((resolve, reject) => {
       const id = data.id;
-      let txn = this.db.transaction([store], 'readwrite');
+      let txn = this[p.db].transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       try {
@@ -161,13 +172,11 @@ function set(store) {
         resolve();
       }
     });
-  };
-}
+  }
 
-function remove(store) {
-  return function remove(id) {
+  [p.remove](store, id) {
     return new Promise((resolve, reject) => {
-      let txn = this.db.transaction([store], 'readwrite');
+      let txn = this[p.db].transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       try {
@@ -177,16 +186,14 @@ function remove(store) {
         resolve();
       }
     });
-  };
-}
+  }
 
-function clear(store) {
-  return function clear() {
+  [p.clearDb](store) {
     return new Promise((resolve, reject) => {
-      let txn = this.db.transaction([store], 'readwrite');
+      let txn = this[p.db].transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       txn.objectStore(store).clear();
     });
-  };
+  }
 }
