@@ -7,26 +7,7 @@ import { Service } from 'components/mvc';
 import Settings from './settings';
 import Db from './db';
 import Network from './network';
-
-// Fixtures for some rules.
-let themes = [
-  {
-    name: 'When front door opens, front door camera sends me a picture.',
-    conditionServiceId: 123,
-    conditionProp: true,
-    actionServiceId: 456,
-    actionProp: true,
-    enabled: true
-  },
-  {
-    name: 'When a motion sensor detects presence, living room light turns on.',
-    conditionServiceId: 123,
-    conditionProp: true,
-    actionServiceId: 456,
-    actionProp: true,
-    enabled: false
-  }
-];
+import Recipes from './recipes';
 
 // Private members.
 const p = {
@@ -91,6 +72,11 @@ export default class Foxbox extends Service {
           this.togglePolling(this[p.settings].pollingEnabled);
         });
         this.togglePolling(this[p.settings].pollingEnabled);
+
+        this.recipes = new Recipes({
+          settings: this[p.settings],
+          net: this[p.net]
+        });
       });
   }
 
@@ -400,25 +386,6 @@ export default class Foxbox extends Service {
 
   setTag() {
     return this[p.db].setTag.apply(this[p.db], arguments);
-  }
-
-  getRecipes() {
-    return Promise.resolve(themes);
-  }
-
-  addRecipe(recipe) {
-    themes.push(recipe);
-    return Promise.resolve(themes);
-  }
-
-  removeRecipe(id) {
-    themes.splice(id, 1);
-    return Promise.resolve(themes);
-  }
-
-  toggleRecipe(id, value = true) {
-    themes[id].enabled = value;
-    return Promise.resolve(themes);
   }
 
   performSetOperation(operation, value) {

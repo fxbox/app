@@ -2,144 +2,124 @@ import React from 'components/react';
 
 import NavigationMenu from 'js/views/navigation-menu';
 
+// @todo Validate input on select onChange:
+//    * Check if integer
+//    * Check if value is within boundaries
+//    * Check if properties belong to selected service
+
 export default class ThemesNew extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      services: [],
+      servicesWithGet: [],
+      servicesWithSet: [],
 
-      service: null,
-      property: null,
-      actionService: null,
-      actionProperty: null
+      serviceWithGet: null,
+      getter: null,
+      serviceWithSet: null,
+      setter: null
     };
 
     this.foxbox = props.foxbox;
 
     this.updateServices = this.updateServices.bind(this);
+    this.handleServiceWithGetChange = this.handleServiceWithGetChange
+      .bind(this);
+    this.handleGetterChange = this.handleGetterChange.bind(this);
+    this.handleServiceWithSetChange = this.handleServiceWithSetChange
+      .bind(this);
+    this.handleSetterChange = this.handleSetterChange.bind(this);
+    this.handleActionButton = this.handleActionButton.bind(this);
   }
 
   componentDidMount() {
-    this.foxbox.getServices()
+    Promise.all([
+        this.foxbox.recipes.getServicesWithGetters(),
+        this.foxbox.recipes.getServicesWithSetters()
+      ])
       .then(services => {
         this.updateServices(services);
       })
       .catch(console.error.bind(console));
-
-    this.foxbox.addEventListener('service-change', this.updateServices);
   }
 
-  componentWillUnmount() {
-    this.foxbox.removeEventListener('service-change', this.updateServices);
+  updateServices([servicesWithGet, servicesWithSet] = [[], []]) {
+    this.setState({ servicesWithGet, servicesWithSet });
   }
 
-  updateServices(services = []) {
-    services = [
-      {
-        id: 1,
-        name: 'living room light'
-      },
-      {
-        id: 2,
-        name: 'front door camera'
-      },
-      {
-        id: 3,
-        name: 'motion sensor'
-      },
-      {
-        id: 4,
-        name: 'front door'
-      }
-    ];
-    this.setState({ services });
-
-    this.validateSelectedId();
-  }
-
-  /**
-   * Validate the currently selected service against the list of services.
-   */
-  validateSelectedId(service = this.state.service) {
-    if (service === '0') {
-      service = null;
-    /*} else if (!this.state.services.find(s => s.id === service)) {
-      service = null;*/
-    }
-
-    if (service === null) {
+  handleServiceWithGetChange(evt) {
+    const serviceWithGet = evt.target.value;
+    if (serviceWithGet !== '') {
+      this.setState({ serviceWithGet });
+    } else {
       this.setState({
-        service,
-        property: null,
-        actionService: null,
-        actionProperty: null
+        serviceWithGet: null,
+        getter: null,
+        serviceWithSet: null,
+        setter: null
       });
     }
   }
 
-  handleServiceSelection(evt) {
-    const service = evt.target.value;
-    this.setState({ service });
-
-    this.validateSelectedId(service);
-  }
-
-  handlePropertySelection(evt) {
-    const property = evt.target.value;
-    if (property !== '0') {
-      this.setState({ property });
+  handleGetterChange(evt) {
+    const getter = evt.target.value;
+    if (getter !== '') {
+      this.setState({ getter });
     } else {
       this.setState({
-        property: null,
-        actionService: null,
-        actionProperty: null
+        getter: null,
+        serviceWithSet: null,
+        setter: null
       });
     }
   }
 
-  handleActionServiceSelection(evt) {
-    const actionService = evt.target.value;
-    if (actionService !== '0') {
-      this.setState({ actionService });
+  handleServiceWithSetChange(evt) {
+    const serviceWithSet = evt.target.value;
+    if (serviceWithSet !== '') {
+      this.setState({ serviceWithSet });
     } else {
       this.setState({
-        actionService: null,
-        actionProperty: null
+        serviceWithSet: null,
+        setter: null
       });
     }
   }
 
-  handleActionPropertySelection(evt) {
-    const actionProperty = evt.target.value;
-    if (actionProperty !== '0') {
-      this.setState({ actionProperty });
+  handleSetterChange(evt) {
+    const setter = evt.target.value;
+    if (setter !== '') {
+      this.setState({ setter });
     } else {
       this.setState({
-        actionProperty: null
+        setter: null
       });
     }
   }
 
   handleActionButton() {
-    if (this.state.actionProperty === null) {
+    if (this.state.setter === null) {
       return;
     }
 
-    const selects = document.querySelectorAll('select');
+    const serviceWithGetObject = this.state
+      .servicesWithGet[this.state.serviceWithGet];
+    const getterObject = this.state
+      .servicesWithGet[this.state.serviceWithGet].get[this.state.getter];
+    const serviceWithSetObject = this.state
+      .servicesWithSet[this.state.serviceWithSet];
+    const setterObject = this.state
+      .servicesWithSet[this.state.serviceWithSet].set[this.state.setter];
+    const label = `${serviceWithGetObject.label} ${getterObject.label}, ` +
+      `${serviceWithSetObject.label} ${setterObject.label}.`;
 
-    const service = selects[0].options[selects[0].selectedIndex].label;
-    const property = selects[1].options[selects[1].selectedIndex].label;
-    const actionService = selects[2].options[selects[2].selectedIndex].label;
-    const actionProperty = selects[3].options[selects[3].selectedIndex].label;
-
-    this.foxbox.addRecipe({
-        name: `When a ${service} ${property}, ` +
-          `${actionService} ${actionProperty}.`,
-        conditionServiceId: this.state.service,
-        conditionProp: this.state.property,
-        actionServiceId: this.state.actionService,
-        actionProp: this.state.actionProperty,
+    this.foxbox.recipes.add({
+        label,
+        serviceWithGet: serviceWithGetObject.id,
+        getter: getterObject.value,
+        serviceWithSet: serviceWithSetObject.id,
+        setter: setterObject.value,
         enabled: true
       })
       .then(() => {
@@ -149,88 +129,96 @@ export default class ThemesNew extends React.Component {
   }
 
   render() {
+    let optionNodes;
+
     let className = 'new-theme__select';
-    if (this.state.service !== null) {
+    if (this.state.serviceWithGet !== null) {
       className += ' new-theme__select--selected';
     }
-    const optionNodes = this.state.services.map(service => (
-      <option key={service.id} value={service.id}>{service.name}</option>
+    optionNodes = this.state.servicesWithGet.map((service, id) => (
+      <option key={id} value={id}>{service.label}</option>
     ));
     let serviceSelector = (
-      <select value={this.state.service}
-              onChange={this.handleServiceSelection.bind(this)}
+      <select value={this.state.serviceWithGet}
+              onChange={this.handleServiceWithGetChange}
               className={className}>
-        <option value="0">Select a device</option>
+        <option value="">Select a device</option>
         {optionNodes}
       </select>
     );
 
     className = 'new-theme__select';
-    if (this.state.property !== null) {
+    if (this.state.getter !== null) {
       className += ' new-theme__select--selected';
     }
     let propertySelector = (
       <select className="new-theme__select new-theme__select--hidden"></select>
     );
-    if (this.state.service !== null) {
+    if (this.state.serviceWithGet !== null) {
+      optionNodes = this.state.servicesWithGet[this.state.serviceWithGet].get
+        .map((getter, id) => (
+          <option key={id} value={id}>{getter.label}</option>
+        ));
       propertySelector = (
-        <select value={this.state.property}
-                onChange={this.handlePropertySelection.bind(this)}
+        <select value={this.state.getter}
+                onChange={this.handleGetterChange}
                 className={className}>
-          <option value="0">Select a property</option>
-          <option key="1" value="1">detects presence</option>
-          <option key="2" value="2">detects no presence</option>
+          <option value="">Select a property</option>
+          {optionNodes}
         </select>
       );
     }
 
     className = 'new-theme__select';
-    if (this.state.actionService !== null) {
+    if (this.state.serviceWithSet !== null) {
       className += ' new-theme__select--selected';
     }
     let actionServiceSelector = (
       <select className="new-theme__select new-theme__select--hidden"></select>
     );
-    if (this.state.property !== null) {
-      const actionServiceNodes = this.state.services.map(service => (
-        <option key={service.id} value={service.id}>{service.name}</option>
+    if (this.state.getter !== null) {
+      optionNodes = this.state.servicesWithSet.map((service, id) => (
+        <option key={id} value={id}>{service.label}</option>
       ));
       actionServiceSelector = (
-        <select value={this.state.actionService}
-                onChange={this.handleActionServiceSelection.bind(this)}
+        <select value={this.state.serviceWithSet}
+                onChange={this.handleServiceWithSetChange}
                 className={className}>
-          <option value="0">Select a device</option>
-          {actionServiceNodes}
+          <option value="">Select a device</option>
+          {optionNodes}
         </select>
       );
     }
 
     className = 'new-theme__select';
-    if (this.state.actionProperty !== null) {
+    if (this.state.setter !== null) {
       className += ' new-theme__select--selected';
     }
     let actionPropertySelector = (
       <select className="new-theme__select new-theme__select--hidden"></select>
     );
-    if (this.state.actionService !== null) {
+    if (this.state.serviceWithSet !== null) {
+      optionNodes = this.state.servicesWithSet[this.state.serviceWithSet].set
+        .map((setter, id) => (
+          <option key={id} value={id}>{setter.label}</option>
+        ));
       actionPropertySelector = (
-        <select value={this.state.actionProperty}
-                onChange={this.handleActionPropertySelection.bind(this)}
+        <select value={this.state.setter}
+                onChange={this.handleSetterChange}
                 className={className}>
-          <option key="0" value="0">Select a property</option>
-          <option key="1" value="1">sends me a picture</option>
-          <option key="2" value="2">records a video</option>
+          <option value="">Select a property</option>
+          {optionNodes}
         </select>
       );
     }
 
     let headerClassName = 'new-theme__header';
-    if (this.state.property === null) {
+    if (this.state.getter === null) {
       headerClassName += ' new-theme__header--hidden';
     }
 
     let actionButtonClassName = 'app-view__action';
-    if (this.state.actionProperty === null) {
+    if (this.state.setter === null) {
       actionButtonClassName += ' app-view__action--disabled';
     }
 
@@ -240,7 +228,7 @@ export default class ThemesNew extends React.Component {
           <a href="#themes" className="app-view__action">Cancel</a>
           <h1>New Recipe</h1>
           <button className={actionButtonClassName}
-                  onClick={this.handleActionButton.bind(this)}>Done
+                  onClick={this.handleActionButton}>Done
           </button>
         </header>
         <section className="app-view__body">
