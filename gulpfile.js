@@ -69,12 +69,6 @@ gulp.task('copy-app', function() {
     .pipe(gulp.dest(DIST_APP_ROOT));
 });
 
-gulp.task('copy-unit-tests', function() {
-  return gulp
-    .src([TESTS_UNIT_ROOT + 'test-main.js'])
-    .pipe(gulp.dest(DIST_TESTS_UNIT_ROOT));
-});
-
 /**
  * converts javascript to es5. this allows us to use harmony classes and modules.
  */
@@ -101,10 +95,7 @@ gulp.task('babel-app', function() {
  */
 gulp.task('babel-unit-tests', function() {
   try {
-    return gulp.src([
-        TESTS_UNIT_ROOT + '**/*.js',
-        '!' + TESTS_UNIT_ROOT + 'test-main.js'
-      ])
+    return gulp.src([TESTS_UNIT_ROOT + '**/*.js'])
       .pipe(
         babel().on('error', function(e) {
           console.error('Error occurred while running Babel', e);
@@ -151,7 +142,7 @@ gulp.task('build', function(cb) {
  * Build unit tests.
  */
 gulp.task('build-unit-tests', function(cb) {
-  runSequence('clobber-tests', 'copy-unit-tests', 'babel-unit-tests', cb);
+  runSequence('clobber-tests', 'babel-unit-tests', cb);
 });
 
 /**

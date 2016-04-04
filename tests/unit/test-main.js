@@ -7,7 +7,7 @@ var TEST_REGEXP = /(spec|test)\.js$/i;
 Object.keys(window.__karma__.files).forEach(function(file) {
   if (TEST_REGEXP.test(file)) {
     // Normalize paths to RequireJS module names.
-    allTestFiles.push(file.replace(/^\/base\//g, ''));
+    allTestFiles.push(file.replace(/^\/base\/|\.js$/g, ''));
   }
 });
 
@@ -16,10 +16,19 @@ require.config({
   baseUrl: '/base',
   deps: allTestFiles,
   callback: window.__karma__.start,
+
   // ReactDOM expects "react" module to be defined, but it is not.
   map: {
     '*': {
       'react': 'components/react'
     }
+  },
+
+  paths: {
+    'components': 'dist/app/components',
+    'js': 'dist/app/js',
+    // Addons include React TestUtils.
+    'components/react': 'node_modules/react/dist/react-with-addons',
+    'rxjs': 'node_modules/rxjs/bundles/Rx.umd'
   }
 });

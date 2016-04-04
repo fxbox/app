@@ -19,7 +19,8 @@ const p = {
   nextPollTimeout: Symbol('nextPollTimeout'),
 
   // Private methods.
-  fetchServices: Symbol('fetchServices')
+  fetchServices: Symbol('fetchServices'),
+  getOperationValueType: Symbol('getOperationValueType')
 };
 
 /**
@@ -389,11 +390,12 @@ export default class Foxbox extends Service {
   }
 
   performSetOperation(operation, value) {
+    let operationType = this[p.getOperationValueType](operation.kind);
     return this[p.net].fetchJSON(
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
       'PUT',
       // Query operation by id.
-      [[{ id: operation.id }, { [operation.kind.typ]: value }]]
+      [[{ id: operation.id }, { [operationType]: value }]]
     );
   }
 
@@ -432,5 +434,31 @@ export default class Foxbox extends Service {
           };
         });
       });
+  }
+
+  /**
+   * Returns value type string for the specified operation kind.
+   *
+   * @param {string|Object} operationKind Kind of the operation, string for the
+   * well known type and object for the Extension channel kind.
+   * @return {string}
+   * @private
+   */
+  [p.getOperationValueType](operationKind) {
+    if (!operationKind) {
+      throw new Error('Operation kind is not defined!');
+    }
+
+    // Operation kind can be either object or string.
+    if (typeof operationKind === 'object') {
+      return operationKind.typ;
+    }
+
+    switch (operationKind) {
+      case 'TakeSnapshot':
+        return 'Unit';
+      default:
+        return operationKind;
+    }
   }
 }
