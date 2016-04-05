@@ -1,4 +1,4 @@
 {
-  "presets": ["es2015", "react"],
+  "presets": ["react"],
   "plugins": ["transform-es2015-modules-amd"]
 }
