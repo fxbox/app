@@ -20,19 +20,29 @@ export default class NavigationMenu extends React.Component {
   render() {
     let route = location.hash.substr(1).split('/').shift();
     let menuNodes = [
-      ['services', 'Home'],
-      ['themes', 'Themes'],
-      ['mr-fox', 'Mr. Fox']
+      {
+        id: 'services',
+        label: 'Home'
+      },
+      {
+        id: 'themes',
+        label: 'Themes'
+      },
+      {
+        id: 'mr-fox',
+        label: 'Mr. Fox'
+      }
     ].map((menu) => {
       let className = 'navigation-menu__item';
-      if (route === menu[0]) {
+      if (route === menu.id) {
         className += ' navigation-menu__item--active';
       }
 
       return (
-        <li key={menu[0]} className={className}>
-          <a href={`#${menu[0]}`} className="navigation-menu__item-link">
-            {menu[1]}
+        <li key={menu.id} className={className}>
+          <a href={`#${menu.id}`}
+             className="navigation-menu__item-link">
+            {menu.label}
           </a>
         </li>
       );

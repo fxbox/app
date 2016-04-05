@@ -81,15 +81,15 @@ select {
   align-items: center;
   padding: 1rem 3rem;
 
-  background-color: #2f99cd;
+  background-color: #0ca8a4;
   color: #fff;
 }
 
 .app-view__header--white {
   background-color: #fff;
-  color: #2f99cd;
+  color: #0ca8a4;
   text-align: center;
-  border-bottom: 1px solid #2f99cd;
+  border-bottom: 1px solid #0ca8a4;
 }
 
 .app-view__body {
