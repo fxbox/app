@@ -1,8 +1,9 @@
 'use strict';
 
 // Private members.
-const p = {
+const p = Object.freeze({
   // Private properties.
+  settings: Symbol('settings'),
   local: Symbol('local'),
   remote: Symbol('remote'),
   pingInterval: Symbol('pingInterval'),
@@ -11,18 +12,20 @@ const p = {
   fetch: Symbol('fetch'),
   ping: Symbol('ping'),
   pingBox: Symbol('pingBox')
-};
+});
 
 export default class Network {
   constructor(settings) {
-    this.settings = settings;
-
+    // Private properties.
+    this[p.settings] = settings;
     // Whether we can connect to the box via a local connection.
     this[p.local] = false;
     // Whether we can connect to the box via a remote connection.
     this[p.remote] = false;
     // A reference to the interval to get the online status.
     this[p.pingInterval] = null;
+
+    Object.seal(this);
   }
 
   /**
@@ -41,11 +44,11 @@ export default class Network {
 
       // We also ping the box every few minutes to make sure it's still there.
       this[p.pingInterval] = setInterval(pingBox,
-        this.settings.onlineCheckingLongInterval);
+        this[p.settings].onlineCheckingLongInterval);
     } else {
       // If the Network Information API is not implemented, fallback to polling.
       this[p.pingInterval] = setInterval(pingBox,
-        this.settings.onlineCheckingInterval);
+        this[p.settings].onlineCheckingInterval);
     }
 
     this[p.pingBox]();
@@ -65,13 +68,17 @@ export default class Network {
   }
 
   get localOrigin() {
-    return `${this.settings.localScheme}://${this.settings.localHostname}:` +
-      `${this.settings.localPort}`;
+    const settings = this[p.settings];
+
+    return `${settings.localScheme}://${settings.localHostname}:` +
+      `${settings.localPort}`;
   }
 
   get tunnelOrigin() {
-    return `${this.settings.tunnelScheme}://${this.settings.tunnelHostname}:` +
-      `${this.settings.tunnelPort}`;
+    const settings = this[p.settings];
+
+    return `${settings.tunnelScheme}://${settings.tunnelHostname}:` +
+      `${settings.tunnelPort}`;
   }
 
   get connected() {
@@ -139,9 +146,9 @@ export default class Network {
       req.headers['Content-Type'] = 'application/json;charset=UTF-8';
     }
 
-    if (this.settings.session) {
+    if (this[p.settings].session) {
       // The user is logged in, we authenticate the request.
-      req.headers.Authorization = `Bearer ${this.settings.session}`;
+      req.headers.Authorization = `Bearer ${this[p.settings].session}`;
     }
 
     if (body !== undefined) {
@@ -179,7 +186,7 @@ export default class Network {
       });
 
     // @todo Find a better way to detect if a tunnel connection is active.
-    if (this.settings.tunnelHostname !== '') {
+    if (this[p.settings].tunnelHostname !== '') {
       this[p.ping](`${this.tunnelOrigin}/ping`)
         .then(() => {
           this[p.remote] = true;

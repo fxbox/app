@@ -3,16 +3,19 @@
 // @todo Proxy recipes in the db and emit events on change (see services).
 
 // Private members.
-const p = {
+const p = Object.freeze({
   // Private properties.
   settings: Symbol('settings'),
   net: Symbol('net')
-};
+});
 
 export default class Recipe {
   constructor(props) {
+    // Private properties.
     this[p.settings] = props.settings;
     this[p.net] = props.net;
+
+    Object.seal(this);
   }
 
   /**
