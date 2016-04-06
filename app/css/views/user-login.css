@@ -15,7 +15,7 @@
   min-height: 5rem;
 
   color: white;
-  background: #2F99CD;
+  background: #0ca8a4;
   border: none;
 }
 
@@ -23,9 +23,9 @@
   margin: 1rem;
   padding: 1rem;
 
-  border: .2rem solid #2F99CD;
+  border: .2rem solid #0ca8a4;
   border-radius: .2rem;
   font-size: 2rem;
-  background: #2F99CD;
+  background: #0ca8a4;
   color: white;
 }

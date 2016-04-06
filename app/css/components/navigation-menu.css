@@ -3,39 +3,37 @@
   display: flex;
 
   width: 100%;
-  height: 100%;
+  height: 5.6rem;
+  background-color: #08788a;
 }
 
 .navigation-menu__item {
   flex-grow: 1;
-  margin: .1rem;
-
-  opacity: 0.5;
 
   text-align: center;
-  background: grey;
+  filter: brightness(5);
+  -webkit-filter: brightness(5);
+  border-bottom: .3rem solid transparent;
 }
 
 .navigation-menu__item-link {
   display: block;
-  height: 15vmin;
 
-  opacity: 0.5;
-
+  height: 4.75rem;
   color: #fff;
   text-decoration: none;
   font-size: 0;
-  background: url(../menu-icons/settings.svg) center center no-repeat;
-  background-size: 7.5vmin;
+  background: url(../menu-icons/settings.svg) center 1.6rem no-repeat;
+  background-size: 2.4rem;
 }
 
-.navigation-menu__item--active,
-.navigation-menu__item--active .navigation-menu__item-link {
-  opacity: 1;
-  background-color: #2f99cd;
+.navigation-menu__item--active {
+  filter: initial;
+  -webkit-filter: initial;
+  border-bottom-color: #3fd4f2;
 }
 
-.navigation-menu__item-link[href~="#home"] {
+.navigation-menu__item-link[href~="#services"] {
   background-image: url(../menu-icons/home.svg);
 }
 
@@ -44,7 +42,7 @@
 }
 
 .navigation-menu__item-link[href~="#mr-fox"] {
-  background-image: url(../menu-icons/mr-fox.svg);
+  background-image: url(../menu-icons/notifications.svg);
 }
 
 .navigation-menu__item-link[href~="#settings"] {
