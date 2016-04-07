@@ -1,3 +1,7 @@
+[data-icon="unknown"] {
+  background-image: url('services-list/unknown.svg');
+}
+
 [data-icon="ip-camera"] {
   background-image: url('services-list/ip-camera.svg');
 }
