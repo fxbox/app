@@ -5,13 +5,20 @@
 
 > An app for [Project Link](https://wiki.mozilla.org/Project_Link)
 
+## Support
+
+The following browsers are actively supported:
+
+* Firefox Nightly for Android
+* Chrome Beta for Android
+
 ## Prerequisites
 
 Assuming you have git and [nvm](http://nvm.sh/) installed, clone this repo:
 
 ```bash
-git clone https://github.com/fxbox/app
-cd app
+$ git clone https://github.com/fxbox/app
+$ cd app
 ```
 
 And then run:
@@ -20,28 +27,29 @@ And then run:
 $ nvm install v4.2.2
 $ nvm use v4.2.2
 $ npm install -g gulp
+$ npm install
 ```
 
 ## How to build?
 
+### Building a web app
+
 ```bash
-$ npm install
-$ git checkout -- gulpfile.js
 $ gulp
 ```
 
 Then point your browser to [http://localhost:8000](http://localhost:8000/).
 
-Note: The site is built in the `dist/app` folder.
+Note: The app is built in the `dist/app` folder.
 
-## Building for Cordova
+### Building for Cordova
 
 To build this app as a Cordova app, run:
 
 ```bash
-npm install -g cordova
-gulp cordova-setup
-gulp cordova-android
+$ npm install -g cordova
+$ gulp cordova-setup
+$ gulp cordova-android
 ```
 
 Make sure you have either an Android device connected over the Android Debugging
@@ -56,10 +64,10 @@ to debug the Android emulator.
 For local development of the SecureHTTP plugin, you can do:
 
 ```bash
-cd dist/cordova/
-cordova plugin remove com.synconset.cordovaHTTP
-cordova plugin add /path/to/local/SecureHTTP
-cordova run android
+$ cd dist/cordova/
+$ cordova plugin remove com.synconset.cordovaHTTP
+$ cordova plugin add /path/to/local/SecureHTTP
+$ cordova run android
 ```
 
 ## Tests
@@ -71,6 +79,7 @@ Run `npm test`.
 ### Run end-to-end tests (e2e)
 
 Steps (to be scripted soon):
+
 1. Clone [foxbox](https://github.com/fxbox/foxbox/)
 2. Run it with `cargo run`
 3. With a browser, perform the first time setup by going to [http://localhost:3000](http://localhost:3000/)
