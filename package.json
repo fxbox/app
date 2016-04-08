@@ -60,7 +60,7 @@
     "requirejs": "^2.2.0",
     "run-sequence": "^1.1.5",
     "rxjs": "^5.0.0-beta.4",
-    "selenium-webdriver": "^2.52.0",
+    "selenium-webdriver": "^2.53.1",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0"
   }
