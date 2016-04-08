@@ -83,4 +83,4 @@ Steps (to be scripted soon):
 1. Clone [foxbox](https://github.com/fxbox/foxbox/)
 2. Run it with `cargo run`
 3. With a browser, perform the first time setup by going to [http://localhost:3000](http://localhost:3000/)
-4. Run `npm test-e2e`
+4. Run `gulp test-e2e`
