@@ -1,6 +1,8 @@
 import React from 'components/react';
 
-export default class UserLogin extends React.Component {
+import BaseView from 'js/views/base-view';
+
+export default class UserLogin extends BaseView {
   constructor(props) {
     super(props);
 
@@ -25,7 +27,15 @@ export default class UserLogin extends React.Component {
     this.foxbox.login();
   }
 
-  render() {
+  renderHeader() {
+    return super.renderHeader('Project Link', 'app-view__header--white');
+  }
+
+  renderFooter() {
+    return null;
+  }
+
+  renderBody() {
     let boxes = (<div hidden></div>);
 
     if (this.state.boxes.length > 1) {
@@ -48,17 +58,12 @@ export default class UserLogin extends React.Component {
     }
 
     return (
-      <div className="app-view">
-        <header className="app-view__header app-view__header--white">
-          <h1>Project Link</h1>
-        </header>
-        <form className="app-view__body user-login"
-              onSubmit={this.handleOnSubmit.bind(this)}>
-          <img className="user-login__logo" src="img/icon.svg"/>
-          {boxes}
-          <button className="user-login__login-button">Log in</button>
-        </form>
-      </div>
+      <form className="app-view__fill-body user-login"
+            onSubmit={this.handleOnSubmit.bind(this)}>
+        <img className="user-login__logo" src="img/icon.svg"/>
+        {boxes}
+        <button className="user-login__login-button">Log in</button>
+      </form>
     );
   }
 }

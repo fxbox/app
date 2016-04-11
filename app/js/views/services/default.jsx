@@ -1,6 +1,5 @@
 import React from 'components/react';
 
-import NavigationMenu from 'js/views/navigation-menu';
 import TagList from 'js/views/tag-list';
 
 export default class Service extends React.Component {
@@ -69,22 +68,14 @@ export default class Service extends React.Component {
 
   render() {
     return (
-      <div className="app-view">
-        <header className="app-view__header">
-          <h1>{this.service.properties.name}</h1>
-        </header>
-        <section className="app-view__body">
-          <h2>Tags</h2>
-          <TagList tags={this.state.tags} serviceId={this.service.id}
-                   foxbox={this.foxbox}/>
-        </section>
+      <div className="app-view__fill-body">
+        <h2>Tags</h2>
+        <TagList tags={this.state.tags} serviceId={this.service.id}
+                 foxbox={this.foxbox}/>
         <button className="add-tag-button" type="button"
                 onClick={this.handleAddTag.bind(this)}>
           Create a new tag
         </button>
-        <footer className="app-view__footer">
-          <NavigationMenu foxbox={this.foxbox}/>
-        </footer>
       </div>
     );
   }

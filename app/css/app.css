@@ -99,6 +99,10 @@ select {
   overflow-y: auto;
 }
 
+.app-view__fill-body {
+  height: 100%;
+}
+
 .app-view__footer {
   flex: 0 0 auto;
 }
