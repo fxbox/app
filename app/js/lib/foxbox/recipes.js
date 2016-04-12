@@ -28,8 +28,9 @@ export default class Recipe {
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`)
       // Get all recipes.
       .then(services => services.filter(service =>
-        service.adapter === 'thinkerbell-adapter' &&
-        service.id !== 'thinkerbell-root-service'
+        service.adapter !== 'thinkerbell-adapter'
+          && service.adapter !== 'webpush@link.mozilla.org'
+          && service.adapter !== 'console@link.mozilla.org'
       ))
       // Fetch their respective enabled status.
       .then(recipes => {
@@ -52,7 +53,8 @@ export default class Recipe {
             id: recipe.id,
             label: recipe.id,
             enabled: servicesEnabled[index][`${recipe.id}/get_enabled`]
-              .OnOff === 'On'
+              && servicesEnabled[index][`${recipe.id}/get_enabled`]
+                .OnOff === 'On'
           })));
       });
   }
@@ -62,8 +64,12 @@ export default class Recipe {
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`)
       // Get all services but the recipes.
       .then(services => services.filter(service =>
-        service.adapter != 'thinkerbell-adapter' &&
-        service.adapter != 'webpush@link.mozilla.org'
+        service.adapter !== 'thinkerbell-adapter'
+          && service.adapter !== 'webpush@link.mozilla.org'
+          && service.adapter !== 'console@link.mozilla.org'
+
+          // Deactivating IP camera from services with getters.
+          && service.adapter !== 'ip-camera@link.mozilla.org'
       ))
       // Keep only the services with getters.
       .then(services => services.filter(service =>
@@ -71,13 +77,13 @@ export default class Recipe {
       ))
       // User friendly name.
       .then(services => services.map(service => {
-          switch (service.id) {
-            case 'service:clock@link.mozilla.org':
+          switch (service.adapter) {
+            case 'clock@link.mozilla.org':
               service.name = 'Everyday';
               break;
 
             default:
-              service.name = service.id;
+              service.name = service.adapter;
               break;
           }
 
@@ -86,8 +92,8 @@ export default class Recipe {
       ))
       // User friendly getters.
       .then(services => services.map(service => {
-          switch (service.id) {
-            case 'service:clock@link.mozilla.org':
+          switch (service.adapter) {
+            case 'clock@link.mozilla.org':
               service.getters = [
                 {
                   label: 'in the morning',
@@ -128,8 +134,9 @@ export default class Recipe {
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`)
       // Get all services but the recipes.
       .then(services => services.filter(service =>
-        service.adapter != 'thinkerbell-adapter' &&
-        service.adapter != 'webpush@link.mozilla.org'
+        service.adapter !== 'thinkerbell-adapter'
+          && service.adapter !== 'webpush@link.mozilla.org'
+          && service.adapter !== 'console@link.mozilla.org'
       ))
       // Keep only the services with getters.
       .then(services => services.filter(service =>
@@ -137,13 +144,17 @@ export default class Recipe {
       ))
       // User friendly name.
       .then(services => services.map(service => {
-          switch (service.id) {
-            case 'espeak@link.mozilla.org':
+          switch (service.adapter) {
+            case 'espeak_adapter@link.mozilla.org':
               service.name = 'say';
               break;
 
+            case 'ip-camera@link.mozilla.org':
+              service.name = service.properties.name;
+              break;
+
             default:
-              service.name = service.id;
+              service.name = service.adapter;
               break;
           }
 
@@ -152,8 +163,8 @@ export default class Recipe {
       ))
       // User friendly getters.
       .then(services => services.map(service => {
-          switch (service.id) {
-            case 'espeak@link.mozilla.org':
+          switch (service.adapter) {
+            case 'espeak_adapter@link.mozilla.org':
               service.setters = [
                 {
                   label: '"Good morning!"',
@@ -169,6 +180,16 @@ export default class Recipe {
                   label: '"Good evening!"',
                   value: 'espeak@link.mozilla.org,Sentence,String,' +
                   '"Good evening!"'
+                }
+              ];
+              break;
+
+            case 'ip-camera@link.mozilla.org':
+              service.setters = [
+                {
+                  label: 'takes a picture',
+                  value: 'setter:snapshot.ae67e622-7a66-465e-bab0-' +
+                  'b0c5540c5748@link.mozilla.org,TakeSnapshot,null,null'
                 }
               ];
               break;
