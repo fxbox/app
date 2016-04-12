@@ -10,6 +10,10 @@ import Network from './network';
 import Recipes from './recipes';
 import WebPush from './webpush';
 
+import BaseService from './services/base';
+import IpCameraService from './services/ip-camera';
+import LightService from './services/light';
+
 // Private members.
 const p = Object.freeze({
   // Private properties.
@@ -23,7 +27,7 @@ const p = Object.freeze({
 
   // Private methods.
   fetchServices: Symbol('fetchServices'),
-  getOperationValueType: Symbol('getOperationValueType')
+  getServiceInstance: Symbol('getServiceInstance'),
 });
 
 /**
@@ -386,7 +390,10 @@ export default class Foxbox extends Service {
 
         if (hasNewServices ||
           fetchedServices.length !== storedServices.length) {
-          // The state of the services changes.
+          // The services changed.
+          fetchedServices = fetchedServices.map(
+            this[p.getServiceInstance].bind(this)
+          );
           this._dispatchEvent('service-change', fetchedServices);
         }
 
@@ -402,18 +409,20 @@ export default class Foxbox extends Service {
    */
   getServices() {
     return this[p.db].getServices()
-      .then(services => {
-        return services.map(service => service.data);
-      });
+      .then((services) => services.map(
+        service => this[p.getServiceInstance](service.data)
+      ));
   }
 
   getTags() {
     return this[p.db].getTags.apply(this[p.db], arguments);
   }
 
+  // @todo If service doesn't exist in the DB, fetch it from the box.
   getService() {
     // Get data from the DB so we get the attributes, the state and the tags.
-    return this[p.db].getService.apply(this[p.db], arguments);
+    return this[p.db].getService.apply(this[p.db], arguments)
+      .then((service) => this[p.getServiceInstance](service.data));
   }
 
   setService() {
@@ -425,97 +434,40 @@ export default class Foxbox extends Service {
   }
 
   /**
-   * Ask the user for acepting push notifications from the box.
+   * Ask the user for accepting push notifications from the box.
    * This method will be call each time that we log in, but will
-   * stop the execution if we already have the push subcription
+   * stop the execution if we already have the push subscription
    * information.
    *
    * @param {boolean} resubscribe Parameter used for testing
-   * purposes, and follow the whole subscrition process even if
+   * purposes, and follow the whole subscription process even if
    * we have push subscription information.
    */
   subscribeToNotifications(resubscribe = false) {
     return this[p.webPush].subscribeToNotifications(resubscribe);
   }
 
-  performSetOperation(operation, value) {
-    let operationType = this[p.getOperationValueType](operation.kind);
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
-      'PUT',
-      // Query operation by id.
-      [[{ id: operation.id }, { [operationType]: value }]]
-    );
-  }
-
-  performGetOperation(operation) {
-    let payload = { id: operation.id };
-
-    if (operation.kind.type === 'Binary') {
-      return this[p.net].fetchBlob(
-        `${this[p.net].origin}/api/v${this[p.settings].apiVersion}` +
-        '/channels/get',
-        // For now we only support JPEG blobs.
-        'image/jpeg',
-        'PUT',
-        payload
-      );
-    }
-
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/get`,
-      'PUT',
-      payload
-    );
-  }
-
   [p.fetchServices]() {
     return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`)
-      .then((services) => {
-        return services.map((service) => {
-          // Some service don't have name, but can have product_name instead,
-          // eventually we should get rid of this line and use unified service
-          // label field provided by taxonomy.
-          service.properties.name = service.properties.name ||
-            service.properties.product_name;
-
-          return {
-            id: service.id,
-            type: service.adapter,
-            getters: service.getters,
-            setters: service.setters,
-            properties: service.properties
-          };
-        });
-      });
+      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`
+    );
   }
 
-  /**
-   * Returns value type string for the specified operation kind.
-   *
-   * @param {string|Object} operationKind Kind of the operation, string for the
-   * well known type and object for the Extension channel kind.
-   * @return {string}
-   * @private
-   */
-  [p.getOperationValueType](operationKind) {
-    if (!operationKind) {
-      throw new Error('Operation kind is not defined!');
-    }
+  [p.getServiceInstance](data) {
+    const config = {
+      net: this[p.net],
+      settings: this[p.settings]
+    };
 
-    // Operation kind can be either object or string.
-    if (typeof operationKind === 'object') {
-      return operationKind.type;
-    }
+    switch (data.adapter) {
+      case 'ip-camera@link.mozilla.org':
+        return new IpCameraService(data, config);
 
-    switch (operationKind) {
-      case 'TakeSnapshot':
-        return 'Unit';
-      case 'LightOn':
-        return 'OnOff';
+      case 'philips_hue@link.mozilla.org':
+        return new LightService(data, config);
+
       default:
-        return operationKind;
+        return new BaseService(data, config);
     }
   }
 }

@@ -4,26 +4,40 @@ export default class ServicesListItem extends React.Component {
   constructor(props) {
     super(props);
 
-    this.props = props;
     this.state = {
-      // @todo Query getter to get the `available` state.
-      available: true,
-      // @todo Query getter to get the `power` state.
+      available: false,
       on: true,
     };
 
+    this.service = props.service;
     this.foxbox = props.foxbox;
+  }
+
+  componentDidMount() {
+    switch (this.service.type) {
+      case 'light':
+        this.service.isAvailable()
+          .then((available) => {
+            this.setState({ available });
+          })
+          .catch(console.error.bind(console));
+
+        this.service.isOn()
+          .then((on) => {
+            this.setState({ on });
+          })
+          .catch(console.error.bind(console));
+        break;
+    }
   }
 
   handleLightOnChange(evt) {
     const on = evt.target.checked;
-    const value = on ? 'On' : 'Off';
-    const operation = this.getOperationByAlias('LightOn');
 
     // Optimistic update.
     this.setState({ on });
 
-    this.foxbox.performSetOperation(operation, value)
+    this.service.turn(on)
       .catch((error) => {
         // Revert back to the previous value.
         this.setState({ on: !on });
@@ -32,38 +46,14 @@ export default class ServicesListItem extends React.Component {
   }
 
   /**
-   * Gets service operation with the specified alias.
-   *
-   * @param {string} alias Alias of the operation we're looking for.
-   * @return {Object} Operation associated with the specified alias.
-   *
-   * @private
-   */
-  getOperationByAlias(alias) {
-    const operations = this.props.setters;
-
-    let operationKey = Object.keys(operations).find((key) => {
-      let operation = operations[key];
-
-      if (typeof operation.kind === 'object') {
-        return operation.kind.kind === alias;
-      }
-
-      return operation.kind === alias;
-    });
-
-    return operations[operationKey];
-  }
-
-  /**
    * Convert colours from xy space to RGB.
    * See details at:
    * http://www.developers.meethue.com/documentation/color-conversions-rgb-xy
    */
   getBulbColour() {
-    const hue = /* this.state.hue */ 1;
-    const sat = /* this.state.sat */ 1;
-    const val = /* this.state.val */ 1;
+    const hue = /* this.service.hue */ 1;
+    const sat = /* this.service.sat */ 1;
+    const val = /* this.service.val */ 1;
     let h = hue;
     let s = Math.round(sat * 100);
     let l = val;
@@ -79,8 +69,8 @@ export default class ServicesListItem extends React.Component {
     let serviceType = 'Light';
     let icon = 'light';
 
-    if (this.props.model !== undefined) {
-      switch (this.props.model) {
+    if (this.service.model !== undefined) {
+      switch (this.service.model) {
         case 'BSB002':
           icon = 'bridge_v2';
           break;
@@ -183,9 +173,9 @@ export default class ServicesListItem extends React.Component {
       <li className="service-list__item" data-icon={icon}
           data-connected={isConnected}>
         <a className="service-list__item-link"
-           href={`#services/${this.props.id}`}>
+           href={`#services/${this.service.id}`}>
           {serviceType}
-          <small>{` (${this.props.name})`}</small>
+          <small>{` (${this.service.name})`}</small>
         </a>
         <div className="service-list__item-color-picker"
              style={{ background: this.getBulbColour() }}>
@@ -200,14 +190,14 @@ export default class ServicesListItem extends React.Component {
   }
 
   renderGenericService(type = 'Unknown service', icon = 'unknown') {
-    const serviceNameNode = this.props.name ?
-      (<small>{` (${this.props.name})`}</small>) :
+    const serviceNameNode = this.service.name ?
+      (<small>{` (${this.service.name})`}</small>) :
       null;
 
     return (
       <li className="service-list__item" data-icon={icon} data-connected="true">
         <a className="service-list__item-link"
-           href={`#services/${this.props.id}`}>
+           href={`#services/${this.service.id}`}>
           {type}
           {serviceNameNode}
         </a>
@@ -216,11 +206,11 @@ export default class ServicesListItem extends React.Component {
   }
 
   render() {
-    switch (this.props.type) {
-      case 'philips_hue@link.mozilla.org':
-        return this.renderLightService();
-      case 'ip-camera@link.mozilla.org':
+    switch (this.service.type) {
+      case 'ip-camera':
         return this.renderGenericService('Camera', 'ip-camera');
+      case 'light':
+        return this.renderLightService();
       case 'OpenZwave Adapter':
         if (this.hasDoorLockChannel(this.props.getters) ||
             this.hasDoorLockChannel(this.props.setters)) {
@@ -241,10 +231,7 @@ export default class ServicesListItem extends React.Component {
 
 ServicesListItem.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
-  id: React.PropTypes.string.isRequired,
-  model: React.PropTypes.string,
-  name: React.PropTypes.string.isRequired,
-  type: React.PropTypes.string.isRequired,
+  service: React.PropTypes.object.isRequired,
   getters: React.PropTypes.object,
   setters: React.PropTypes.object,
 };
