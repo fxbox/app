@@ -32,6 +32,8 @@
   font-size: 1.4rem;
   line-height: 2.8rem;
   width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .themes-list__remove {
