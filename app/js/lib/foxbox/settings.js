@@ -28,7 +28,8 @@ const QUERY_STRING_AUTH_TOKEN_NAME = 'auth';
 const storage = localStorage ? localStorage : {
   getItem: () => undefined,
   setItem: () => {},
-  removeItem: () => {}
+  removeItem: () => {},
+  clear: () => {},
 };
 
 export default class Settings extends Model {
@@ -62,6 +63,8 @@ export default class Settings extends Model {
     return new Promise(resolve => {
       // @todo Remove only the items set here.
       storage.clear();
+      this._session = null;
+
       resolve();
     });
   }

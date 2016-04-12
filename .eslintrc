@@ -24,7 +24,8 @@
     "no-use-before-define": ["error", { "functions": false, "classes": true }],
     "no-var": ["error"],
     "quotes": ["error", "single"],
-    "semi": ["error", "always"]
+    "semi": ["error", "always"],
+    "comma-dangle": ["warn", "only-multiline"]
   },
 
   "env": {

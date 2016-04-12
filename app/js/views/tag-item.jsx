@@ -55,7 +55,7 @@ export default class TagItem extends React.Component {
 TagItem.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
   checked: React.PropTypes.bool,
-  id: React.PropTypes.string.isRequired,
+  id: React.PropTypes.number.isRequired,
   name: React.PropTypes.string.isRequired,
   serviceId: React.PropTypes.string.isRequired
 };

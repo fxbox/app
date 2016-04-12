@@ -5,24 +5,54 @@ export default class ServicesListItem extends React.Component {
     super(props);
 
     this.props = props;
-    this.state = props.state;
+    this.state = {
+      // @todo Query getter to get the `available` state.
+      available: true,
+      // @todo Query getter to get the `power` state.
+      on: true,
+    };
 
     this.foxbox = props.foxbox;
   }
 
-  componentWillReceiveProps(props) {
-    this.setState(props.state);
+  handleLightOnChange(evt) {
+    const on = evt.target.checked;
+    const value = on ? 'On' : 'Off';
+    const operation = this.getOperationByAlias('LightOn');
+
+    // Optimistic update.
+    this.setState({ on });
+
+    this.foxbox.performSetOperation(operation, value)
+      .catch((error) => {
+        // Revert back to the previous value.
+        this.setState({ on: !on });
+        console.error(error);
+      });
   }
 
-  handleLightOnChange(evt) {
-    // No optimistic update because some network issues can't be caught.
-    const on = evt.target.checked;
+  /**
+   * Gets service operation with the specified alias.
+   *
+   * @param {string} alias Alias of the operation we're looking for.
+   * @return {Object} Operation associated with the specified alias.
+   *
+   * @private
+   */
+  getOperationByAlias(alias) {
+    const operations = this.props.setters;
 
-    this.foxbox.setServiceState(this.props.id, { on })
-      .then(() => {
-        this.setState({ on });
-      })
-      .catch(console.error.bind(console));
+    let operationKey = Object.keys(operations).find((key) => {
+      let operation = operations[key];
+
+      if (typeof operation.kind === 'object') {
+        return operation.kind.kind === alias;
+      }
+
+      return operation.kind === alias;
+    });
+
+    return operations[operationKey];
   }
 
   /**
@@ -31,9 +61,12 @@ export default class ServicesListItem extends React.Component {
    * http://www.developers.meethue.com/documentation/color-conversions-rgb-xy
    */
   getBulbColour() {
-    let h = this.state.hue;
-    let s = Math.round(this.state.sat * 100);
-    let l = this.state.val;
+    const hue = /* this.state.hue */ 1;
+    const sat = /* this.state.sat */ 1;
+    const val = /* this.state.val */ 1;
+    let h = hue;
+    let s = Math.round(sat * 100);
+    let l = val;
 
     // We set the luminosity to 50% and use the brightness as the opacity. The
     // brighter, the more opaque. Pale shades get transparent.
@@ -41,10 +74,7 @@ export default class ServicesListItem extends React.Component {
   }
 
   renderLightService() {
-    let isConnected = false;
-    if (this.state.available !== undefined) {
-      isConnected = this.state.available;
-    }
+    let isConnected = this.state.available;
 
     let serviceType = 'Light';
     let icon = 'light';
@@ -158,7 +188,7 @@ export default class ServicesListItem extends React.Component {
           <small>{` (${this.props.name})`}</small>
         </a>
         <div className="service-list__item-color-picker"
-             style={{ background: this.getBulbColour.call(this) }}>
+             style={{ background: this.getBulbColour() }}>
         </div>
         <label>
           <input className="service-list__on-off-toggle" type="checkbox"
@@ -174,7 +204,8 @@ export default class ServicesListItem extends React.Component {
       <li className="service-list__item" data-icon={icon} data-connected="true">
         <a className="service-list__item-link"
            href={`#services/${this.props.id}`}>
-          {type} <small>{` (${this.props.name})`}</small>
+          {type}
+          <small>{` (${this.props.name})`}</small>
         </a>
       </li>
     );
@@ -182,7 +213,7 @@ export default class ServicesListItem extends React.Component {
 
   render() {
     switch (this.props.type) {
-      case 'Extended color light':
+      case 'philips_hue@link.mozilla.org':
         return this.renderLightService();
       case 'ip-camera@link.mozilla.org':
         return this.renderGenericService('Camera', 'ip-camera');
@@ -194,9 +225,9 @@ export default class ServicesListItem extends React.Component {
 
 ServicesListItem.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
-  state: React.PropTypes.object,
   id: React.PropTypes.string.isRequired,
   model: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
-  type: React.PropTypes.string.isRequired
+  type: React.PropTypes.string.isRequired,
+  setters: React.PropTypes.object,
 };

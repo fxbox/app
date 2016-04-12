@@ -133,5 +133,5 @@ export default class CameraService extends React.Component {
 
 CameraService.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
-  service: React.PropTypes.object.isRequired
+  service: React.PropTypes.object.isRequired,
 };
