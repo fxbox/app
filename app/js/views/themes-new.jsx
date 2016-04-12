@@ -12,120 +12,118 @@ export default class ThemesNew extends BaseView {
     super(props);
 
     this.state = {
-      servicesWithGet: [],
-      servicesWithSet: [],
+      getters: [],
+      setters: [],
 
-      serviceWithGet: null,
-      getter: null,
-      serviceWithSet: null,
-      setter: null
+      selectedGetterIndex: -1,
+      selectedGetterValueIndex: -1,
+
+      selectedSetterIndex: -1,
+      selectedSetterValueIndex: -1
     };
 
     this.foxbox = props.foxbox;
 
     this.updateServices = this.updateServices.bind(this);
-    this.handleServiceWithGetChange = this.handleServiceWithGetChange
-      .bind(this);
-    this.handleGetterChange = this.handleGetterChange.bind(this);
-    this.handleServiceWithSetChange = this.handleServiceWithSetChange
-      .bind(this);
-    this.handleSetterChange = this.handleSetterChange.bind(this);
-    this.handleActionButton = this.handleActionButton.bind(this);
+    this.onGetterSelected = this.onGetterSelected.bind(this);
+    this.onGetterValueSelected = this.onGetterValueSelected.bind(this);
+    this.onSetterSelected = this.onSetterSelected.bind(this);
+    this.onSetterValueSelected = this.onSetterValueSelected.bind(this);
+    this.onSaveRecipe = this.onSaveRecipe.bind(this);
   }
 
   componentDidMount() {
     Promise.all([
-        this.foxbox.recipes.getServicesWithGetters(),
-        this.foxbox.recipes.getServicesWithSetters()
-      ])
-      .then(services => {
-        this.updateServices(services);
-      })
-      .catch(console.error.bind(console));
+      this.foxbox.recipes.getGetters(),
+      this.foxbox.recipes.getSetters()
+    ])
+    .then(services => this.updateServices(services))
+    .catch(console.error.bind(console));
   }
 
-  updateServices([servicesWithGet, servicesWithSet] = [[], []]) {
-    this.setState({ servicesWithGet, servicesWithSet });
+  updateServices([getters, setters] = [[], []]) {
+    this.setState({ getters, setters });
   }
 
-  handleServiceWithGetChange(evt) {
-    const serviceWithGet = evt.target.value;
-    if (serviceWithGet !== '') {
-      this.setState({ serviceWithGet });
+  onGetterSelected(evt) {
+    if (evt.target.value) {
+      const selectedGetterIndex = Number(evt.target.value);
+      this.setState({ selectedGetterIndex });
     } else {
       this.setState({
-        serviceWithGet: null,
-        getter: null,
-        serviceWithSet: null,
-        setter: null
+        selectedGetterIndex: -1,
+        selectedGetterValueIndex: -1,
+
+        selectedSetterIndex: -1,
+        selectedSetterValueIndex: -1
       });
     }
   }
 
-  handleGetterChange(evt) {
-    const getter = evt.target.value;
-    if (getter !== '') {
-      this.setState({ getter });
+  onGetterValueSelected(evt) {
+    if (evt.target.value) {
+      const selectedGetterValueIndex = Number(evt.target.value);
+      this.setState({ selectedGetterValueIndex });
     } else {
       this.setState({
-        getter: null,
-        serviceWithSet: null,
-        setter: null
+        selectedGetterValueIndex: -1,
+
+        selectedSetterIndex: -1,
+        selectedSetterValueIndex: -1
       });
     }
   }
 
-  handleServiceWithSetChange(evt) {
-    const serviceWithSet = evt.target.value;
-    if (serviceWithSet !== '') {
-      this.setState({ serviceWithSet });
+  onSetterSelected(evt) {
+    if (evt.target.value) {
+      const selectedSetterIndex = Number(evt.target.value);
+      this.setState({ selectedSetterIndex });
     } else {
       this.setState({
-        serviceWithSet: null,
-        setter: null
+        selectedSetterIndex: -1,
+        selectedSetterValueIndex: -1
       });
     }
   }
 
-  handleSetterChange(evt) {
-    const setter = evt.target.value;
-    if (setter !== '') {
-      this.setState({ setter });
+  onSetterValueSelected(evt) {
+    if (evt.target.value) {
+      const selectedSetterValueIndex = Number(evt.target.value);
+      this.setState({ selectedSetterValueIndex });
     } else {
       this.setState({
-        setter: null
+        selectedSetterValueIndex: -1
       });
     }
   }
 
-  handleActionButton() {
-    if (this.state.setter === null) {
+  onSaveRecipe() {
+    if (this.state.selectedSetterValueIndex < 0) {
       return;
     }
 
-    const serviceWithGetObject = this.state
-      .servicesWithGet[this.state.serviceWithGet];
-    const getterObject = this.state
-      .servicesWithGet[this.state.serviceWithGet].get[this.state.getter];
-    const serviceWithSetObject = this.state
-      .servicesWithSet[this.state.serviceWithSet];
-    const setterObject = this.state
-      .servicesWithSet[this.state.serviceWithSet].set[this.state.setter];
-    const label = `${serviceWithGetObject.label} ${getterObject.label}, ` +
-      `${serviceWithSetObject.label} ${setterObject.label}.`;
+    const getter = this.state.getters[this.state.selectedGetterIndex];
+    const getterValue = getter.options[this.state.selectedGetterValueIndex];
+
+    const setter = this.state.setters[this.state.selectedSetterIndex];
+    const setterValue = setter.options[this.state.selectedSetterValueIndex];
+
+    const name = `${getter.name} ${getterValue.label}, ` +
+      `${setter.name} ${setterValue.label}.`;
 
     this.foxbox.recipes.add({
-        label,
-        serviceWithGet: serviceWithGetObject.id,
-        getter: getterObject.value,
-        serviceWithSet: serviceWithSetObject.id,
-        setter: setterObject.value,
-        enabled: true
-      })
-      .then(() => {
-        location.hash = '#themes';
-      })
-      .catch(console.error.bind(console));
+      name,
+      getter,
+      getterValue,
+      setter,
+      setterValue
+    })
+    .then(() => {
+      location.hash = '#themes';
+    })
+    .catch(e => {
+      console.log('Error occurred while saving recipe: ', e);
+    });
   }
 
   renderHeader() {
@@ -139,111 +137,132 @@ export default class ThemesNew extends BaseView {
         <a href="#themes" className="app-view__action">Cancel</a>
         <h1>New Recipe</h1>
         <button className={actionButtonClassName}
-                onClick={this.handleActionButton}>Done
+                onClick={this.onSaveRecipe}>Done
         </button>
       </header>
     );
   }
 
   renderBody() {
-    let optionNodes;
-
-    let className = 'new-theme__select';
-    if (this.state.serviceWithGet !== null) {
-      className += ' new-theme__select--selected';
-    }
-    optionNodes = this.state.servicesWithGet.map((service, id) => (
-      <option key={id} value={id}>{service.label}</option>
-    ));
-    let serviceSelector = (
-      <select value={this.state.serviceWithGet}
-              onChange={this.handleServiceWithGetChange}
-              className={className}>
-        <option value="">Select a device</option>
-        {optionNodes}
-      </select>
-    );
-
-    className = 'new-theme__select';
-    if (this.state.getter !== null) {
-      className += ' new-theme__select--selected';
-    }
-    let propertySelector = (
-      <select className="new-theme__select new-theme__select--hidden"></select>
-    );
-    if (this.state.serviceWithGet !== null) {
-      optionNodes = this.state.servicesWithGet[this.state.serviceWithGet].get
-        .map((getter, id) => (
-          <option key={id} value={id}>{getter.label}</option>
-        ));
-      propertySelector = (
-        <select value={this.state.getter}
-                onChange={this.handleGetterChange}
-                className={className}>
-          <option value="">Select a property</option>
-          {optionNodes}
-        </select>
-      );
-    }
-
-    className = 'new-theme__select';
-    if (this.state.serviceWithSet !== null) {
-      className += ' new-theme__select--selected';
-    }
-    let actionServiceSelector = (
-      <select className="new-theme__select new-theme__select--hidden"></select>
-    );
-    if (this.state.getter !== null) {
-      optionNodes = this.state.servicesWithSet.map((service, id) => (
-        <option key={id} value={id}>{service.label}</option>
-      ));
-      actionServiceSelector = (
-        <select value={this.state.serviceWithSet}
-                onChange={this.handleServiceWithSetChange}
-                className={className}>
-          <option value="">Select a device</option>
-          {optionNodes}
-        </select>
-      );
-    }
-
-    className = 'new-theme__select';
-    if (this.state.setter !== null) {
-      className += ' new-theme__select--selected';
-    }
-    let actionPropertySelector = (
-      <select className="new-theme__select new-theme__select--hidden"></select>
-    );
-    if (this.state.serviceWithSet !== null) {
-      optionNodes = this.state.servicesWithSet[this.state.serviceWithSet].set
-        .map((setter, id) => (
-          <option key={id} value={id}>{setter.label}</option>
-        ));
-      actionPropertySelector = (
-        <select value={this.state.setter}
-                onChange={this.handleSetterChange}
-                className={className}>
-          <option value="">Select a property</option>
-          {optionNodes}
-        </select>
-      );
-    }
-
     let headerClassName = 'new-theme__header';
-    if (this.state.getter === null) {
+    if (this.state.selectedGetterValueIndex < 0) {
       headerClassName += ' new-theme__header--hidden';
     }
 
     return (
       <div className="app-view__fill-body new-theme">
         <h2 className="new-theme__header">If</h2>
-        {serviceSelector}
-        {propertySelector}
+        {this.renderGetterSelector()}
+        {this.renderGetterValueSelector()}
 
         <h2 className={headerClassName}>Do</h2>
-        {actionServiceSelector}
-        {actionPropertySelector}
+        {this.renderSetterSelector()}
+        {this.renderSetterValueSelector()}
       </div>
+    );
+  }
+
+  renderGetterSelector() {
+    let className = 'new-theme__select';
+    if (this.state.selectedGetterIndex >= 0) {
+      className += ' new-theme__select--selected';
+    }
+
+    const optionNodes = this.state.getters.map((getter, index) => (
+      <option key={index} value={index}>{getter.name}</option>
+    ));
+
+    return (
+      <select value={this.state.selectedGetterIndex}
+              onChange={this.onGetterSelected}
+              className={className}>
+        <option value="">Select a device</option>
+        {optionNodes}
+      </select>
+    );
+  }
+
+  renderGetterValueSelector() {
+    if (this.state.selectedGetterIndex < 0) {
+      // TODO: Rethink styling to avoid redundant element.
+      return (
+        <select className="new-theme__select new-theme__select--hidden">
+        </select>
+      );
+    }
+
+    let className = 'new-theme__select';
+    if (this.state.selectedGetterValueIndex >= 0) {
+      className += ' new-theme__select--selected';
+    }
+
+    const options = this.state.getters[this.state.selectedGetterIndex].options;
+    const optionNodes = options.map((option, index) => (
+      <option key={index} value={index}>{option.label}</option>
+    ));
+
+    return (
+      <select value={this.state.selectedGetterValueIndex}
+              onChange={this.onGetterValueSelected}
+              className={className}>
+        <option value="">Select a property</option>
+        {optionNodes}
+      </select>
+    );
+  }
+
+  renderSetterSelector() {
+    if (this.state.selectedGetterValueIndex < 0) {
+      return (
+        <select className="new-theme__select new-theme__select--hidden">
+        </select>
+      );
+    }
+
+    let className = 'new-theme__select';
+    if (this.state.selectedSetterIndex >= 0) {
+      className += ' new-theme__select--selected';
+    }
+
+    const optionNodes = this.state.setters.map((setter, index) => (
+      <option key={index} value={index}>{setter.name}</option>
+    ));
+
+    return (
+      <select value={this.state.selectedSetterIndex}
+              onChange={this.onSetterSelected}
+              className={className}>
+        <option value="">Select a device</option>
+        {optionNodes}
+      </select>
+    );
+  }
+
+  renderSetterValueSelector() {
+    if (this.state.selectedSetterIndex < 0) {
+      return (
+        <select className="new-theme__select new-theme__select--hidden">
+        </select>
+      );
+    }
+
+    let className = 'new-theme__select';
+    if (this.state.setter !== null) {
+      className += ' new-theme__select--selected';
+    }
+
+    const options = this.state.setters[this.state.selectedSetterIndex].options;
+    const optionNodes = options.map((option, index) => (
+      <option key={index} value={index}>{option.label}</option>
+    ));
+
+    return (
+      <select value={this.state.selectedSetterValueIndex}
+              onChange={this.onSetterValueSelected}
+              className={className}>
+        <option value="">Select a property</option>
+        {optionNodes}
+      </select>
     );
   }
 }

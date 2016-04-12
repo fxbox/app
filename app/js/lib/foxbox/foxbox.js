@@ -402,7 +402,7 @@ export default class Foxbox extends Service {
   performGetOperation(operation) {
     let payload = { id: operation.id };
 
-    if (operation.kind.typ === 'Binary') {
+    if (operation.kind.type === 'Binary') {
       return this[p.net].fetchBlob(
         `${this[p.net].origin}/api/v${this[p.settings].apiVersion}` +
         '/channels/get',
@@ -451,7 +451,7 @@ export default class Foxbox extends Service {
 
     // Operation kind can be either object or string.
     if (typeof operationKind === 'object') {
-      return operationKind.typ;
+      return operationKind.type;
     }
 
     switch (operationKind) {
