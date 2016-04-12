@@ -250,11 +250,7 @@ gulp.task('offline', ['build'], function() {
  */
 gulp.task('clean', function() {
   return del([
-    '.bowerrc',
-    '.editorconfig',
-    '.git/hooks/pre-commit',
     'dist/',
-    'app/components',
     'node_modules/'
   ]);
 });
