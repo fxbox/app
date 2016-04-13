@@ -2,6 +2,7 @@ import React from 'components/react';
 
 import BaseView from 'js/views/base-view';
 import CameraServiceView from 'js/views/services/camera';
+import LightServiceView from 'js/views/services/light';
 import DefaultServiceView from 'js/views/services/default';
 
 export default class Service extends BaseView {
@@ -33,13 +34,16 @@ export default class Service extends BaseView {
       return null;
     }
 
-    switch(this.state.service.type) {
+    switch (this.state.service.type) {
       case 'ip-camera@link.mozilla.org':
         return (<CameraServiceView service={this.state.service}
-                                   foxbox={this.foxbox} />);
+                                   foxbox={this.foxbox}/>);
+      case 'philips_hue@link.mozilla.org':
+        return (<LightServiceView service={this.state.service}
+                                  foxbox={this.foxbox}/>);
       default:
         return (<DefaultServiceView service={this.state.service}
-                                    foxbox={this.foxbox} />);
+                                    foxbox={this.foxbox}/>);
     }
   }
 }

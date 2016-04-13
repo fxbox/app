@@ -16,7 +16,7 @@ export default class ServicesList extends React.Component {
           type={service.type}
           manufacturer={service.properties.manufacturer}
           model={service.properties.model}
-          state={service.state}
+          setters={service.setters}
           foxbox={this.props.foxbox}/>
       )
     );
@@ -28,6 +28,7 @@ export default class ServicesList extends React.Component {
 
   isUserFacingService(service) {
     switch (service.type) {
+      case 'philips_hue@link.mozilla.org':
       case 'ip-camera@link.mozilla.org':
         return true;
       default:

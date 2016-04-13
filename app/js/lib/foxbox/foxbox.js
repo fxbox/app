@@ -156,6 +156,13 @@ export default class Foxbox extends Service {
    * @param {number} index The index of the box in the boxes array.
    */
   selectBox(index = 0) {
+    if (!this[p.boxes].length) {
+      this[p.settings].configured = false;
+      console.error('No boxes found. Is this app online? Is the box online?');
+
+      return;
+    }
+
     if (index >= this[p.boxes].length) {
       this[p.settings].configured = false;
       console.error('Index out of range.');
@@ -254,8 +261,9 @@ export default class Foxbox extends Service {
    */
   schedulePoll() {
     // Return early if polling is not enabled or it has already been scheduled.
-    if (!this[p.isPollingEnabled] ||
-      this[p.nextPollTimeout]) {
+    if (!this[p.isPollingEnabled]
+      || this[p.nextPollTimeout]
+      || !this.isLoggedIn) {
       return;
     }
 
@@ -350,44 +358,6 @@ export default class Foxbox extends Service {
       });
   }
 
-  /**
-   * Fetch the state of a service from the box.
-   *
-   * @param {string} id The ID of the service.
-   * @return {Promise}
-   */
-  getServiceState(id) {
-    return this[p.net].fetchJSON(`${this[p.net].origin}/services/${id}/state`)
-      .then(res => {
-        if (!res) {
-          throw new Error('The action couldn\'t be performed.');
-        }
-
-        return res;
-      });
-  }
-
-  /**
-   * Change the state of a service.
-   *
-   * @param {string} id The ID of the service.
-   * @param {Object} state An object containing pairs of key/value.
-   * @return {Promise}
-   */
-  setServiceState(id, state) {
-    return new Promise((resolve, reject) => {
-      this[p.net].fetchJSON(`${this[p.net].origin}/services/${id}/state`,
-        'PUT', state)
-        .then(res => {
-          if (!res || !res.result || res.result !== 'success') {
-            return reject(new Error('The action couldn\'t be performed.'));
-          }
-
-          return resolve();
-        });
-    });
-  }
-
   getTags() {
     return this[p.db].getTags.apply(this[p.db], arguments);
   }
@@ -473,6 +443,8 @@ export default class Foxbox extends Service {
     switch (operationKind) {
       case 'TakeSnapshot':
         return 'Unit';
+      case 'LightOn':
+        return 'OnOff';
       default:
         return operationKind;
     }

@@ -2,7 +2,7 @@ import React from 'components/react';
 
 import TagList from 'js/views/tag-list';
 
-export default class Service extends React.Component {
+export default class LightService extends React.Component {
   constructor(props) {
     super(props);
 
@@ -81,7 +81,7 @@ export default class Service extends React.Component {
   }
 }
 
-Service.propTypes = {
+LightService.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
   service: React.PropTypes.object.isRequired,
 };
