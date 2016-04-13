@@ -30,6 +30,7 @@ export default class ServicesList extends React.Component {
     switch (service.type) {
       case 'philips_hue@link.mozilla.org':
       case 'ip-camera@link.mozilla.org':
+      case 'OpenZwave Adapter':
         return true;
       default:
         return false;
