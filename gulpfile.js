@@ -146,55 +146,6 @@ gulp.task('build-unit-tests', function(cb) {
 });
 
 /**
- * Cordova tasks:
- */
-
-function addTask(name, dir, cmds) {
-  gulp.task(name, function(cb) {
-    process.chdir(dir);
-    function nextCmd() {
-      var cmd = cmds.shift();
-      exec(cmd, function(err, stdout, stderr) {
-        if (stdout.length) {
-          console.log(stdout);
-        }
-        if (stderr.length) {
-          console.error(stderr);
-        }
-        if (err) {
-          return cb(err);
-        }
-        if (cmds.length) {
-          nextCmd();
-        } else {
-          cb();
-        }
-      });
-    }
-
-    nextCmd();
-  });
-}
-
-addTask('cordova-create', 'dist', [
-  'cordova create cordova',
-  'rm -r cordova/www/*',
-  'cp -r app/* cordova/www/'
-]);
-
-gulp.task('cordova-setup', function(cb) {
-  runSequence(['build'], ['cordova-create'], cb);
-});
-
-addTask('cordova-android', 'dist/cordova', [
-  'cordova plugin add https://github.com/michielbdejong/SecureHTTP.git',
-  'cordova plugin add phonegap-plugin-barcodescanner',
-  'cordova platform add android@5.1.0',
-  'cordova build android',
-  'cordova run android'
-]);
-
-/**
  * Watch for changes on the file system, and rebuild if so.
  */
 gulp.task('watch', function() {
