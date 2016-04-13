@@ -390,6 +390,7 @@ export default class Foxbox extends Service {
   }
 
   subscribeToNotifications(resubscribe = false) {
+    const settings = this[p.settings];
     if (!navigator.serviceWorker) {
       return Promise.reject('No service worker supported');
     }
@@ -404,7 +405,8 @@ export default class Foxbox extends Service {
         const endpoint = subscription.endpoint;
         const key = subscription.getKey ? subscription.getKey('p256dh') : '';
         settings.pushEndpoint = endpoint;
-        settings.pushPubKey = btoa(String.fromCharCode.apply(null, new Uint8Array(key)));
+        settings.pushPubKey = btoa(String.fromCharCode.apply(null,
+          new Uint8Array(key)));
 
         // Send push information to the server
         // XXX: We will need some library to write taxonomy messages
@@ -420,10 +422,11 @@ export default class Foxbox extends Service {
               }
             }
           ]];
-        return fetchJSON(`${this.origin}/api/v1/channels/set`, 'PUT', pushConfigurationMsg)
+        return this[p.net].fetchJSONfetchJSON(
+          `${this.origin}/api/v1/channels/set`, 
+          'PUT', pushConfigurationMsg)
         .then(() => {
           // Setup some common push resources
-          // XXX: Use the taxonomy message library and define some common resources
           const pushResourcesMsg = [[
               [{
                 id: 'setter:resource.webpush@link.mozilla.org'
@@ -434,7 +437,9 @@ export default class Foxbox extends Service {
               }
 
             ]];
-          return fetchJSON(`${this.origin}/api/v1/channels/set`, 'PUT', pushResourcesMsg);
+          return this[p.net].fetchJSONfetchJSON(
+            `${this.origin}/api/v1/channels/set`,
+           'PUT', pushResourcesMsg);
         });
       })
       .catch((error) => {

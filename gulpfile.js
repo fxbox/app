@@ -43,7 +43,8 @@ gulp.task('lint', function() {
   return gulp.src([
       'app/**/*.{js,jsx}',
       'tests/**/*.js',
-      '!app/components/**'
+      '!app/components/**',
+      '!app/hookSW.js'
     ])
     .pipe(eslint())
     .pipe(eslint.format())
