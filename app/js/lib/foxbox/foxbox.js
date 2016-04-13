@@ -391,6 +391,7 @@ export default class Foxbox extends Service {
 
   subscribeToNotifications(resubscribe = false) {
     const settings = this[p.settings];
+    const boxHost = this[p.net].origin;
     if (!navigator.serviceWorker) {
       return Promise.reject('No service worker supported');
     }
@@ -422,8 +423,8 @@ export default class Foxbox extends Service {
               }
             }
           ]];
-        return this[p.net].fetchJSONfetchJSON(
-          `${this.origin}/api/v1/channels/set`, 
+        return this[p.net].fetchJSON(
+          `${boxHost}/api/v1/channels/set`, 
           'PUT', pushConfigurationMsg)
         .then(() => {
           // Setup some common push resources
@@ -437,8 +438,8 @@ export default class Foxbox extends Service {
               }
 
             ]];
-          return this[p.net].fetchJSONfetchJSON(
-            `${this.origin}/api/v1/channels/set`,
+          return this[p.net].fetchJSON(
+            `${boxHost}/api/v1/channels/set`,
            'PUT', pushResourcesMsg);
         });
       })
@@ -446,6 +447,7 @@ export default class Foxbox extends Service {
         if (Notification.permission === 'denied') {
           return Promise.reject('Permission request was denied.');
         } else {
+          console.error('Error while saving subscription ', error);
           return Promise.reject('Subscription error: ', error);
         }
       });
