@@ -54,13 +54,6 @@ describe('Camera service view tests', function () {
   });
 
   it('Renders itself in the correct state', function () {
-    const header = TestUtils.findRenderedDOMComponentWithClass(
-      component,
-      'app-view__header'
-    );
-
-    assert.equal(serviceStub.properties.name, header.textContent);
-
     const controls = TestUtils.findRenderedDOMComponentWithClass(
       component,
       'camera-controls'

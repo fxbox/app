@@ -1,11 +1,11 @@
 import React from 'components/react';
 
-import ThemesListItem from 'js/views/themes-list-item';
-import NavigationMenu from 'js/views/navigation-menu';
+import BaseView from 'js/views/base-view';
+import ThemesListItemView from 'js/views/themes-list-item';
 
 // @todo Allow editing existing recipes when clicking on the label.
 
-export default class Themes extends React.Component {
+export default class Themes extends BaseView {
   constructor(props) {
     super(props);
 
@@ -29,30 +29,30 @@ export default class Themes extends React.Component {
       .catch(console.error.bind(console));
   }
 
-  render() {
+  renderHeader() {
+    return (
+      <header className="app-view__header">
+        <h1>Recipes</h1>
+        <a href="#themes/new" className="themes__new-link">
+          <img className="app-view__action-icon"
+               src="css/icons/plus.svg"
+               alt="Add a recipe"/>
+        </a>
+      </header>
+    );
+  }
+
+  renderBody() {
     const themeItems = this.state.themes.map(theme => (
-      <ThemesListItem key={theme.id}
-                      theme={theme}
-                      update={this.update}
-                      foxbox={this.foxbox}/>
+      <ThemesListItemView key={theme.id}
+                          theme={theme}
+                          update={this.update}
+                          foxbox={this.foxbox} />
     ));
 
     return (
-      <div className="app-view">
-        <header className="app-view__header">
-          <h1>Recipes</h1>
-          <a href="#themes/new" className="themes__new-link">
-            <img className="app-view__action-icon"
-                 src="css/icons/plus.svg"
-                 alt="Add a recipe"/>
-          </a>
-        </header>
-        <section className="app-view__body themes">
-          <ul className="themes-list">{themeItems}</ul>
-        </section>
-        <footer className="app-view__footer">
-          <NavigationMenu foxbox={this.foxbox}/>
-        </footer>
+      <div className="app-view__fill-body themes">
+        <ul className="themes-list">{themeItems}</ul>
       </div>
     );
   }

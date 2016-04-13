@@ -1,13 +1,13 @@
 import React from 'components/react';
 
-import NavigationMenu from 'js/views/navigation-menu';
+import BaseView from 'js/views/base-view';
 
 // @todo Validate input on select onChange:
 //    * Check if integer
 //    * Check if value is within boundaries
 //    * Check if properties belong to selected service
 
-export default class ThemesNew extends React.Component {
+export default class ThemesNew extends BaseView {
   constructor(props) {
     super(props);
 
@@ -128,7 +128,24 @@ export default class ThemesNew extends React.Component {
       .catch(console.error.bind(console));
   }
 
-  render() {
+  renderHeader() {
+    let actionButtonClassName = 'app-view__action';
+    if (this.state.setter === null) {
+      actionButtonClassName += ' app-view__action--disabled';
+    }
+
+    return (
+      <header className="app-view__header">
+        <a href="#themes" className="app-view__action">Cancel</a>
+        <h1>New Recipe</h1>
+        <button className={actionButtonClassName}
+                onClick={this.handleActionButton}>Done
+        </button>
+      </header>
+    );
+  }
+
+  renderBody() {
     let optionNodes;
 
     let className = 'new-theme__select';
@@ -217,34 +234,15 @@ export default class ThemesNew extends React.Component {
       headerClassName += ' new-theme__header--hidden';
     }
 
-    let actionButtonClassName = 'app-view__action';
-    if (this.state.setter === null) {
-      actionButtonClassName += ' app-view__action--disabled';
-    }
-
     return (
-      <div className="app-view">
-        <header className="app-view__header">
-          <a href="#themes" className="app-view__action">Cancel</a>
-          <h1>New Recipe</h1>
-          <button className={actionButtonClassName}
-                  onClick={this.handleActionButton}>Done
-          </button>
-        </header>
-        <section className="app-view__body">
-          <div className="new-theme">
-            <h2 className="new-theme__header">If</h2>
-            {serviceSelector}
-            {propertySelector}
+      <div className="app-view__fill-body new-theme">
+        <h2 className="new-theme__header">If</h2>
+        {serviceSelector}
+        {propertySelector}
 
-            <h2 className={headerClassName}>Do</h2>
-            {actionServiceSelector}
-            {actionPropertySelector}
-          </div>
-        </section>
-        <footer className="app-view__footer">
-          <NavigationMenu foxbox={this.foxbox}/>
-        </footer>
+        <h2 className={headerClassName}>Do</h2>
+        {actionServiceSelector}
+        {actionPropertySelector}
       </div>
     );
   }

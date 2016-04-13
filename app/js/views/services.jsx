@@ -1,17 +1,15 @@
 import React from 'components/react';
 
-import NavigationMenu from 'js/views/navigation-menu';
-import ServicesList from 'js/views/services-list';
-import Modal from 'js/views/modal';
+import ServicesListView from 'js/views/services-list';
+import BaseView from 'js/views/base-view';
 
-export default class Services extends React.Component {
+export default class Services extends BaseView {
   constructor(props) {
     super(props);
 
     this.state = {
       services: [],
 
-      isModalVisible: false,
       title: '',
       body: ''
     };
@@ -65,25 +63,15 @@ export default class Services extends React.Component {
     this.setState({ services });
   }
 
-  dismissModal() {
-    this.setState({ isModalVisible: false });
+  renderHeader() {
+    return super.renderHeader('My Home');
   }
 
-  render() {
+  renderBody() {
     return (
-      <div className="app-view">
-        <header className="app-view__header">
-          <h1>My Home</h1>
-        </header>
-        <section className="app-view__body">
-          <h2>General</h2>
-          <ServicesList services={this.state.services} foxbox={this.foxbox}/>
-        </section>
-        <footer className="app-view__footer">
-          <NavigationMenu foxbox={this.foxbox}/>
-        </footer>
-        <Modal visible={this.state.isModalVisible} title={this.state.title}
-               body={this.state.body} dismiss={this.dismissModal.bind(this)}/>
+      <div className="app-view__fill-body">
+        <h2>General</h2>
+        <ServicesListView services={this.state.services} foxbox={this.foxbox} />
       </div>
     );
   }

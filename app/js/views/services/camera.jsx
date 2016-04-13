@@ -1,7 +1,5 @@
 import React from 'components/react';
 
-import NavigationMenu from 'js/views/navigation-menu';
-
 export default class CameraService extends React.Component {
   constructor(props) {
     super(props);
@@ -17,7 +15,7 @@ export default class CameraService extends React.Component {
 
   /**
    * Gets service operation with the specified alias.
-   * 
+   *
    * @param {Array<Object>} operations List of available service operations.
    * @param {string} alias Alias of the operation we're looking for.
    * @return {Object} Operation associated with the specified alias.
@@ -102,7 +100,7 @@ export default class CameraService extends React.Component {
   }
 
   render() {
-    let cameraControlsClass = 'app-view__body camera-controls';
+    let cameraControlsClass = 'app-view__fill-body camera-controls';
 
     if (this.state.hasPreview) {
       cameraControlsClass += ' camera-controls--has-preview';
@@ -113,29 +111,21 @@ export default class CameraService extends React.Component {
     }
 
     return (
-      <div className="app-view">
-        <header className="app-view__header">
-          <h1>{this.service.properties.name}</h1>
-        </header>
-        <div className={cameraControlsClass}>
-          <img ref="snapshotPreview"
-               alt={'Snapshot preview'} className="camera-controls__preview" />
-          <div className="camera-controls__empty-preview">
-            <p>Preview is not available.</p>
-            <p>Touch button to take a snapshot!</p>
-          </div>
-          <section className="camera-controls__snapshot-tools">
-            <button className="camera-controls__snapshot-btn" type="button"
-                    title="Take a snapshot"
-                    onClick={this.takeSnapshot.bind(this)}>
-            </button>
-            <img ref="previousSnapshot"
-                 className="camera-controls__previous-snapshot" />
-          </section>
+      <div className={cameraControlsClass}>
+        <img ref="snapshotPreview"
+             alt={'Snapshot preview'} className="camera-controls__preview" />
+        <div className="camera-controls__empty-preview">
+          <p>Preview is not available.</p>
+          <p>Touch button to take a snapshot!</p>
         </div>
-        <footer className="app-view__footer">
-          <NavigationMenu foxbox={this.foxbox}/>
-        </footer>
+        <section className="camera-controls__snapshot-tools">
+          <button className="camera-controls__snapshot-btn" type="button"
+                  title="Take a snapshot"
+                  onClick={this.takeSnapshot.bind(this)}>
+          </button>
+          <img ref="previousSnapshot"
+               className="camera-controls__previous-snapshot" />
+        </section>
       </div>
     );
   }
