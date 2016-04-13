@@ -6,7 +6,6 @@ import ServiceController from 'js/controllers/service';
 import ThemesController from 'js/controllers/themes';
 
 import Foxbox from 'js/lib/foxbox/foxbox';
-import Qr from 'js/lib/qr';
 
 export default class MainController extends RoutingController {
   constructor() {
@@ -27,13 +26,6 @@ export default class MainController extends RoutingController {
     });
 
     this.foxbox = foxbox;
-
-    if (window.cordova) {
-      // FIXME: Adding this to the `window` global for debugging, should
-      // integrate this into the app's UI, see
-      // https://github.com/fxbox/app/issues/6
-      window.qr = new Qr();
-    }
   }
 
   main() {
