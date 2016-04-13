@@ -36,7 +36,7 @@ export default class UserLogin extends BaseView {
   }
 
   renderBody() {
-    let boxes = (<div hidden></div>);
+    let boxes = null;
 
     if (this.state.boxes.length > 1) {
       let value = this.state.value !== null ? 0 : this.state.value;
