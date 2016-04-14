@@ -179,15 +179,16 @@ export default class Recipes {
   }
 
   getSetters() {
-    // Currently we support only Camera and TTS as actuator.
+    // Currently we support only TTS, camera and connected lights as actuators.
     const supportedKinds = [
-      'TakeSnapshot',
       {
         vendor: 'team@link.mozilla.org',
         adapter: 'eSpeak adapter',
         kind: 'Sentence',
         type: 'String'
-      }
+      },
+      'TakeSnapshot',
+      'LightOn',
     ];
 
     const settersURL = `${this[p.net].origin}/api/` +
@@ -198,36 +199,53 @@ export default class Recipes {
     )
     .then(setters => {
       return setters.map(setter => {
-        let name, options = [];
+        let name;
+        let options = [];
 
         // Check for the complex extension kind
         if (typeof setter.kind === 'object') {
           if (setter.kind.kind === 'Sentence') {
             name = 'say';
-            options.push(...[{
-              label: '"Good morning!"',
-              value: { String: '"Good morning!"' }
-            }, {
-              label: '"Good afternoon!"',
-              value: { String: '"Good afternoon!"' }
-            }, {
-              label: '"Good evening!"',
-              value: { String: '"Good evening!"' }
-            }]);
+            options.push(...[
+              {
+                label: '"Good morning!"',
+                value: { String: '"Good morning!"' }
+              },
+              {
+                label: '"Good afternoon!"',
+                value: { String: '"Good afternoon!"' }
+              },
+              {
+                label: '"Good evening!"',
+                value: { String: '"Good evening!"' }
+              },
+            ]);
           }
         } else if (setter.kind === 'TakeSnapshot') {
-          name = 'Camera';
+          name = 'camera';
           options.push({
-              label: 'take a picture',
-              value: { 'Unit': null }
+            label: 'takes a picture',
+            value: { 'Unit': null }
           });
+        } else if (setter.kind === 'LightOn') {
+          name = 'light';
+          options.push(...[
+            {
+              label: 'gets turned on',
+              value: { OnOff: 'On' }
+            },
+            {
+              label: 'gets turned off',
+              value: { OnOff: 'Off' }
+            },
+          ]);
         }
 
         return {
           id: setter.id,
           kind: setter.kind,
           name: name || setter.adapter,
-          options
+          options,
         };
       });
     });
