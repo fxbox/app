@@ -70,15 +70,13 @@ export default class Network {
   get localOrigin() {
     const settings = this[p.settings];
 
-    return `${settings.localScheme}://${settings.localHostname}:` +
-      `${settings.localPort}`;
+    return settings.localOrigin;
   }
 
   get tunnelOrigin() {
     const settings = this[p.settings];
 
-    return `${settings.tunnelScheme}://${settings.tunnelHostname}:` +
-      `${settings.tunnelPort}`;
+    return settings.tunnelOrigin;
   }
 
   get connected() {
@@ -186,7 +184,7 @@ export default class Network {
       });
 
     // @todo Find a better way to detect if a tunnel connection is active.
-    if (this[p.settings].tunnelHostname !== '') {
+    if (this[p.settings].tunnelOrigin !== '') {
       this[p.ping](`${this.tunnelOrigin}/ping`)
         .then(() => {
           this[p.remote] = true;

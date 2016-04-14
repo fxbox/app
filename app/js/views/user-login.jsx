@@ -41,13 +41,12 @@ export default class UserLogin extends BaseView {
     if (this.state.boxes.length > 1) {
       let value = this.state.value !== null ? 0 : this.state.value;
       const options = this.state.boxes.map((box, index) => {
-        if (box.local_ip === this.foxbox.localHostname) {
+        if (box.clientId === this.foxbox.clientId) {
           value = index;
         }
-        const label = box.local_ip +
-          (box.tunnel_url ? ` / ${box.tunnel_url}` : '');
+
         return (
-          <option key={box.local_ip} value={index}>{label}</option>
+          <option key={box.clientId} value={index}>{box.clientId}</option>
         );
       });
 
