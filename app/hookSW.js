@@ -31,7 +31,7 @@ self.addEventListener('pushsubscriptionchange', function(evt) {
 
 self.addEventListener('notificationclick', function(evt) {
   evt.notification.close();
-  event.waitUntil(clients.matchAll({
+  evt.waitUntil(clients.matchAll({
     type: "window"
   }).then(function(clients) {
     clients.forEach((client) => {
