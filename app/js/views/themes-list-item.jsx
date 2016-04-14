@@ -23,7 +23,7 @@ export default class ThemesListItem extends React.Component {
 
     this.setState({ enabled }); // Optimistic update.
 
-    this.foxbox.recipes.toggle(this.props.theme.id, enabled)
+    this.foxbox.recipes.toggle(this.props.theme, enabled)
       .catch(error => {
         this.setState({ enabled: !enabled }); // Revert back to previous value.
         console.error(error);
@@ -34,7 +34,7 @@ export default class ThemesListItem extends React.Component {
    * Delete a recipe.
    */
   handleOnDelete() {
-    this.foxbox.recipes.remove(this.props.theme.id)
+    this.foxbox.recipes.remove(this.props.theme)
       .then(() => {
         this.props.update();
       })

@@ -6,10 +6,35 @@
 const p = Object.freeze({
   // Private properties.
   settings: Symbol('settings'),
-  net: Symbol('net')
+  net: Symbol('net'),
+
+  // Recipe private properties.
+  service: Symbol('service'),
 });
 
-export default class Recipe {
+export class Recipe {
+  constructor(service) {
+    if (!service) {
+      throw new Error('Service is required!');
+    }
+
+    this[p.service] = service;
+  }
+
+  get id() {
+    return this[p.service].id;
+  }
+
+  get label() {
+    return this[p.service].source && this[p.service].source.name;
+  }
+
+  get enabled() {
+    return this[p.service].status;
+  }
+}
+
+export default class Recipes {
   constructor(props) {
     // Private properties.
     this[p.settings] = props.settings;
@@ -25,189 +50,187 @@ export default class Recipe {
    */
   getAll() {
     return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`)
-      // Get all recipes.
-      .then(services => services.filter(service =>
-        service.adapter !== 'thinkerbell-adapter'
-          && service.adapter !== 'webpush@link.mozilla.org'
-          && service.adapter !== 'console@link.mozilla.org'
-      ))
-      // Fetch their respective enabled status.
-      .then(recipes => {
-        const promises = recipes.map(recipe => {
-          const payload = [
-            { id: `${recipe.id}/get_enabled` }
-          ];
-
-          return this[p.net].fetchJSON(
-            `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/` +
-            'channels/get',
-            'PUT',
-            payload
-          );
+      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`,
+      'POST',
+      { getters: [{ kind: 'ThinkerbellRuleSource' }] }
+    )
+    .then(services => {
+      // Mark getters and setters with more friendly names.
+      return services.map(service => {
+        const enabledGetterId = Object.keys(service.getters).find(getterId => {
+          return service.getters[getterId].kind === 'ThinkerbellRuleOn';
+        });
+        const sourceGetterId = Object.keys(service.getters).find(getterId => {
+          return service.getters[getterId].kind === 'ThinkerbellRuleSource';
         });
 
-        return Promise.all(promises)
-          // Map all the recipes to a more user-friendly format.
-          .then(servicesEnabled => recipes.map((recipe, index) => ({
-            id: recipe.id,
-            label: recipe.id,
-            enabled: servicesEnabled[index][`${recipe.id}/get_enabled`]
-              && servicesEnabled[index][`${recipe.id}/get_enabled`]
-                .OnOff === 'On'
-          })));
+        const enabledSetterId = Object.keys(service.setters).find(setterId => {
+          return service.setters[setterId].kind === 'ThinkerbellRuleOn';
+        });
+        const removeSetterId = Object.keys(service.setters).find(setterId => {
+          return service.setters[setterId].kind === 'RemoveThinkerbellRule';
+        });
+
+        return {
+          id: service.id,
+          getEnabled: enabledGetterId,
+          getSource: sourceGetterId,
+          setEnabled: enabledSetterId,
+          remove: removeSetterId,
+          status: null,
+          source: null
+        };
       });
+    })
+    .then(services => {
+      // Fetch recipe enabled statuses and sources.
+      const { enabledSelectors, sourceSelectors } = services.reduce(
+        (selectors, service) => {
+          selectors.enabledSelectors.push({ id: service.getEnabled });
+          selectors.sourceSelectors.push({ id: service.getSource });
+
+          return selectors;
+        },
+        { enabledSelectors: [], sourceSelectors: [] }
+      );
+
+      const getterURL = `${this[p.net].origin}/api/` +
+        `v${this[p.settings].apiVersion}/channels/get`;
+
+      return Promise.all([
+        this[p.net].fetchJSON(getterURL, 'PUT', enabledSelectors),
+        this[p.net].fetchJSON(getterURL, 'PUT', sourceSelectors)
+      ])
+      .then(([statuses, sources]) => {
+        return services.map(service => {
+          const statusResponse = statuses[service.getEnabled];
+          const sourceResponse = sources[service.getSource];
+
+          if (statusResponse && statusResponse.OnOff) {
+            service.status = statusResponse.OnOff === 'On';
+          } else {
+            console.error(
+              'Error occurred while retrieving recipe (%s) status: ',
+              service.id,
+              statusResponse && statusResponse.Error
+            );
+            service.status = false;
+          }
+
+          if (sourceResponse && sourceResponse.String) {
+            service.source = JSON.parse(sourceResponse.String);
+          } else {
+            console.error(
+              'Error occurred while retrieving recipe (%s) source: ',
+              service.id,
+              sourceResponse && sourceResponse.Error
+            );
+            service.source = null;
+          }
+
+          return new Recipe(service);
+        });
+      });
+    });
   }
 
-  getServicesWithGetters() {
+  getGetters() {
+    // Currently we support only Clock as a trigger.
+    const supportedKinds = ['CurrentTimeOfDay'];
+
+    const gettersURL = `${this[p.net].origin}/api/` +
+      `v${this[p.settings].apiVersion}/channels/getters`;
+
     return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`)
-      // Get all services but the recipes.
-      .then(services => services.filter(service =>
-        service.adapter !== 'thinkerbell-adapter'
-          && service.adapter !== 'webpush@link.mozilla.org'
-          && service.adapter !== 'console@link.mozilla.org'
+      gettersURL, 'POST', supportedKinds.map(kind => ({ kind }))
+    )
+    .then(getters => {
+      return getters.map(getter => {
+        let name, options = [];
 
-          // Deactivating IP camera from services with getters.
-          && service.adapter !== 'ip-camera@link.mozilla.org'
-      ))
-      // Keep only the services with getters.
-      .then(services => services.filter(service =>
-        Object.keys(service.getters).length
-      ))
-      // User friendly name.
-      .then(services => services.map(service => {
-          switch (service.adapter) {
-            case 'clock@link.mozilla.org':
-              service.name = 'Everyday';
-              break;
-
-            default:
-              service.name = service.adapter;
-              break;
-          }
-
-          return service;
+        // Assign user friendly name to every getter and it's value options.
+        switch (getter.kind) {
+          case 'CurrentTimeOfDay':
+            name = 'Everyday';
+            options.push(...[{
+              label: 'in the morning',
+              // 08:00 AM, 8 * 60 * 60 = 28800 seconds from 00:00.
+              value: { Geq: { Duration: 28800 } }
+            }, {
+              label: 'in the afternoon',
+              // 02:00 PM, 14 * 60 * 60 = 50400 seconds from 00:00.
+              value: { Geq: { Duration: 50400 } }
+            }, {
+              label: 'in the evening',
+              // 06:00 PM, 18 * 60 * 60 = 64800 seconds from 00:00.
+              value: { Geq: { Duration: 64800 } }
+            }]);
+            break;
         }
-      ))
-      // User friendly getters.
-      .then(services => services.map(service => {
-          switch (service.adapter) {
-            case 'clock@link.mozilla.org':
-              service.getters = [
-                {
-                  label: 'in the morning',
-                  value: 'service:clock@link.mozilla.org,CurrentTimeOfDay,eq,' +
-                  '08:00am'
-                },
-                {
-                  label: 'in the afternoon',
-                  value: 'service:clock@link.mozilla.org,CurrentTimeOfDay,eq,' +
-                  '02:00pm'
-                },
-                {
-                  label: 'in the evening',
-                  value: 'service:clock@link.mozilla.org,CurrentTimeOfDay,eq,' +
-                  '06:00pm'
-                }
-              ];
-              break;
 
-            default:
-              //service.getters = service.getters;
-              break;
-          }
-
-          return service;
-        }
-      ))
-      // Map all the recipes to a more user-friendly format.
-      .then(services => services.map(service => ({
-        id: service.id,
-        label: service.name,
-        get: service.getters
-      })));
+        return {
+          id: getter.id,
+          kind: getter.kind,
+          name: name || getter.adapter,
+          options
+        };
+      });
+    });
   }
 
-  getServicesWithSetters() {
+  getSetters() {
+    // Currently we support only Camera and TTS as actuator.
+    const supportedKinds = [
+      'TakeSnapshot',
+      {
+        vendor: 'team@link.mozilla.org',
+        adapter: 'eSpeak adapter',
+        kind: 'Sentence',
+        type: 'String'
+      }
+    ];
+
+    const settersURL = `${this[p.net].origin}/api/` +
+      `v${this[p.settings].apiVersion}/channels/setters`;
+
     return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`)
-      // Get all services but the recipes.
-      .then(services => services.filter(service =>
-        service.adapter !== 'thinkerbell-adapter'
-          && service.adapter !== 'webpush@link.mozilla.org'
-          && service.adapter !== 'console@link.mozilla.org'
-      ))
-      // Keep only the services with getters.
-      .then(services => services.filter(service =>
-        Object.keys(service.setters).length
-      ))
-      // User friendly name.
-      .then(services => services.map(service => {
-          switch (service.adapter) {
-            case 'espeak_adapter@link.mozilla.org':
-              service.name = 'say';
-              break;
+      settersURL, 'POST', supportedKinds.map(kind => ({ kind }))
+    )
+    .then(setters => {
+      return setters.map(setter => {
+        let name, options = [];
 
-            case 'ip-camera@link.mozilla.org':
-              service.name = service.properties.name;
-              break;
-
-            default:
-              service.name = service.adapter;
-              break;
+        // Check for the complex extension kind
+        if (typeof setter.kind === 'object') {
+          if (setter.kind.kind === 'Sentence') {
+            name = 'say';
+            options.push(...[{
+              label: '"Good morning!"',
+              value: { String: '"Good morning!"' }
+            }, {
+              label: '"Good afternoon!"',
+              value: { String: '"Good afternoon!"' }
+            }, {
+              label: '"Good evening!"',
+              value: { String: '"Good evening!"' }
+            }]);
           }
-
-          return service;
+        } else if (setter.kind === 'TakeSnapshot') {
+          name = 'Camera';
+          options.push({
+              label: 'take a picture',
+              value: { 'Unit': null }
+          });
         }
-      ))
-      // User friendly getters.
-      .then(services => services.map(service => {
-          switch (service.adapter) {
-            case 'espeak_adapter@link.mozilla.org':
-              service.setters = [
-                {
-                  label: '"Good morning!"',
-                  value: 'espeak@link.mozilla.org,Sentence,String,' +
-                  '"Good morning!"'
-                },
-                {
-                  label: '"Good afternoon!"',
-                  value: 'espeak@link.mozilla.org,Sentence,String,' +
-                  '"Good afternoon!"'
-                },
-                {
-                  label: '"Good evening!"',
-                  value: 'espeak@link.mozilla.org,Sentence,String,' +
-                  '"Good evening!"'
-                }
-              ];
-              break;
 
-            case 'ip-camera@link.mozilla.org':
-              service.setters = [
-                {
-                  label: 'takes a picture',
-                  value: 'setter:snapshot.ae67e622-7a66-465e-bab0-' +
-                  'b0c5540c5748@link.mozilla.org,TakeSnapshot,null,null'
-                }
-              ];
-              break;
-
-            default:
-              //service.setters = service.setters;
-              break;
-          }
-
-          return service;
-        }
-      ))
-      // Map all the recipes to a more user-friendly format.
-      .then(services => services.map(service => ({
-        id: service.id,
-        label: service.name,
-        set: service.setters
-      })));
+        return {
+          id: setter.id,
+          kind: setter.kind,
+          name: name || setter.adapter,
+          options
+        };
+      });
+    });
   }
 
   /**
@@ -215,41 +238,23 @@ export default class Recipe {
    *
    * @return {Promise}
    */
-  add(recipe) {
-    const [idGet, kindGet, rangeKeyGet, rangeValGet] = recipe.getter.split(',');
-    const [idSet, kindSet, rangeKeySet, rangeValSet] = recipe.setter.split(',');
-
-    recipe = {
+  add({ name, getter, getterValue, setter, setterValue }) {
+    const recipe = {
+      name,
       rules: [
         {
           conditions: [
             {
-              source: [
-                {
-                  id: idGet
-                }
-              ],
-              kind: {
-                kind: kindGet
-              },
-              range: {
-                [rangeKeyGet]: rangeValGet
-              }
+              source: [{ id: getter.id }],
+              kind: getter.kind,
+              range: getterValue.value
             }
           ],
           execute: [
             {
-              destination: [
-                {
-                  id: idSet
-                }
-              ],
-              kind: {
-                kind: kindSet
-              },
-              value: {
-                [rangeKeySet]: rangeValSet
-              }
+              destination: [{ id: setter.id }],
+              kind: setter.kind,
+              value: setterValue.value
             }
           ]
         }
@@ -259,65 +264,56 @@ export default class Recipe {
     return this[p.net].fetchJSON(
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
       'PUT',
-      [
-        [
-          [
-            { id: 'thinkerbell-add-rule' }
-          ],
-          {
-            ThinkerbellRule: {
-              name: 'foo',
-              source: JSON.stringify(recipe)
-            }
+      {
+        select:{
+          kind: 'AddThinkerbellRule'
+        },
+        value: {
+          ThinkerbellRule: {
+            name,
+            source: JSON.stringify(recipe)
           }
-        ]
-      ]
+        }
+      }
     );
   }
 
   /**
    * Remove a recipe with the associated id.
    *
-   * @param {string} id
+   * @param {Recipe} recipe Recipe instance to remove.
    * @return {Promise}
    */
-  remove(id) {
+  remove(recipe) {
     return this[p.net].fetchJSON(
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
       'PUT',
-      [
-        [
-          [
-            { id: `${id}/remove` }
-          ],
-          null
-        ]
-      ]
+      {
+        select: { id: recipe[p.service].remove },
+        value: null
+      }
     );
   }
 
   /**
    * Enable or disable the specified recipe.
    *
-   * @param {string} id
+   * @param {Recipe} recipe Recipe to toggle status for.
    * @param {boolean=} value Whether to enable or disable. Enable by default.
    * @return {Promise}
    */
-  toggle(id, value = true) {
+  toggle(recipe, value = true) {
     const textValue = value ? 'On' : 'Off';
     return this[p.net].fetchJSON(
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
       'PUT',
-      [
-        [
-          [
-            { id: `${id}/set_enabled` }
-          ],
-          {
-            OnOff: textValue
-          }
-        ]
-      ]
-    );
+      {
+        select: { id: recipe[p.service].setEnabled },
+        value: { OnOff: textValue }
+      }
+    )
+    .then(() => {
+      recipe[p.service].status = value;
+    });
   }
 }
