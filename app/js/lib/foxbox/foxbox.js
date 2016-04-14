@@ -389,9 +389,19 @@ export default class Foxbox extends Service {
     return this[p.db].setTag.apply(this[p.db], arguments);
   }
 
+  /**
+   * Ask the user for acepting push notifications from the box.
+   * This method will be call each time that we log in, but will
+   * stop the execution if we already have the push subcription
+   * information.
+   *
+   * @param {boolean} resubscribe Parameter used for testing
+   * purposes, and follow the whole subscrition process even if
+   * we have push subscription information.
+   */
   subscribeToNotifications(resubscribe = false) {
     const settings = this[p.settings];
-    const boxHost = this[p.net].origin;
+    const boxPath = `${this[p.net].origin}/api/v${this[p.settings].apiVersion}`;
     if (!navigator.serviceWorker) {
       return Promise.reject('No service worker supported');
     }
@@ -400,8 +410,9 @@ export default class Foxbox extends Service {
       return Promise.resolve();
     }
 
-    return navigator.serviceWorker.ready.then((reg) => {
-      reg.pushManager.subscribe({userVisibleOnly: true})
+    return navigator.serviceWorker.ready
+      .then((reg) => {
+        reg.pushManager.subscribe({userVisibleOnly: true})
       .then((subscription) => {
         const endpoint = subscription.endpoint;
         const key = subscription.getKey ? subscription.getKey('p256dh') : '';
@@ -410,7 +421,7 @@ export default class Foxbox extends Service {
           new Uint8Array(key)));
 
         // Send push information to the server
-        // XXX: We will need some library to write taxonomy messages
+        // @todo: We will need some library to write taxonomy messages
         const pushConfigurationMsg = [[
             [{
               id: 'setter:subscribe.webpush@link.mozilla.org'
@@ -423,8 +434,8 @@ export default class Foxbox extends Service {
               }
             }
           ]];
-        return this[p.net].fetchJSON(
-          `${boxHost}/api/v1/channels/set`, 
+
+        return this[p.net].fetchJSON(boxPath + '/channels/set', 
           'PUT', pushConfigurationMsg)
         .then(() => {
           // Setup some common push resources
@@ -438,8 +449,7 @@ export default class Foxbox extends Service {
               }
 
             ]];
-          return this[p.net].fetchJSON(
-            `${boxHost}/api/v1/channels/set`,
+          return this[p.net].fetchJSON(boxPath + '/channels/set',
            'PUT', pushResourcesMsg);
         });
       })

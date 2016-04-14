@@ -29,8 +29,8 @@ self.addEventListener('pushsubscriptionchange', function(evt) {
 function showNotification(obj, evt) {
   var title = 'Link: Notification';
   var body = obj.body;
-  var icon = 'img/icons/128.png';
-  var tag = 'link-push';
+  var icon = 'img/icon.svg';
+  var tag = obj.tag || 'link-push';
 
   evt.waitUntil(self.registration.showNotification(title, {
     body: body,
