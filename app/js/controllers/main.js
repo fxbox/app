@@ -32,6 +32,7 @@ export default class MainController extends RoutingController {
     this.foxbox.init()
       .then(() => {
         if (this.foxbox.isLoggedIn) {
+          this.foxbox.subscribeToNotifications();
           if (location.hash === '') {
             location.hash = '#services';
           }
