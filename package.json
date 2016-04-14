@@ -44,7 +44,7 @@
     "gulp-live-server": "0.0.29",
     "gulp-mocha": "^2.2.0",
     "gulp-rename": "^1.2.2",
-    "gulp-sww": "0.0.8",
+    "gulp-sww": "0.0.9",
     "gulp-webserver": "^0.9.1",
     "gulp-zip": "^3.2.0",
     "karma": "^0.13.22",
