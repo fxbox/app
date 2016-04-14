@@ -51,11 +51,7 @@ function notifyClient(obj) {
   return self.clients.matchAll()
     .then((clients) => {
       clients.forEach((client) => {
-        var senderID = event.source ? event.source.id : 'unknown';
-        client.postMessage({
-          client: senderID,
-          message: obj
-        });
+        client.postMessage(obj);
       });
     });
 }
