@@ -136,7 +136,7 @@ export default class Recipes {
 
   getGetters() {
     // Currently we support only Clock and Motion Sensor as triggers.
-    const supportedKinds = ['CurrentTimeOfDay', 'OpenClosed'];
+    const supportedKinds = ['CurrentTimeOfDay', 'OpenClosed', 'LightOn'];
 
     const gettersURL = `${this[p.net].origin}/api/` +
       `v${this[p.settings].apiVersion}/channels/getters`;
@@ -255,7 +255,7 @@ export default class Recipes {
                           'opened. Here is a picture of what I see.',
                         action: `dev/${setter.service}/camera-latest-image`
                       }),
-                      resource: 'placeholder'
+                      resource: 'rest1'
                     }
                   }
                 },
@@ -329,7 +329,7 @@ export default class Recipes {
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
       'PUT',
       {
-        select:{
+        select: {
           kind: 'AddThinkerbellRule'
         },
         value: {
@@ -379,5 +379,102 @@ export default class Recipes {
     .then(() => {
       recipe[p.service].status = value;
     });
+  }
+
+  // Hack for the demo.
+  /**
+   * Create the following static recipe:
+   * * When:
+   *    * The first light is on
+   *    * It's 8:00am
+   * * Then:
+   *    * Turn all the lights off
+   *    * Notify the user
+   */
+  createDemoRecipes() {
+    Promise.all([
+        this.getGetters(),
+        this.getSetters()
+      ])
+      .then(services => {
+        const clockGetter = services[0].find(
+          service => service.kind === 'CurrentTimeOfDay'
+        );
+        const firstLightGetter = services[0].find(
+          service => service.kind === 'LightOn'
+        );
+        const lightsSetter = services[1].filter(
+          service => service.kind === 'LightOn'
+        );
+
+        const conditions = [
+          // When it's 8:00am.
+          {
+            source: [{ id: clockGetter.id }],
+            kind: 'CurrentTimeOfDay',
+            range: { Geq: { Duration: 28800 } }
+          },
+          // When the first light is on.
+          {
+            source: [{ id: firstLightGetter.id }],
+            kind: firstLightGetter.kind,
+            range: { Eq: { OnOff: 'On' } }
+          }
+        ];
+
+        const execute = [].concat(
+          // Turn off all lights.
+          lightsSetter.map(setter => ({
+            destination: [{ id: setter.id }],
+            kind: setter.kind,
+            value: { OnOff: 'Off' }
+          })),
+          // Notify the user.
+          [
+            {
+              // Notify the user.
+              destination: [{ kind: 'WebPushNotify' }],
+              kind: 'WebPushNotify',
+              value: {
+                WebPushNotify: {
+                  message: JSON.stringify({
+                    message: 'Hello Alex, I\'ve turned your kitchen lights ' +
+                    'off & locked the door for you. Have a wonderful day'
+                  }),
+                  resource: 'rest1'
+                }
+              }
+            }
+          ]);
+
+        const recipe = {
+          name: 'Turn off the lights when I leave for work.',
+          rules: [
+            {
+              conditions,
+              execute
+            }
+          ]
+        };
+
+        console.log('Recipe for the demo', recipe);
+
+        return this[p.net].fetchJSON(
+          `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/` +
+          'channels/set',
+          'PUT',
+          {
+            select: {
+              kind: 'AddThinkerbellRule'
+            },
+            value: {
+              ThinkerbellRule: {
+                name,
+                source: JSON.stringify(recipe)
+              }
+            }
+          }
+        );
+      });
   }
 }
