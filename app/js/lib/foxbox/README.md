@@ -52,3 +52,8 @@ is disconnected from it.
 ### `service-state-change`
 
 This event is emitted when a service states change.
+
+### `box-online`
+
+This event is emitted once a box is discovered on the local network or every
+time we get a response from a ping to a previously discovered box url (local or remote).

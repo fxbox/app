@@ -5,7 +5,6 @@ import { Model } from 'components/mvc';
 // Prefix all entries to avoid collisions.
 const PREFIX = 'foxbox-';
 
-const DEFAULT_LOCAL_ORIGIN = 'http://localhost:3000';
 const DEFAULT_POLLING_ENABLED = true;
 const POLLING_INTERVAL = 2000;
 const ONLINE_CHECKING_INTERVAL = 5000;
@@ -32,8 +31,7 @@ const storage = localStorage ? localStorage : {
 
 export default class Settings extends Model {
   constructor() {
-    const localOrigin = storage.getItem(`${PREFIX}localOrigin`) ||
-      DEFAULT_LOCAL_ORIGIN;
+    const localOrigin = storage.getItem(`${PREFIX}localOrigin`);
 
     const pollingEnabled = storage.getItem(`${PREFIX}pollingEnabled`) !== null ?
       storage.getItem(`${PREFIX}pollingEnabled`) === 'true' :
@@ -88,9 +86,12 @@ export default class Settings extends Model {
   }
 
   set localOrigin(origin) {
-    this._localOrigin = origin ?
-        (new URL(origin)).origin : DEFAULT_LOCAL_ORIGIN;
-    storage.setItem(`${PREFIX}localOrigin`, this._localOrigin);
+    this._localOrigin = origin ? (new URL(origin)).origin : null;
+    if (this._localOrigin) {
+      storage.setItem(`${PREFIX}localOrigin`, this._localOrigin);
+    } else {
+      storage.removeItem(`${PREFIX}localOrigin`);
+    }
   }
 
   get tunnelOrigin() {
@@ -98,8 +99,12 @@ export default class Settings extends Model {
   }
 
   set tunnelOrigin(origin) {
-    this._tunnelOrigin = origin ? (new URL(origin)).origin : '';
-    storage.setItem(`${PREFIX}tunnelOrigin`, this._tunnelOrigin);
+    this._tunnelOrigin = origin ? (new URL(origin)).origin : null;
+    if (this._tunnelOrigin) {
+      storage.setItem(`${PREFIX}tunnelOrigin`, this._tunnelOrigin);
+    } else {
+      storage.removeItem(`${PREFIX}tunnelOrigin`);
+    }
   }
 
   get clientId() {

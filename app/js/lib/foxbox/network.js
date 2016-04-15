@@ -15,7 +15,7 @@ const p = Object.freeze({
 });
 
 export default class Network {
-  constructor(settings) {
+  constructor(settings, pingCallback) {
     // Private properties.
     this[p.settings] = settings;
     // Whether we can connect to the box via a local connection.
@@ -24,6 +24,8 @@ export default class Network {
     this[p.remote] = false;
     // A reference to the interval to get the online status.
     this[p.pingInterval] = null;
+    // A callback triggered on each ping response.
+    this[p.pingCallback] = pingCallback;
 
     Object.seal(this);
   }
@@ -175,24 +177,29 @@ export default class Network {
    * @private
    */
   [p.pingBox]() {
-    this[p.ping](`${this.localOrigin}/ping`)
+    let promises = [];
+    promises.push(this[p.ping](`${this.localOrigin}/ping`)
       .then(() => {
         this[p.local] = true;
       })
       .catch(() => {
         this[p.local] = false;
-      });
+      }));
 
     // @todo Find a better way to detect if a tunnel connection is active.
-    if (this[p.settings].tunnelOrigin !== '') {
-      this[p.ping](`${this.tunnelOrigin}/ping`)
+    if (this[p.settings].tunnelOrigin) {
+      promises.push(this[p.ping](`${this.tunnelOrigin}/ping`)
         .then(() => {
           this[p.remote] = true;
         })
         .catch(() => {
           this[p.remote] = false;
-        });
+        }));
     }
+
+    Promise.all(promises).then(() => {
+      this[p.pingCallback](this[p.local] || this[p.remote]);
+    });
   }
 
   /**
