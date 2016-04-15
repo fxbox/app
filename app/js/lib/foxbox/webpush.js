@@ -15,7 +15,7 @@ export default class WebPush {
   constructor(network, settings, callback) {
     this[p.net] = network;
     this[p.settings] = settings;
-    this.callback = callback;
+    this[p.dispatchEvent] = callback;
 
     Object.seal(this);
   }
@@ -23,7 +23,7 @@ export default class WebPush {
   subscribeToNotifications(resubscribe = false) {
     const settings = this[p.settings];
     const boxPath = 
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}`;  
+      `${this[p.net].origin}/api/v${settings.apiVersion}`;  
 
     if (!navigator.serviceWorker) {
       return Promise.reject('No service worker supported');
@@ -61,7 +61,7 @@ export default class WebPush {
             }
           ]];
 
-        return this[p.net].fetchJSON(boxPath + '/channels/set',
+        return this[p.net].fetchJSON(`${boxPath}/channels/set`,
           'PUT', pushConfigurationMsg)
         .then(() => {
           // Setup some common push resources
@@ -73,23 +73,21 @@ export default class WebPush {
                   resources: ['res1']
                 }
               }
-
             ]];
-          return this[p.net].fetchJSON(boxPath + '/channels/set',
+          return this[p.net].fetchJSON(`${boxPath}/channels/set`,
            'PUT', pushResourcesMsg);
         });
       })
       .catch((error) => {
         if (Notification.permission === 'denied') {
-          return Promise.reject('Permission request was denied.');
+          throw 'Permission request was denied.';
         } else {
           console.error('Error while saving subscription ', error);
-          return Promise.reject('Subscription error: ', error);
+          throw 'Subscription error: ' + error;
         }
       });
     });
   }
-
 
   [p.listenForMessages](evt) {
     const msg = evt.data || {};
@@ -98,7 +96,6 @@ export default class WebPush {
       return;
     }
 
-    this.callback(msg);
+    this[p.dispatchEvent](msg);
   }
-
 }
