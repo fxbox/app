@@ -135,8 +135,8 @@ export default class Recipes {
   }
 
   getGetters() {
-    // Currently we support only Clock as a trigger.
-    const supportedKinds = ['CurrentTimeOfDay'];
+    // Currently we support only Clock and Motion Sensor as triggers.
+    const supportedKinds = ['CurrentTimeOfDay', 'OpenClosed'];
 
     const gettersURL = `${this[p.net].origin}/api/` +
       `v${this[p.settings].apiVersion}/channels/getters`;
@@ -165,6 +165,13 @@ export default class Recipes {
               // 06:00 PM, 18 * 60 * 60 = 64800 seconds from 00:00.
               value: { Geq: { Duration: 64800 } }
             }]);
+            break;
+          case 'OpenClosed':
+            name = 'Motion Sensor';
+            options.push({
+              label: 'detects motion',
+              value: { Eq: { OpenClosed: 'Open' } }
+            });
             break;
         }
 

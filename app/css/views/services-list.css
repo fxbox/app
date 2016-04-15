@@ -5,3 +5,7 @@
 [data-icon="ip-camera"] {
   background-image: url('services-list/ip-camera.svg');
 }
+
+[data-icon="motion-sensor"] {
+  background-image: url('services-list/motion-sensor.svg');
+}

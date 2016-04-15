@@ -435,7 +435,7 @@ export default class Foxbox extends Service {
             }
           ]];
 
-        return this[p.net].fetchJSON(boxPath + '/channels/set', 
+        return this[p.net].fetchJSON(boxPath + '/channels/set',
           'PUT', pushConfigurationMsg)
         .then(() => {
           // Setup some common push resources
@@ -500,6 +500,12 @@ export default class Foxbox extends Service {
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`)
       .then((services) => {
         return services.map((service) => {
+          // Some service don't have name, but can have product_name instead,
+          // eventually we should get rid of this line and use unified service
+          // label field provided by taxonomy.
+          service.properties.name = service.properties.name ||
+            service.properties.product_name;
+
           return {
             id: service.id,
             type: service.adapter,
