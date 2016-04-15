@@ -206,8 +206,8 @@ export default class Recipes {
     )
     .then(setters => {
       return setters.map(setter => {
+        const options = [];
         let name;
-        let options = [];
 
         // Check for the complex extension kind
         if (typeof setter.kind === 'object') {
@@ -230,10 +230,38 @@ export default class Recipes {
           }
         } else if (setter.kind === 'TakeSnapshot') {
           name = 'camera';
-          options.push({
-            label: 'takes a picture',
-            value: { 'Unit': null }
-          });
+          options.push(...[
+            {
+              label: 'takes a picture',
+              value: { 'Unit': null }
+            },
+            {
+              label: 'sends me a picture',
+              value: [
+                {
+                  // Take a picture.
+                  destination: [{ id: setter.id }],
+                  kind: 'TakeSnapshot',
+                  value: { Unit: null }
+                },
+                {
+                  // Notify the user.
+                  destination: [{ kind: 'WebPushNotify' }],
+                  kind: 'WebPushNotify',
+                  value: {
+                    WebPushNotify: {
+                      message: JSON.stringify({
+                        message: 'Your bedroom patio door has just been ' +
+                          'opened. Here is a picture of what I see.',
+                        action: `dev/${setter.service}/camera-latest-image`
+                      }),
+                      resource: 'placeholder'
+                    }
+                  }
+                },
+              ]
+            },
+          ]);
         } else if (setter.kind === 'LightOn') {
           name = 'light';
           options.push(...[
@@ -264,6 +292,23 @@ export default class Recipes {
    * @return {Promise}
    */
   add({ name, getter, getterValue, setter, setterValue }) {
+    let execute;
+
+    if (Array.isArray(setterValue.value)) {
+      execute = setterValue.value;
+    } else if (typeof setterValue.value === 'object') {
+      execute = [
+        {
+          destination: [{ id: setter.id }],
+          kind: setter.kind,
+          value: setterValue.value
+        }
+      ];
+    } else {
+      console.error('Setter doesn\'t have a supported format:',
+        JSON.stringify(setter));
+    }
+
     const recipe = {
       name,
       rules: [
@@ -275,13 +320,7 @@ export default class Recipes {
               range: getterValue.value
             }
           ],
-          execute: [
-            {
-              destination: [{ id: setter.id }],
-              kind: setter.kind,
-              value: setterValue.value
-            }
-          ]
+          execute
         }
       ]
     };
