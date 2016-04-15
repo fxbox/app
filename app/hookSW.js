@@ -19,9 +19,12 @@ self.addEventListener('push', function(evt) {
     notifyClient(obj)
       .then(() => {
         showNotification(obj, evt);
+      })
+      .catch((error) => {
+        console.error('Error processing notification: ', error);
       });
   } else {
-    console.log('Discarding notification: ' + JSON.stringify(obj));
+    console.error('Notification doesnt contain a body, ignoring it: ');
   }
 });
 
@@ -33,7 +36,8 @@ self.addEventListener('notificationclick', function(evt) {
   evt.notification.close();
   evt.waitUntil(clients.matchAll({
     type: "window"
-  }).then(function(clients) {
+  })
+  .then(function(clients) {
     clients.forEach((client) => {
       if ('focus' in client) {
         client.focus();
@@ -45,7 +49,8 @@ self.addEventListener('notificationclick', function(evt) {
 /**
  * Notify the foxlink library of the message received via push.
  * This will notify all the windows/tabs opened with the app.
- * @param {object} obj Payload coming from the push notification
+ *
+ * @param {Object} obj Payload coming from the push notification
  */
 function notifyClient(obj) {
   return self.clients.matchAll()
@@ -59,6 +64,7 @@ function notifyClient(obj) {
 /**
  * Displays a notification based on the data coming from the
  * push.
+ *
  * @param {object} obj Payload coming from the push notification
  * @param {event} evt Original event generated
  * @return {Promise} Promise resolved once the notification is showed
