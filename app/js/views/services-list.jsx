@@ -27,9 +27,17 @@ export default class ServicesList extends React.Component {
   }
 
   isUserFacingService(service) {
+    // If service doesn't have any getters and setters, there is no need to
+    // display it to the user.
+    if (!Object.keys(service.getters).length &&
+        !Object.keys(service.setters).length) {
+      return false;
+    }
+
     switch (service.type) {
       case 'philips_hue@link.mozilla.org':
       case 'ip-camera@link.mozilla.org':
+      case 'OpenZwave Adapter':
         return true;
       default:
         return false;
