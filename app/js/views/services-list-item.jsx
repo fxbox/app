@@ -217,6 +217,8 @@ export default class ServicesListItem extends React.Component {
         return this.renderLightService();
       case 'ip-camera@link.mozilla.org':
         return this.renderGenericService('Camera', 'ip-camera');
+      case 'OpenZwave Adapter':
+        return this.renderGenericService('OpenZWave', 'zwave');
       default:
         return this.renderGenericService();
     }
