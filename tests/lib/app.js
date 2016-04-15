@@ -23,7 +23,7 @@ App.prototype = {
   cleanUp: function() {
     return this.driver.executeAsyncScript(() => {
       var callback = arguments[arguments.length - 1];
-      window.foxbox.clear()
+      window.foxbox.clear(true /* ignore sw */)
         .then(callback)
         .catch(callback);
     });

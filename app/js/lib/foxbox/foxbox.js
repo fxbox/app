@@ -98,8 +98,17 @@ export default class Foxbox extends Service {
   /**
    * Clear all data/settings stored on the browser. Use with caution.
    */
-  clear() {
-    const promises = [this[p.settings].clear(), this[p.db].clear()];
+  clear(ignoreServiceWorker) {
+    let promises = [this[p.settings].clear(), this[p.db].clear()];
+    if (!navigator.serviceWorker) {
+      return Promise.all(promises);
+    }
+
+    if (!ignoreServiceWorker) {
+      promises.push(navigator.serviceWorker.ready
+        .then((registration) => registration.unregister()));
+    }
+
     return Promise.all(promises);
   }
 
