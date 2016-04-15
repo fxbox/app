@@ -4,6 +4,7 @@ import UsersController from 'js/controllers/users';
 import ServicesController from 'js/controllers/services';
 import ServiceController from 'js/controllers/service';
 import ThemesController from 'js/controllers/themes';
+import DevController from 'js/controllers/dev';
 
 import Foxbox from 'js/lib/foxbox/foxbox';
 
@@ -22,7 +23,8 @@ export default class MainController extends RoutingController {
       'services': new ServicesController(options),
       'services/(.+)': new ServiceController(options),
       'themes': themesController,
-      'themes/(.+)': themesController
+      'themes/(.+)': themesController,
+      'dev/(.+)/(.+)': new DevController(options),
     });
 
     this.foxbox = foxbox;
