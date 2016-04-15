@@ -12,17 +12,13 @@
 // In our case we will write vanilla ServiceWorker code
 
 self.addEventListener('push', function(evt) {
-  console.log('Push received ', JSON.stringify(evt.data));
   var obj = evt.data ? evt.data.json() : {};
+  console.log('Push received ', obj);
 
   if (obj && obj.message) {
-    notifyClient(obj)
-      .then(() => {
-        showNotification(obj, evt);
-      })
-      .catch((error) => {
-        console.error('Error processing notification: ', error);
-      });
+    var message = JSON.parse(obj.message);
+    console.log('Got the message ', message);
+    evt.waitUntil(processNotification(message));
   } else {
     console.error('Notification doesnt contain a body, ignoring it: ');
   }
@@ -46,6 +42,13 @@ self.addEventListener('notificationclick', function(evt) {
   }));
 });
 
+function processNotification(obj) {
+  return notifyClient(obj)
+    .then(() => {
+       return showNotification(obj);
+    });
+}
+
 /**
  * Notify the foxlink library of the message received via push.
  * This will notify all the windows/tabs opened with the app.
@@ -66,18 +69,17 @@ function notifyClient(obj) {
  * push.
  *
  * @param {object} obj Payload coming from the push notification
- * @param {event} evt Original event generated
  * @return {Promise} Promise resolved once the notification is showed
  */
-function showNotification(obj, evt) {
+function showNotification(obj) {
   var title = 'Link: Notification';
   var body = obj.message;
   var icon = 'img/icon.svg';
   var tag = obj.resource || obj.tag || 'link-push';
 
-  return evt.waitUntil(self.registration.showNotification(title, {
+  return self.registration.showNotification(title, {
     body: body,
     icon: icon,
     tag: tag
-  }));
+  });
 }
