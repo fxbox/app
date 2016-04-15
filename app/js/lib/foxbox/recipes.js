@@ -136,7 +136,12 @@ export default class Recipes {
 
   getGetters() {
     // Currently we support only Clock and Motion Sensor as triggers.
-    const supportedKinds = ['CurrentTimeOfDay', 'OpenClosed', 'LightOn'];
+    const supportedKinds = [
+      'CurrentTimeOfDay',
+      'OpenClosed',
+      'LightOn',
+      'DoorLocked',
+    ];
 
     const gettersURL = `${this[p.net].origin}/api/` +
       `v${this[p.settings].apiVersion}/channels/getters`;
@@ -173,6 +178,15 @@ export default class Recipes {
               value: { Eq: { OpenClosed: 'Open' } }
             });
             break;
+          case 'DoorLocked':
+            name = 'Door';
+            options.push({
+              label: 'is locked',
+              value: { Eq: { DoorLocked: 'Locked' } }
+            }, {
+              label: 'is unlocked',
+              value: { Eq: { DoorLocked: 'Unlocked' } }
+            });
         }
 
         return {
@@ -196,6 +210,7 @@ export default class Recipes {
       },
       'TakeSnapshot',
       'LightOn',
+      'DoorLocked',
     ];
 
     const settersURL = `${this[p.net].origin}/api/` +
@@ -272,6 +287,18 @@ export default class Recipes {
             {
               label: 'gets turned off',
               value: { OnOff: 'Off' }
+            },
+          ]);
+        } else if (setter.kind === 'DoorLocked') {
+          name = 'door lock';
+          options.push(...[
+            {
+              label: 'locks the door',
+              value: { DoorLocked: 'Locked' }
+            },
+            {
+              label: 'unlocks the door',
+              value: { DoorLocked: 'Unlocked' }
             },
           ]);
         }

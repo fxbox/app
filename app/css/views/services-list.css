@@ -9,3 +9,7 @@
 [data-icon="motion-sensor"] {
   background-image: url('services-list/motion-sensor.svg');
 }
+
+[data-icon="door-lock"] {
+  background-image: url('services-list/door-lock.svg');
+}
