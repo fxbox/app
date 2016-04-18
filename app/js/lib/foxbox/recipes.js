@@ -503,5 +503,99 @@ export default class Recipes {
           }
         );
       });
+
+    this.createDoorLockDemoRecipe();
+  }
+
+  /**
+   * Create the following static recipe:
+   * * When:
+   *    * The door is open
+   *    * It's 8:00am
+   * * Then:
+   *    * Close the door
+   *    * Notify the user
+   */
+  createDoorLockDemoRecipe() {
+    Promise.all([
+      this.getGetters(),
+      this.getSetters(),
+    ])
+    .then(([getters, setters]) => {
+      const clockGetter = getters.find(
+        (getter) => getter.kind === 'CurrentTimeOfDay'
+      );
+
+      const doorLockGetter = getters.find(
+        (getter) => getter.kind === 'DoorLocked'
+      );
+
+      const doorLockSetter = setters.find(
+        (setter) => setter.kind === 'DoorLocked'
+      );
+
+      const conditions = [
+        // When it's 8:00am.
+        {
+          source: [{ id: clockGetter.id }],
+          kind: 'CurrentTimeOfDay',
+          range: { Geq: { Duration: 28800 } }
+        },
+        {
+          source: [{ id: doorLockGetter.id }],
+          kind: doorLockGetter.kind,
+          range: { Eq: { DoorLocked: 'Unlocked' } }
+        }
+      ];
+
+      const execute = [
+        {
+          destination: [{ id: doorLockSetter.id }],
+          kind: doorLockSetter.kind,
+          value: { DoorLocked: 'Locked' }
+        },
+        {
+          // Notify the user.
+          destination: [{ kind: 'WebPushNotify' }],
+          kind: 'WebPushNotify',
+          value: {
+            WebPushNotify: {
+              message: JSON.stringify({
+                message: 'Hello Alex, I\'ve locked the door for you. ' +
+                  'Have a wonderful day!'
+              }),
+              resource: 'res1'
+            }
+          }
+        }
+      ];
+
+      const recipe = {
+        name: 'Lock the door when I leave for work.',
+        rules: [
+          {
+            conditions,
+            execute
+          }
+        ]
+      };
+
+      return this[p.net].fetchJSON(
+        `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/` +
+        'channels/set',
+        'PUT',
+        {
+          select: {
+            kind: 'AddThinkerbellRule'
+          },
+          value: {
+            ThinkerbellRule: {
+              name,
+              source: JSON.stringify(recipe)
+            }
+          }
+        }
+      );
+    });
   }
 }
