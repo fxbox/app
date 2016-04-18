@@ -222,10 +222,20 @@ export default class ServicesListItem extends React.Component {
       case 'ip-camera@link.mozilla.org':
         return this.renderGenericService('Camera', 'ip-camera');
       case 'OpenZwave Adapter':
+        if (this.hasDoorLockChannel(this.props.getters) ||
+            this.hasDoorLockChannel(this.props.setters)) {
+          return this.renderGenericService('Door Lock', 'door-lock');
+        }
         return this.renderGenericService('Motion Sensor', 'motion-sensor');
       default:
         return this.renderGenericService();
     }
+  }
+
+  hasDoorLockChannel(channels) {
+    return Object.keys(channels).find(
+      (key) => channels[key].kind === 'DoorLocked'
+    );
   }
 }
 
@@ -235,5 +245,6 @@ ServicesListItem.propTypes = {
   model: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
   type: React.PropTypes.string.isRequired,
+  getters: React.PropTypes.object,
   setters: React.PropTypes.object,
 };
