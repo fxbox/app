@@ -46,55 +46,59 @@ export default class ThemesNew extends BaseView {
   }
 
   onGetterSelected(evt) {
-    if (evt.target.value) {
-      const selectedGetterIndex = Number(evt.target.value);
-      this.setState({ selectedGetterIndex });
-    } else {
-      this.setState({
-        selectedGetterIndex: -1,
-        selectedGetterValueIndex: -1,
+    let selectedGetterIndex = -1;
 
-        selectedSetterIndex: -1,
-        selectedSetterValueIndex: -1
-      });
+    if (evt.target.value) {
+      selectedGetterIndex = Number(evt.target.value);
     }
+
+    this.setState({
+      selectedGetterIndex,
+      selectedGetterValueIndex: -1,
+
+      selectedSetterIndex: -1,
+      selectedSetterValueIndex: -1
+    });
   }
 
   onGetterValueSelected(evt) {
-    if (evt.target.value) {
-      const selectedGetterValueIndex = Number(evt.target.value);
-      this.setState({ selectedGetterValueIndex });
-    } else {
-      this.setState({
-        selectedGetterValueIndex: -1,
+    let selectedGetterValueIndex = -1;
 
-        selectedSetterIndex: -1,
-        selectedSetterValueIndex: -1
-      });
+    if (evt.target.value) {
+      selectedGetterValueIndex = Number(evt.target.value);
     }
+
+    this.setState({
+      selectedGetterValueIndex,
+
+      selectedSetterIndex: -1,
+      selectedSetterValueIndex: -1
+    });
   }
 
   onSetterSelected(evt) {
+    let selectedSetterIndex = -1;
+
     if (evt.target.value) {
-      const selectedSetterIndex = Number(evt.target.value);
-      this.setState({ selectedSetterIndex });
-    } else {
-      this.setState({
-        selectedSetterIndex: -1,
-        selectedSetterValueIndex: -1
-      });
+      selectedSetterIndex = Number(evt.target.value);
     }
+
+    this.setState({
+      selectedSetterIndex,
+      selectedSetterValueIndex: -1
+    });
   }
 
   onSetterValueSelected(evt) {
+    let selectedSetterValueIndex = -1;
+
     if (evt.target.value) {
-      const selectedSetterValueIndex = Number(evt.target.value);
-      this.setState({ selectedSetterValueIndex });
-    } else {
-      this.setState({
-        selectedSetterValueIndex: -1
-      });
+      selectedSetterValueIndex = Number(evt.target.value);
     }
+
+    this.setState({
+      selectedSetterValueIndex
+    });
   }
 
   onSaveRecipe() {
