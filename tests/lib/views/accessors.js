@@ -7,7 +7,7 @@ function Accessors(driver) {
 Accessors.prototype = {
   waitForElement: function(locator) {
     var element = this.driver.wait(until.elementLocated(locator));
-    return this.driver.wait(until.elementIsVisible(element));
+    return this.driver.wait(until.elementIsEnabled(element));
   }
 };
 

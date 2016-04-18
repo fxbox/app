@@ -19,6 +19,10 @@
   border: none;
 }
 
+.user-login__login-button:disabled {
+  background: #c1d9d8;
+}
+
 .user-login__box-selector {
   margin: 1rem;
   padding: 1rem;

@@ -13,8 +13,11 @@ registrationServerSimulator.get('/ping', (req, res) => {
   res.json(
     [{
       'public_ip': '217.111.161.212',
-      'local_ip': '127.0.0.1',
-      'tunnel_url': 'null',
+      'client': 'XXX',
+      'message': JSON.stringify({
+        'local_origin': 'http://127.0.0.1:3000',
+        'tunnel_origin': 'null'
+      }),
       'timestamp': Math.floor(Date.now()/1000)
     }]
   );

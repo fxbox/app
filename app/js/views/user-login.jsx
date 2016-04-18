@@ -8,10 +8,21 @@ export default class UserLogin extends BaseView {
 
     this.state = {
       boxes: props.foxbox.boxes,
-      value: null
+      value: null,
+      loginEnabled: false
     };
 
     this.foxbox = props.foxbox;
+
+    this.onBoxOnline = this.onBoxOnline.bind(this);
+  }
+
+  componentDidMount() {
+    this.foxbox.addEventListener('box-online', this.onBoxOnline);
+  }
+
+  componentWillUnmount() {
+    this.foxbox.removeEventListener('box-online', this.onBoxOnline);
   }
 
   handleOnChange(evt) {
@@ -25,6 +36,10 @@ export default class UserLogin extends BaseView {
     evt.preventDefault(); // Avoid redirection to /?.
 
     this.foxbox.login();
+  }
+
+  onBoxOnline(online) {
+    this.setState({ loginEnabled: online });
   }
 
   renderHeader() {
@@ -61,7 +76,8 @@ export default class UserLogin extends BaseView {
             onSubmit={this.handleOnSubmit.bind(this)}>
         <img className="user-login__logo" src="img/icon.svg"/>
         {boxes}
-        <button className="user-login__login-button">Log in</button>
+        <button className="user-login__login-button"
+                disabled={!this.state.loginEnabled}>Log in</button>
       </form>
     );
   }

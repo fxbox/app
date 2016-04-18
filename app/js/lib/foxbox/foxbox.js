@@ -52,7 +52,9 @@ export default class Foxbox extends Service {
     // Private properties.
     this[p.settings] = new Settings();
     this[p.db] = new Db();
-    this[p.net] = new Network(this[p.settings]);
+    this[p.net] = new Network(this[p.settings], foxboxOnline => {
+      this._dispatchEvent('box-online', foxboxOnline);
+    });
     this[p.boxes] = Object.freeze([]);
     this[p.isPollingEnabled] = false;
     this[p.nextPollTimeout] = null;
@@ -70,28 +72,30 @@ export default class Foxbox extends Service {
   init() {
     window.foxbox = this;
 
+    // No need to block the UI on the discovery process.
+    // Once we discover a box we can connect to, we will start
+    // polling and triggering box-online events with a boolean
+    // indicating if we have access to box or not.
+    this._initDiscovery().then(() => {
+      return this[p.net].init();
+    })
+    .then(() => {
+      // Start polling.
+      this[p.settings].on('pollingEnabled', () => {
+        this.togglePolling(this[p.settings].pollingEnabled);
+      });
+      this.togglePolling(this[p.settings].pollingEnabled);
+
+      this.recipes = new Recipes({
+        settings: this[p.settings],
+        net: this[p.net]
+      });
+    });
+
     return this._initUserSession()
-      .then(() => {
-        return this._initDiscovery();
-      })
-      .then(() => {
-        return this[p.net].init();
-      })
       .then(() => {
         // The DB is only initialised if there's no redirection to the box.
         return this[p.db].init();
-      })
-      .then(() => {
-        // Start polling.
-        this[p.settings].on('pollingEnabled', () => {
-          this.togglePolling(this[p.settings].pollingEnabled);
-        });
-        this.togglePolling(this[p.settings].pollingEnabled);
-
-        this.recipes = new Recipes({
-          settings: this[p.settings],
-          net: this[p.net]
-        });
       });
   }
 
@@ -127,7 +131,7 @@ export default class Foxbox extends Service {
   /**
    * Get the URL of the box using the registration server.
    * If it fails, we fallback to the previously set hostname.
-   * It there isn't, it falls back to localhost.
+   * It there isn't, we schedule a retry.
    *
    * @returns {Promise}
    * @private
@@ -140,42 +144,58 @@ export default class Foxbox extends Service {
       return Promise.resolve();
     }
 
-    return new Promise((resolve) => {
-      this[p.net].fetchJSON(this[p.settings].registrationService)
-        .then(boxes => {
-          if (!Array.isArray(boxes) || boxes.length === 0) {
-            return resolve();
-          }
+    return this[p.net].fetchJSON(this[p.settings].registrationService)
+      .then((boxes) => {
+        if (!Array.isArray(boxes)) {
+          console.warn('Got unexpected response from registry server', boxes);
+          return;
+        }
 
-          // We filter out boxes registered more than 5 minutes ago.
-          const now = Math.floor(Date.now() / 1000) - 60 * 5;
-          this[p.boxes] = Object.freeze(
-            boxes
-              .filter(box => box.timestamp - now >= 0)
-              .map(box => {
-                  // NOTE(sgiles): There is consideration to allow
-                  // only "local_origin" and "tunnel_origin", removing the need
-                  // to parse message - this merges the relevant message fields
-                  // into the main object
-                  const { local_origin, tunnel_origin } =
-                    JSON.parse(box.message);
-                  box.local_origin  = local_origin;
-                  box.tunnel_origin = tunnel_origin;
-                  return Object.freeze(box);
-              })
-          );
+        // We filter out boxes registered more than 2 minutes ago.
+        const now = Math.floor(Date.now() / 1000) - 60 * 2;
+        this[p.boxes] = Object.freeze(
+          boxes
+            .filter(box => box.timestamp - now >= 0)
+            .map(box => {
+                // NOTE(sgiles): There is consideration to allow
+                // only "local_origin" and "tunnel_origin", removing the
+                // need to parse message - this merges the relevant message
+                // fields into the main object
+                const { local_origin, tunnel_origin } =
+                  JSON.parse(box.message);
+                box.local_origin  = local_origin;
+                box.tunnel_origin = tunnel_origin;
+                return Object.freeze(box);
+            })
+        );
 
-          if (!this[p.settings].configured) {
-            this.selectBox();
-          }
-          resolve();
-        })
-        .catch(() => {
-          // When something goes wrong, we still want to resolve the promise so
-          // that a hostname set previously is reused.
-          resolve();
-        });
-    });
+        // If the registration server didn't give us any info and
+        // we have no record of previous registrations, we schedule
+        // a retry.
+        if (!this[p.boxes].length &&
+            !this[p.settings]._localOrigin &&
+            !this[p.settings]._tunnelOrigin) {
+          console.warn('No boxes found. Retrying...');
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              this._initDiscovery().then(resolve, resolve);
+            }, 1000);
+          });
+        }
+
+        if (!this[p.settings].configured) {
+          this.selectBox();
+        }
+
+        this._dispatchEvent('box-online', true);
+      })
+      .catch(() => {
+        // Default to a previously stored box registration.
+        if (this[p.settings]._localOrigin ||
+            this[p.settings]._tunnelOrigin) {
+          this._dispatchEvent('box-online', true);
+        }
+      });
   }
 
   /**
