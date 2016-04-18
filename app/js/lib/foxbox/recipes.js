@@ -139,7 +139,6 @@ export default class Recipes {
     const supportedKinds = [
       'CurrentTimeOfDay',
       'OpenClosed',
-      'LightOn',
       'DoorLocked',
     ];
 
@@ -270,7 +269,7 @@ export default class Recipes {
                           'opened. Here is a picture of what I see.',
                         action: `dev/${setter.service}/camera-latest-image`
                       }),
-                      resource: 'rest1'
+                      resource: 'res1'
                     }
                   }
                 },
@@ -427,9 +426,10 @@ export default class Recipes {
         const clockGetter = services[0].find(
           service => service.kind === 'CurrentTimeOfDay'
         );
-        const firstLightGetter = services[0].find(
+        // Commented until the Philips Hue adapter watcher lands in the box.
+        /*const firstLightGetter = services[0].find(
           service => service.kind === 'LightOn'
-        );
+        );*/
         const lightsSetter = services[1].filter(
           service => service.kind === 'LightOn'
         );
@@ -442,11 +442,11 @@ export default class Recipes {
             range: { Geq: { Duration: 28800 } }
           },
           // When the first light is on.
-          {
+          /*{
             source: [{ id: firstLightGetter.id }],
             kind: firstLightGetter.kind,
             range: { Eq: { OnOff: 'On' } }
-          }
+          }*/
         ];
 
         const execute = [].concat(
@@ -466,9 +466,9 @@ export default class Recipes {
                 WebPushNotify: {
                   message: JSON.stringify({
                     message: 'Hello Alex, I\'ve turned your kitchen lights ' +
-                    'off & locked the door for you. Have a wonderful day'
+                    'off for you. Have a wonderful day!'
                   }),
-                  resource: 'rest1'
+                  resource: 'res1'
                 }
               }
             }
