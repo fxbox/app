@@ -76,30 +76,31 @@ export default class Foxbox extends Service {
   init() {
     window.foxbox = this;
 
-    // No need to block the UI on the discovery process.
-    // Once we discover a box we can connect to, we will start
-    // polling and triggering box-online events with a boolean
-    // indicating if we have access to box or not.
-    this._initDiscovery().then(() => {
-      return this[p.net].init();
-    })
-    .then(() => {
-      // Start polling.
-      this[p.settings].on('pollingEnabled', () => {
-        this.togglePolling(this[p.settings].pollingEnabled);
-      });
-      this.togglePolling(this[p.settings].pollingEnabled);
-
-      this.recipes = new Recipes({
-        settings: this[p.settings],
-        net: this[p.net],
-      });
-    });
-
-    return this._initUserSession()
+    return this[p.net].init()
       .then(() => {
-        // The DB is only initialised if there's no redirection to the box.
-        return this[p.db].init();
+        // No need to block the UI on the discovery process.
+        // Once we discover a box we can connect to, we will start
+        // polling and triggering box-online events with a boolean
+        // indicating if we have access to box or not.
+        this._initDiscovery()
+          .then(() => {
+            // Start polling.
+            this[p.settings].on('pollingEnabled', () => {
+              this.togglePolling(this[p.settings].pollingEnabled);
+            });
+            this.togglePolling(this[p.settings].pollingEnabled);
+          });
+
+        this.recipes = new Recipes({
+          settings: this[p.settings],
+          net: this[p.net],
+        });
+
+        return this._initUserSession()
+          .then(() => {
+            // The DB is only initialised if there's no redirection to the box.
+            return this[p.db].init();
+          });
       });
   }
 
