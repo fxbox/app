@@ -15,13 +15,11 @@ export default class LightService extends BaseService {
   }
 
   isAvailable() {
-    return this.get('available')
-      .then((response) => response[Object.keys(response)[0]].OnOff === 'On');
+    return this.get('available').then((response) => response.OnOff === 'On');
   }
 
   isOn() {
-    return this.get('LightOn')
-      .then((response) => response[Object.keys(response)[0]].OnOff === 'On');
+    return this.get('LightOn').then((response) => response.OnOff === 'On');
   }
 
   /**

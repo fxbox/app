@@ -7,6 +7,7 @@ export default class ServicesListItem extends React.Component {
     this.state = {
       available: false,
       on: true,
+      locked: true,
     };
 
     this.service = props.service;
@@ -28,6 +29,15 @@ export default class ServicesListItem extends React.Component {
           })
           .catch(console.error.bind(console));
         break;
+      case 'door-lock':
+        this.service.isLocked()
+          .then((locked) => {
+            this.setState({ locked });
+          })
+          .catch((error) => {
+            console.error('Can not retrieve door lock status: %o', error);
+          });
+        break;
     }
   }
 
@@ -42,6 +52,19 @@ export default class ServicesListItem extends React.Component {
         // Revert back to the previous value.
         this.setState({ on: !on });
         console.error(error);
+      });
+  }
+
+  onDoorLockUnlock(evt) {
+    const locked = evt.target.checked;
+
+    this.setState({ locked });
+
+    this.service.lockUnlock(locked)
+      .catch((error) => {
+        // Revert back to the previous value.
+        this.setState({ locked: !locked });
+        console.error('Could not change door lock status: %o', error);
       });
   }
 
@@ -189,6 +212,27 @@ export default class ServicesListItem extends React.Component {
     );
   }
 
+  renderDoorLock() {
+    const doorLockNameNode = this.service.name ?
+      (<small>{` (${this.service.name})`}</small>) :
+      null;
+
+    return (
+      <li className="service-list__item" data-icon="door-lock">
+        <a className="service-list__item-link"
+           href={`#services/${this.service.id}`}>
+          Door Lock
+          {doorLockNameNode}
+        </a>
+        <label>
+          <input className="service-list__on-off-toggle" type="checkbox"
+                 checked={this.state.locked}
+                 onChange={this.onDoorLockUnlock.bind(this)}/>
+        </label>
+      </li>
+    );
+  }
+
   renderGenericService(type = 'Unknown service', icon = 'unknown') {
     const serviceNameNode = this.service.name ?
       (<small>{` (${this.service.name})`}</small>) :
@@ -207,31 +251,21 @@ export default class ServicesListItem extends React.Component {
 
   render() {
     switch (this.service.type) {
+      case 'door-lock':
+        return this.renderDoorLock();
       case 'ip-camera':
         return this.renderGenericService('Camera', 'ip-camera');
       case 'light':
         return this.renderLightService();
-      case 'OpenZwave Adapter':
-        if (this.hasDoorLockChannel(this.props.getters) ||
-            this.hasDoorLockChannel(this.props.setters)) {
-          return this.renderGenericService('Door Lock', 'door-lock');
-        }
+      case 'motion-sensor':
         return this.renderGenericService('Motion Sensor', 'motion-sensor');
       default:
         return this.renderGenericService();
     }
-  }
-
-  hasDoorLockChannel(channels) {
-    return Object.keys(channels).find(
-      (key) => channels[key].kind === 'DoorLocked'
-    );
   }
 }
 
 ServicesListItem.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
   service: React.PropTypes.object.isRequired,
-  getters: React.PropTypes.object,
-  setters: React.PropTypes.object,
 };
