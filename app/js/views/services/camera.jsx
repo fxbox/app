@@ -4,60 +4,13 @@ export default class CameraService extends React.Component {
   constructor(props) {
     super(props);
 
-    this.foxbox = props.foxbox;
-    this.service = props.service;
-
     this.state = {
       hasPreview: false,
       hasPreviousSnapshot: false
     };
-  }
 
-  /**
-   * Gets service operation with the specified alias.
-   *
-   * @param {Array<Object>} operations List of available service operations.
-   * @param {string} alias Alias of the operation we're looking for.
-   * @return {Object} Operation associated with the specified alias.
-   *
-   * @private
-   */
-  getOperationByAlias(operations, alias) {
-    let operationKey = Object.keys(operations).find((key) => {
-      let operation = operations[key];
-
-      if (typeof operation.kind === 'object') {
-        return operation.kind.kind === alias;
-      }
-
-      return operation.kind === alias;
-    });
-
-    return operations[operationKey];
-  }
-
-  /**
-   * Gets service "set" operation with the specified alias.
-   *
-   * @param {string} alias Alias of the operation we're looking for.
-   * @return {Object} Operation associated with the specified alias.
-   *
-   * @private
-   */
-  getSetOperation(alias) {
-    return this.getOperationByAlias(this.service.setters, alias);
-  }
-
-  /**
-   * Gets service "get" operation with the specified alias.
-   *
-   * @param {string} alias Alias of the operation we're looking for.
-   * @return {Object} Operation associated with the specified alias.
-   *
-   * @private
-   */
-  getGetOperation(alias) {
-    return this.getOperationByAlias(this.service.getters, alias);
+    this.foxbox = props.foxbox;
+    this.service = props.service;
   }
 
   /**
@@ -66,12 +19,7 @@ export default class CameraService extends React.Component {
    * @private
    */
   takeSnapshot() {
-    this.foxbox.performSetOperation(this.getSetOperation('TakeSnapshot'), '')
-      .then(() => {
-        return this.foxbox.performGetOperation(
-          this.getGetOperation('latest image')
-        );
-      })
+    this.service.takeSnapshot()
       .then((image) => {
         let previousSnapshot = this.refs.snapshotPreview.src;
 

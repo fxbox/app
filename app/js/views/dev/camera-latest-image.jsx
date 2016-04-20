@@ -10,36 +10,34 @@ export default class CameraLatestImage extends BaseView {
       service: null,
       hasPreview: false
     };
+
     this.foxbox = props.foxbox;
   }
 
   componentDidMount() {
-    this.foxbox.getService(this.props.id).then((response) => {
-      const service = response.data;
+    this.foxbox.getService(this.props.id)
+      .then((service) => {
+        this.setState({ service });
 
-      this.setState({ service });
-
-      return this.foxbox.performGetOperation(
-        this.getGetOperation(service, 'latest image')
-      );
-    })
-    .then((image) => {
-      this.refs.snapshotPreview.src = URL.createObjectURL(image);
-      this.setState({ hasPreview: true });
-    })
-    .catch((e) => {
-      console.error(
-        'Error occurred while retrieving latest image for camera (id=%s): ',
-        this.props.id,
-        e
-      );
-    });
+        return service.takeSnapshot();
+      })
+      .then((image) => {
+        this.refs.snapshotPreview.src = URL.createObjectURL(image);
+        this.setState({ hasPreview: true });
+      })
+      .catch((e) => {
+        console.error(
+          'Error occurred while retrieving latest image for camera (id=%s): ',
+          this.props.id,
+          e
+        );
+      });
   }
 
   renderHeader() {
     return super.renderHeader(
-      this.state.service && this.state.service.properties.name ?
-        this.state.service.properties.name :
+      this.state.service && this.state.service.name ?
+        this.state.service.name :
         'Unknown Service'
     );
   }
@@ -62,45 +60,9 @@ export default class CameraLatestImage extends BaseView {
       </div>
     );
   }
-
-  /**
-   * Gets service operation with the specified alias.
-   *
-   * @param {Array<Object>} operations List of available service operations.
-   * @param {string} alias Alias of the operation we're looking for.
-   * @return {Object} Operation associated with the specified alias.
-   *
-   * @private
-   */
-  getOperationByAlias(operations, alias) {
-    let operationKey = Object.keys(operations).find((key) => {
-      let operation = operations[key];
-
-      if (typeof operation.kind === 'object') {
-        return operation.kind.kind === alias;
-      }
-
-      return operation.kind === alias;
-    });
-
-    return operations[operationKey];
-  }
-
-  /**
-   * Gets service "get" operation with the specified alias.
-   *
-   * @param {Object} service Service instance.
-   * @param {string} alias Alias of the operation we're looking for.
-   * @return {Object} Operation associated with the specified alias.
-   *
-   * @private
-   */
-  getGetOperation(service, alias) {
-    return this.getOperationByAlias(service.getters, alias);
-  }
 }
 
 CameraLatestImage.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
-  id: React.PropTypes.string.isRequired
+  id: React.PropTypes.string.isRequired,
 };

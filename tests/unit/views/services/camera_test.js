@@ -15,45 +15,22 @@ function waitFor(fn) {
   });
 }
 
-describe('Camera service view tests', function () {
-  let foxboxStub, serviceStub, component;
+describe('Camera service view tests', function() {
+  let foxboxStub, serviceMock, component;
 
   before(function() {
-    foxboxStub = sinon.stub({
-      performSetOperation: () => {},
-      performGetOperation: () => {}
-    });
+    foxboxStub = sinon.stub({});
 
-    serviceStub = sinon.stub({
-      setters: {
-        'fake-setter': {
-          kind: 'Fake'
-        },
-
-        'setter-id': {
-          kind: 'TakeSnapshot'
-        }
-      },
-      getters: {
-        'fake-getter': {
-          kind: { kind: 'fake' }
-        },
-
-        'getter-id': {
-          kind: { kind: 'latest image' }
-        }
-      },
-      properties: {
-        name: 'service-name'
-      }
-    });
+    serviceMock = {
+      takeSnapshot: () => Promise.resolve(new Blob([], { type: 'image/jpeg' }))
+    };
 
     component = TestUtils.renderIntoDocument(
-      <CameraServiceView service={serviceStub} foxbox={foxboxStub} />
+      <CameraServiceView service={serviceMock} foxbox={foxboxStub}/>
     );
   });
 
-  it('Renders itself in the correct state', function () {
+  it('Renders itself in the correct state', function() {
     const controls = TestUtils.findRenderedDOMComponentWithClass(
       component,
       'camera-controls'
@@ -71,33 +48,18 @@ describe('Camera service view tests', function () {
   });
 
   it('Correctly calls foxbox to make a snapshot', function(done) {
-    foxboxStub.performSetOperation
-      .withArgs(serviceStub.setters['setter-id'])
-      .returns(Promise.resolve());
-
-    foxboxStub.performGetOperation.returns(Promise.reject('Wrong parameters'));
-    foxboxStub.performGetOperation
-      .withArgs(serviceStub.getters['getter-id'])
-      .returns(Promise.resolve(new Blob([], { type: 'image/jpeg' })));
-
     const snapshotButton = TestUtils.findRenderedDOMComponentWithClass(
       component,
       'camera-controls__snapshot-btn'
     );
+    const serviceSpy = sinon.spy(serviceMock, 'takeSnapshot');
 
     TestUtils.Simulate.click(snapshotButton);
 
     // Wait until snapshot preview is ready.
     waitFor(() => !!component.refs.snapshotPreview.src)
       .then(() => {
-        sinon.assert.calledWith(
-          foxboxStub.performSetOperation, serviceStub.setters['setter-id'], ''
-        );
-
-        sinon.assert.calledWith(
-          foxboxStub.performGetOperation, serviceStub.getters['getter-id']
-        );
-
+        sinon.assert.called(serviceSpy);
         assert.match(component.refs.snapshotPreview.src, /^blob:/);
       })
       .then(done, done);

@@ -11,13 +11,7 @@ export default class ServicesList extends React.Component {
     let serviceNodes = userFacingServices.map((service) => (
         <ServicesListItem
           key={service.id}
-          id={service.id}
-          name={service.properties.name}
-          type={service.type}
-          manufacturer={service.properties.manufacturer}
-          model={service.properties.model}
-          setters={service.setters}
-          getters={service.getters}
+          service={service}
           foxbox={this.props.foxbox}/>
       )
     );
@@ -30,15 +24,13 @@ export default class ServicesList extends React.Component {
   isUserFacingService(service) {
     // If service doesn't have any getters and setters, there is no need to
     // display it to the user.
-    if (!Object.keys(service.getters).length &&
-        !Object.keys(service.setters).length) {
+    if (!service.hasGetters && !service.hasSetters) {
       return false;
     }
 
     switch (service.type) {
-      case 'philips_hue@link.mozilla.org':
-      case 'ip-camera@link.mozilla.org':
-      case 'OpenZwave Adapter':
+      case 'ip-camera':
+      case 'light':
         return true;
       default:
         return false;
@@ -48,5 +40,5 @@ export default class ServicesList extends React.Component {
 
 ServicesList.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
-  services: React.PropTypes.array.isRequired
+  services: React.PropTypes.array.isRequired,
 };

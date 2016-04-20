@@ -9,22 +9,27 @@ export default class Service extends BaseView {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      service: null
+    };
+
     this.foxbox = props.foxbox;
   }
 
   componentDidMount() {
-    this.foxbox.getService(this.props.id).then((service) => {
-      this.setState({ service: service.data });
-    }).catch((e) => {
-      console.error('Error occurred while retrieving service: ', e);
-    });
+    this.foxbox.getService(this.props.id)
+      .then((service) => {
+        this.setState({ service });
+      })
+      .catch((e) => {
+        console.error('Error occurred while retrieving service: ', e);
+      });
   }
 
   renderHeader() {
     return super.renderHeader(
-      this.state.service && this.state.service.properties.name ?
-        this.state.service.properties.name :
+      this.state.service && this.state.service.name ?
+        this.state.service.name :
         'Unknown Service'
     );
   }
@@ -35,10 +40,10 @@ export default class Service extends BaseView {
     }
 
     switch (this.state.service.type) {
-      case 'ip-camera@link.mozilla.org':
+      case 'ip-camera':
         return (<CameraServiceView service={this.state.service}
                                    foxbox={this.foxbox}/>);
-      case 'philips_hue@link.mozilla.org':
+      case 'light':
         return (<LightServiceView service={this.state.service}
                                   foxbox={this.foxbox}/>);
       default:
