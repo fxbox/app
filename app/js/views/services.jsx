@@ -11,7 +11,7 @@ export default class Services extends BaseView {
       services: [],
 
       title: '',
-      body: ''
+      body: '',
     };
 
     this.foxbox = props.foxbox;
@@ -22,14 +22,14 @@ export default class Services extends BaseView {
 
   componentDidMount() {
     this.foxbox.getServices()
-      .then(services => {
+      .then((services) => {
         console.log(services);
         this.updateService(services);
       })
       .catch(console.error.bind(console));
 
     this.foxbox.getTags()
-      .then(tags => {
+      .then((tags) => {
         console.log(tags);
       })
       .catch(console.error.bind(console));
@@ -54,7 +54,7 @@ export default class Services extends BaseView {
   updateServiceState(state) {
     // Find the index of the service which state has changed.
     const serviceId = this.state.services.findIndex(
-      service => service.id === state.id
+      (service) => service.id === state.id
     );
     const services = this.state.services;
 
@@ -78,5 +78,5 @@ export default class Services extends BaseView {
 }
 
 Services.propTypes = {
-  foxbox: React.PropTypes.object.isRequired
+  foxbox: React.PropTypes.object.isRequired,
 };

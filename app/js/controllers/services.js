@@ -7,7 +7,7 @@ import Services from 'js/views/services';
 export default class ServicesController extends Controller {
   main() {
     ReactDOM.render(React.createElement(Services, {
-      foxbox: this.foxbox
+      foxbox: this.foxbox,
     }), this.mountNode);
   }
 }

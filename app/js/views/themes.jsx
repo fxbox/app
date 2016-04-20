@@ -10,7 +10,7 @@ export default class Themes extends BaseView {
     super(props);
 
     this.state = {
-      themes: []
+      themes: [],
     };
 
     this.foxbox = props.foxbox;
@@ -23,7 +23,7 @@ export default class Themes extends BaseView {
 
   update() {
     this.foxbox.recipes.getAll()
-      .then(themes => {
+      .then((themes) => {
         this.setState({ themes });
       })
       .catch(console.error.bind(console));
@@ -43,7 +43,7 @@ export default class Themes extends BaseView {
   }
 
   renderBody() {
-    const themeItems = this.state.themes.map(theme => (
+    const themeItems = this.state.themes.map((theme) => (
       <ThemesListItemView key={theme.id}
                           theme={theme}
                           update={this.update}
@@ -59,5 +59,5 @@ export default class Themes extends BaseView {
 }
 
 Themes.propTypes = {
-  foxbox: React.PropTypes.object.isRequired
+  foxbox: React.PropTypes.object.isRequired,
 };

@@ -12,7 +12,7 @@ describe('Service controller tests', function () {
 
     controller = new ServiceController({
       foxbox: foxboxStub,
-      mountNode: mountNodeStub
+      mountNode: mountNodeStub,
     });
   });
 

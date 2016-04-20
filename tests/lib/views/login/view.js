@@ -5,7 +5,7 @@ var LoginAccessors = require('./accessors');
 function LoginView() {
   [].push.call(arguments, LoginAccessors);
   View.apply(this, arguments);
-  
+
   this.accessors.startLoginButton;
 }
 
@@ -19,7 +19,7 @@ LoginView.prototype = Object.assign({
       var ServicesView = require('../services/view');
       return new ServicesView(this.driver);
     });
-  }
+  },
 
 }, View.prototype);
 

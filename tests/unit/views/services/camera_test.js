@@ -22,7 +22,7 @@ describe('Camera service view tests', function() {
     foxboxStub = sinon.stub({});
 
     serviceMock = {
-      takeSnapshot: () => Promise.resolve(new Blob([], { type: 'image/jpeg' }))
+      takeSnapshot: () => Promise.resolve(new Blob([], { type: 'image/jpeg' })),
     };
 
     component = TestUtils.renderIntoDocument(

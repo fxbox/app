@@ -40,5 +40,5 @@ export default class BaseView extends React.Component {
 }
 
 BaseView.propTypes = {
-  foxbox: React.PropTypes.object.isRequired
+  foxbox: React.PropTypes.object.isRequired,
 };

@@ -13,7 +13,7 @@ ServicesAccessors.prototype = Object.assign({
 
   get recipesViewButton() {
     return this.waitForElement(By.css('a[href="#themes"]'));
-  }
+  },
 }, Accessors.prototype);
 
 module.exports = ServicesAccessors;

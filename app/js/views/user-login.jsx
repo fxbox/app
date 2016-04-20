@@ -9,7 +9,7 @@ export default class UserLogin extends BaseView {
     this.state = {
       boxes: props.foxbox.boxes,
       value: null,
-      loginEnabled: false
+      loginEnabled: false,
     };
 
     this.foxbox = props.foxbox;
@@ -84,5 +84,5 @@ export default class UserLogin extends BaseView {
 }
 
 UserLogin.propTypes = {
-  foxbox: React.PropTypes.object.isRequired
+  foxbox: React.PropTypes.object.isRequired,
 };

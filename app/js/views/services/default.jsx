@@ -8,7 +8,7 @@ export default class Service extends React.Component {
 
     this.state = {
       data: props.service.tags,
-      tags: []
+      tags: [],
     };
 
     this.foxbox = props.foxbox;
@@ -42,8 +42,8 @@ export default class Service extends React.Component {
 
   populateTags() {
     this.foxbox.getTags()
-      .then(tags => {
-        tags.forEach(tag => {
+      .then((tags) => {
+        tags.forEach((tag) => {
           tag.data.checked = !!(this.state.data &&
             this.state.data.includes(tag.id));
         });

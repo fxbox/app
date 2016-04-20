@@ -8,7 +8,7 @@ export default class CameraLatestImage extends BaseView {
 
     this.state = {
       service: null,
-      hasPreview: false
+      hasPreview: false,
     };
 
     this.foxbox = props.foxbox;
@@ -25,11 +25,11 @@ export default class CameraLatestImage extends BaseView {
         this.refs.snapshotPreview.src = URL.createObjectURL(image);
         this.setState({ hasPreview: true });
       })
-      .catch((e) => {
+      .catch((error) => {
         console.error(
           'Error occurred while retrieving latest image for camera (id=%s): ',
           this.props.id,
-          e
+          error
         );
       });
   }

@@ -20,8 +20,8 @@ require.config({
   // ReactDOM expects "react" module to be defined, but it is not.
   map: {
     '*': {
-      'react': 'components/react'
-    }
+      'react': 'components/react',
+    },
   },
 
   paths: {
@@ -29,6 +29,6 @@ require.config({
     'js': 'dist/app/js',
     // Addons include React TestUtils.
     'components/react': 'node_modules/react/dist/react-with-addons',
-    'rxjs': 'node_modules/rxjs/bundles/Rx.umd'
-  }
+    'rxjs': 'node_modules/rxjs/bundles/Rx.umd',
+  },
 });

@@ -18,7 +18,8 @@ LoginAccessors.prototype = Object.assign({
 
   get submitButton() {
     return this.waitForElement(By.id('signin-button'));
-  }
+  },
+
 }, Accessors.prototype);
 
 module.exports = LoginAccessors;

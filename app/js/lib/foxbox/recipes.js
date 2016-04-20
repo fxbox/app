@@ -54,22 +54,24 @@ export default class Recipes {
       'POST',
       { getters: [{ kind: 'ThinkerbellRuleSource' }] }
     )
-    .then(services => {
+    .then((services) => {
       // Mark getters and setters with more friendly names.
-      return services.map(service => {
-        const enabledGetterId = Object.keys(service.getters).find(getterId => {
-          return service.getters[getterId].kind === 'ThinkerbellRuleOn';
-        });
-        const sourceGetterId = Object.keys(service.getters).find(getterId => {
-          return service.getters[getterId].kind === 'ThinkerbellRuleSource';
-        });
+      return services.map((service) => {
+        const enabledGetterId = Object.keys(service.getters).find(
+          (getterId) => service.getters[getterId].kind === 'ThinkerbellRuleOn'
+        );
+        const sourceGetterId = Object.keys(service.getters).find(
+          (getterId) => service.getters[getterId].kind ===
+          'ThinkerbellRuleSource'
+        );
 
-        const enabledSetterId = Object.keys(service.setters).find(setterId => {
-          return service.setters[setterId].kind === 'ThinkerbellRuleOn';
-        });
-        const removeSetterId = Object.keys(service.setters).find(setterId => {
-          return service.setters[setterId].kind === 'RemoveThinkerbellRule';
-        });
+        const enabledSetterId = Object.keys(service.setters).find(
+          (setterId) => service.setters[setterId].kind === 'ThinkerbellRuleOn'
+        );
+        const removeSetterId = Object.keys(service.setters).find(
+          (setterId) => service.setters[setterId].kind ===
+          'RemoveThinkerbellRule'
+        );
 
         return {
           id: service.id,
@@ -78,11 +80,11 @@ export default class Recipes {
           setEnabled: enabledSetterId,
           remove: removeSetterId,
           status: null,
-          source: null
+          source: null,
         };
       });
     })
-    .then(services => {
+    .then((services) => {
       // Fetch recipe enabled statuses and sources.
       const { enabledSelectors, sourceSelectors } = services.reduce(
         (selectors, service) => {
@@ -99,10 +101,10 @@ export default class Recipes {
 
       return Promise.all([
         this[p.net].fetchJSON(getterURL, 'PUT', enabledSelectors),
-        this[p.net].fetchJSON(getterURL, 'PUT', sourceSelectors)
+        this[p.net].fetchJSON(getterURL, 'PUT', sourceSelectors),
       ])
       .then(([statuses, sources]) => {
-        return services.map(service => {
+        return services.map((service) => {
           const statusResponse = statuses[service.getEnabled];
           const sourceResponse = sources[service.getSource];
 
@@ -146,10 +148,10 @@ export default class Recipes {
       `v${this[p.settings].apiVersion}/channels/getters`;
 
     return this[p.net].fetchJSON(
-      gettersURL, 'POST', supportedKinds.map(kind => ({ kind }))
+      gettersURL, 'POST', supportedKinds.map((kind) => ({ kind }))
     )
-    .then(getters => {
-      return getters.map(getter => {
+    .then((getters) => {
+      return getters.map((getter) => {
         let name, options = [];
 
         // Assign user friendly name to every getter and it's value options.
@@ -159,32 +161,32 @@ export default class Recipes {
             options.push(...[{
               label: 'in the morning',
               // 08:00 AM, 8 * 60 * 60 = 28800 seconds from 00:00.
-              value: { Geq: { Duration: 28800 } }
+              value: { Geq: { Duration: 28800 } },
             }, {
               label: 'in the afternoon',
               // 02:00 PM, 14 * 60 * 60 = 50400 seconds from 00:00.
-              value: { Geq: { Duration: 50400 } }
+              value: { Geq: { Duration: 50400 } },
             }, {
               label: 'in the evening',
               // 06:00 PM, 18 * 60 * 60 = 64800 seconds from 00:00.
-              value: { Geq: { Duration: 64800 } }
+              value: { Geq: { Duration: 64800 } },
             }]);
             break;
           case 'OpenClosed':
             name = 'Motion Sensor';
             options.push({
               label: 'detects motion',
-              value: { Eq: { OpenClosed: 'Open' } }
+              value: { Eq: { OpenClosed: 'Open' } },
             });
             break;
           case 'DoorLocked':
             name = 'Door';
             options.push({
               label: 'is locked',
-              value: { Eq: { DoorLocked: 'Locked' } }
+              value: { Eq: { DoorLocked: 'Locked' } },
             }, {
               label: 'is unlocked',
-              value: { Eq: { DoorLocked: 'Unlocked' } }
+              value: { Eq: { DoorLocked: 'Unlocked' } },
             });
         }
 
@@ -192,7 +194,7 @@ export default class Recipes {
           id: getter.id,
           kind: getter.kind,
           name: name || getter.adapter,
-          options
+          options,
         };
       });
     });
@@ -205,7 +207,7 @@ export default class Recipes {
         vendor: 'team@link.mozilla.org',
         adapter: 'eSpeak adapter',
         kind: 'Sentence',
-        type: 'String'
+        type: 'String',
       },
       'TakeSnapshot',
       'LightOn',
@@ -216,10 +218,10 @@ export default class Recipes {
       `v${this[p.settings].apiVersion}/channels/setters`;
 
     return this[p.net].fetchJSON(
-      settersURL, 'POST', supportedKinds.map(kind => ({ kind }))
+      settersURL, 'POST', supportedKinds.map((kind) => ({ kind }))
     )
-    .then(setters => {
-      return setters.map(setter => {
+    .then((setters) => {
+      return setters.map((setter) => {
         const options = [];
         let name;
 
@@ -230,15 +232,15 @@ export default class Recipes {
             options.push(...[
               {
                 label: '"Good morning!"',
-                value: { String: '"Good morning!"' }
+                value: { String: '"Good morning!"' },
               },
               {
                 label: '"Good afternoon!"',
-                value: { String: '"Good afternoon!"' }
+                value: { String: '"Good afternoon!"' },
               },
               {
                 label: '"Good evening!"',
-                value: { String: '"Good evening!"' }
+                value: { String: '"Good evening!"' },
               },
             ]);
           }
@@ -247,7 +249,7 @@ export default class Recipes {
           options.push(...[
             {
               label: 'takes a picture',
-              value: { 'Unit': null }
+              value: { 'Unit': null },
             },
             {
               label: 'sends me a picture',
@@ -256,7 +258,7 @@ export default class Recipes {
                   // Take a picture.
                   destination: [{ id: setter.id }],
                   kind: 'TakeSnapshot',
-                  value: { Unit: null }
+                  value: { Unit: null },
                 },
                 {
                   // Notify the user.
@@ -267,13 +269,13 @@ export default class Recipes {
                       message: JSON.stringify({
                         message: 'Your bedroom patio door has just been ' +
                           'opened. Here is a picture of what I see.',
-                        action: `dev/${setter.service}/camera-latest-image`
+                        action: `dev/${setter.service}/camera-latest-image`,
                       }),
-                      resource: 'res1'
-                    }
-                  }
+                      resource: 'res1',
+                    },
+                  },
                 },
-              ]
+              ],
             },
           ]);
         } else if (setter.kind === 'LightOn') {
@@ -281,11 +283,11 @@ export default class Recipes {
           options.push(...[
             {
               label: 'gets turned on',
-              value: { OnOff: 'On' }
+              value: { OnOff: 'On' },
             },
             {
               label: 'gets turned off',
-              value: { OnOff: 'Off' }
+              value: { OnOff: 'Off' },
             },
           ]);
         } else if (setter.kind === 'DoorLocked') {
@@ -293,11 +295,11 @@ export default class Recipes {
           options.push(...[
             {
               label: 'locks the door',
-              value: { DoorLocked: 'Locked' }
+              value: { DoorLocked: 'Locked' },
             },
             {
               label: 'unlocks the door',
-              value: { DoorLocked: 'Unlocked' }
+              value: { DoorLocked: 'Unlocked' },
             },
           ]);
         }
@@ -327,8 +329,8 @@ export default class Recipes {
         {
           destination: [{ id: setter.id }],
           kind: setter.kind,
-          value: setterValue.value
-        }
+          value: setterValue.value,
+        },
       ];
     } else {
       console.error('Setter doesn\'t have a supported format:',
@@ -343,12 +345,12 @@ export default class Recipes {
             {
               source: [{ id: getter.id }],
               kind: getter.kind,
-              range: getterValue.value
-            }
+              range: getterValue.value,
+            },
           ],
-          execute
-        }
-      ]
+          execute,
+        },
+      ],
     };
 
     return this[p.net].fetchJSON(
@@ -356,14 +358,14 @@ export default class Recipes {
       'PUT',
       {
         select: {
-          kind: 'AddThinkerbellRule'
+          kind: 'AddThinkerbellRule',
         },
         value: {
           ThinkerbellRule: {
             name,
-            source: JSON.stringify(recipe)
-          }
-        }
+            source: JSON.stringify(recipe),
+          },
+        },
       }
     );
   }
@@ -380,7 +382,7 @@ export default class Recipes {
       'PUT',
       {
         select: { id: recipe[p.service].remove },
-        value: null
+        value: null,
       }
     );
   }
@@ -399,7 +401,7 @@ export default class Recipes {
       'PUT',
       {
         select: { id: recipe[p.service].setEnabled },
-        value: { OnOff: textValue }
+        value: { OnOff: textValue },
       }
     )
     .then(() => {
@@ -420,18 +422,18 @@ export default class Recipes {
   createDemoRecipes() {
     Promise.all([
         this.getGetters(),
-        this.getSetters()
+        this.getSetters(),
       ])
-      .then(services => {
+      .then((services) => {
         const clockGetter = services[0].find(
-          service => service.kind === 'CurrentTimeOfDay'
+          (service) => service.kind === 'CurrentTimeOfDay'
         );
         // Commented until the Philips Hue adapter watcher lands in the box.
         /*const firstLightGetter = services[0].find(
-          service => service.kind === 'LightOn'
+          (service) => service.kind === 'LightOn'
         );*/
         const lightsSetter = services[1].filter(
-          service => service.kind === 'LightOn'
+          (service) => service.kind === 'LightOn'
         );
 
         const conditions = [
@@ -439,22 +441,22 @@ export default class Recipes {
           {
             source: [{ id: clockGetter.id }],
             kind: 'CurrentTimeOfDay',
-            range: { Geq: { Duration: 28800 } }
+            range: { Geq: { Duration: 28800 } },
           },
           // When the first light is on.
           /*{
             source: [{ id: firstLightGetter.id }],
             kind: firstLightGetter.kind,
-            range: { Eq: { OnOff: 'On' } }
-          }*/
+            range: { Eq: { OnOff: 'On' } },
+          },*/
         ];
 
         const execute = [].concat(
           // Turn off all lights.
-          lightsSetter.map(setter => ({
+          lightsSetter.map((setter) => ({
             destination: [{ id: setter.id }],
             kind: setter.kind,
-            value: { OnOff: 'Off' }
+            value: { OnOff: 'Off' },
           })),
           // Notify the user.
           [
@@ -466,12 +468,12 @@ export default class Recipes {
                 WebPushNotify: {
                   message: JSON.stringify({
                     message: 'Hello Alex, I\'ve turned your kitchen lights ' +
-                    'off for you. Have a wonderful day!'
+                    'off for you. Have a wonderful day!',
                   }),
-                  resource: 'res1'
-                }
-              }
-            }
+                  resource: 'res1',
+                },
+              },
+            },
           ]);
 
         const recipe = {
@@ -479,9 +481,9 @@ export default class Recipes {
           rules: [
             {
               conditions,
-              execute
-            }
-          ]
+              execute,
+            },
+          ],
         };
 
         console.log('Recipe for the demo', recipe);
@@ -492,14 +494,14 @@ export default class Recipes {
           'PUT',
           {
             select: {
-              kind: 'AddThinkerbellRule'
+              kind: 'AddThinkerbellRule',
             },
             value: {
               ThinkerbellRule: {
                 name,
-                source: JSON.stringify(recipe)
-              }
-            }
+                source: JSON.stringify(recipe),
+              },
+            },
           }
         );
       });
@@ -539,20 +541,20 @@ export default class Recipes {
         {
           source: [{ id: clockGetter.id }],
           kind: 'CurrentTimeOfDay',
-          range: { Geq: { Duration: 28800 } }
+          range: { Geq: { Duration: 28800 } },
         },
         {
           source: [{ id: doorLockGetter.id }],
           kind: doorLockGetter.kind,
-          range: { Eq: { DoorLocked: 'Unlocked' } }
-        }
+          range: { Eq: { DoorLocked: 'Unlocked' } },
+        },
       ];
 
       const execute = [
         {
           destination: [{ id: doorLockSetter.id }],
           kind: doorLockSetter.kind,
-          value: { DoorLocked: 'Locked' }
+          value: { DoorLocked: 'Locked' },
         },
         {
           // Notify the user.
@@ -562,12 +564,12 @@ export default class Recipes {
             WebPushNotify: {
               message: JSON.stringify({
                 message: 'Hello Alex, I\'ve locked the door for you. ' +
-                  'Have a wonderful day!'
+                  'Have a wonderful day!',
               }),
-              resource: 'res1'
-            }
-          }
-        }
+              resource: 'res1',
+            },
+          },
+        },
       ];
 
       const recipe = {
@@ -575,9 +577,9 @@ export default class Recipes {
         rules: [
           {
             conditions,
-            execute
-          }
-        ]
+            execute,
+          },
+        ],
       };
 
       return this[p.net].fetchJSON(
@@ -586,14 +588,14 @@ export default class Recipes {
         'PUT',
         {
           select: {
-            kind: 'AddThinkerbellRule'
+            kind: 'AddThinkerbellRule',
           },
           value: {
             ThinkerbellRule: {
               name,
-              source: JSON.stringify(recipe)
-            }
-          }
+              source: JSON.stringify(recipe),
+            },
+          },
         }
       );
     });

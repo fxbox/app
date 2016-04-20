@@ -13,7 +13,7 @@ const p = Object.freeze({
   getById: Symbol('getById'),
   set: Symbol('set'),
   remove: Symbol('remove'),
-  clearDb: Symbol('clearDb')
+  clearDb: Symbol('clearDb'),
 });
 
 // The name of the db.
@@ -37,12 +37,12 @@ export default class Db {
     return new Promise((resolve, reject) => {
       let req = indexedDB.open(DB_NAME, DB_VERSION);
       req.onupgradeneeded = this[p.upgradeSchema];
-      req.onsuccess = evt => {
+      req.onsuccess = (evt) => {
         this[p.db] = evt.target.result;
 
         // Prepopulate the tags with common values.
         this.getTags()
-          .then(tags => {
+          .then((tags) => {
             if (!tags || !tags.length) {
               this.setTag({ name: 'Kitchen' });
               this.setTag({ name: 'Bedroom' });
@@ -52,9 +52,9 @@ export default class Db {
             return resolve();
           });
       };
-      req.onerror = (e) => {
-        console.error('Error opening database:', e);
-        return reject(e);
+      req.onerror = (error) => {
+        console.error('Error opening database:', error);
+        return reject(error);
       };
     });
   }
@@ -69,7 +69,7 @@ export default class Db {
 
       store = db.createObjectStore(DB_TAG_STORE, {
         keyPath: 'id',
-        autoIncrement: true
+        autoIncrement: true,
       });
       store.createIndex('name', 'name', { unique: true });
     }
@@ -135,7 +135,7 @@ export default class Db {
       txn.oncomplete = () => {
         resolve(results);
       };
-      txn.objectStore(store).openCursor().onsuccess = evt => {
+      txn.objectStore(store).openCursor().onsuccess = (evt) => {
         let cursor = evt.target.result;
         if (cursor) {
           results.push(cursor.value);
@@ -149,7 +149,7 @@ export default class Db {
     return new Promise((resolve, reject) => {
       let txn = this[p.db].transaction([store], 'readonly');
       txn.onerror = reject;
-      txn.objectStore(store).get(id).onsuccess = evt => {
+      txn.objectStore(store).get(id).onsuccess = (evt) => {
         resolve(evt.target.result);
       };
     });
@@ -167,8 +167,8 @@ export default class Db {
         } else {
           txn.objectStore(store).put({ data });
         }
-      } catch (e) {
-        console.error(`Error putting data in ${DB_NAME}:`, e);
+      } catch (error) {
+        console.error(`Error putting data in ${DB_NAME}:`, error);
         resolve();
       }
     });
@@ -181,8 +181,8 @@ export default class Db {
       txn.onerror = reject;
       try {
         txn.objectStore(store).delete(id);
-      } catch (e) {
-        console.error(`Error deleting data from ${DB_NAME}:`, e);
+      } catch (error) {
+        console.error(`Error deleting data from ${DB_NAME}:`, error);
         resolve();
       }
     });

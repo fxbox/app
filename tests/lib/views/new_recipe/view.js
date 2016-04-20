@@ -14,4 +14,5 @@ NewRecipeView.prototype = Object.assign({
 //to add functions here
 
 }, View.prototype);
+
 module.exports = NewRecipeView;

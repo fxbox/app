@@ -9,10 +9,9 @@ describe('Recipes tests', function() {
   before(() => {
     app = new App();
     return app.init()
-      .then(defaultView => { loginView = defaultView; })//;
-      .then(() => { return loginView.loginSuccess(12345678);})
-      .then(servicesView =>  
-        { return servicesGeneralView = servicesView; });
+      .then((defaultView) => { loginView = defaultView; })
+      .then(() => loginView.loginSuccess(12345678))
+      .then((servicesView) => servicesGeneralView = servicesView);
   });
 
   afterEach(() => {
@@ -25,7 +24,6 @@ describe('Recipes tests', function() {
 
   it('should be able to start creating a new recipe', () => {
     return servicesGeneralView.goToRecipesView()
-     .then(recipesView => {
-       return recipesView.goToNewRecipe().tap; });
+      .then((recipesView) => recipesView.goToNewRecipe().tap);
   });
 });

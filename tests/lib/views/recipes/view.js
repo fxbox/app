@@ -16,7 +16,8 @@ RecipesView.prototype = Object.assign({
       var NewRecipeView = require('../new_recipe/view');
       return new NewRecipeView(this.driver);
     });
-  }
+  },
 
 }, View.prototype);
+
 module.exports = RecipesView;

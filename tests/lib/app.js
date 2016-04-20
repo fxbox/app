@@ -36,7 +36,7 @@ App.prototype = {
   get defaultView() {
     var LoginView = require('./views/login/view');
     return new LoginView(this.driver);
-  }
+  },
 };
 
 module.exports = App;

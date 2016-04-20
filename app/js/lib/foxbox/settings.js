@@ -50,12 +50,12 @@ export default class Settings extends Model {
       _pollingEnabled: pollingEnabled,
 
       _pushEndpoint: storage.getItem(`${PREFIX}push_endpoint`) || null,
-      _pushPubKey: storage.getItem(`${PREFIX}push_pubKey`) || null
+      _pushPubKey: storage.getItem(`${PREFIX}push_pubKey`) || null,
     });
   }
 
   clear() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       // @todo Remove only the items set here.
       storage.clear();
       this._session = null;

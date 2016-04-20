@@ -25,7 +25,9 @@
     "no-var": ["error"],
     "quotes": ["error", "single"],
     "semi": ["error", "always"],
-    "comma-dangle": ["warn", "only-multiline"]
+    "comma-dangle": ["error", "always-multiline"],
+    "arrow-parens": ["error", "always"],
+    "guard-for-in": ["error"]
   },
 
   "env": {
