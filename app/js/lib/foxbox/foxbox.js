@@ -175,12 +175,7 @@ export default class Foxbox extends Service {
         if (!this[p.boxes].length &&
             !this[p.settings]._localOrigin &&
             !this[p.settings]._tunnelOrigin) {
-          console.warn('No boxes found. Retrying...');
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              this._initDiscovery().then(resolve, resolve);
-            }, 1000);
-          });
+          throw new Error('Registration service did not return any boxes.');
         }
 
         if (!this[p.settings].configured) {
@@ -189,11 +184,20 @@ export default class Foxbox extends Service {
 
         this._dispatchEvent('box-online', true);
       })
-      .catch(() => {
-        // Default to a previously stored box registration.
+      .catch((e) => {
         if (this[p.settings]._localOrigin ||
             this[p.settings]._tunnelOrigin) {
+          // Default to a previously stored box registration.
           this._dispatchEvent('box-online', true);
+        } else {
+          // If there's no previously stored box registration, we schedule a
+          // retry.
+          console.warn('Retrying box discovery... Reason is %o', e);
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              this._initDiscovery().then(resolve, resolve);
+            }, 1000);
+          });
         }
       });
   }
