@@ -7,16 +7,16 @@
  * ServiceWorkerWare uninitialized.
  */
 
-/* global worker */
+/* eslint-env serviceworker */
 
 // In our case we will write vanilla ServiceWorker code
 
-self.addEventListener('push', function(evt) {
-  var obj = evt.data ? evt.data.json() : {};
+self.addEventListener('push', (evt) => {
+  const obj = evt.data ? evt.data.json() : {};
   console.log('Push received ', obj);
 
   if (obj && obj.message) {
-    var message = JSON.parse(obj.message);
+    const message = JSON.parse(obj.message);
     console.log('Got the message ', message);
     evt.waitUntil(processNotification(message));
   } else {
@@ -24,28 +24,28 @@ self.addEventListener('push', function(evt) {
   }
 });
 
-self.addEventListener('pushsubscriptionchange', function(evt) {
+self.addEventListener('pushsubscriptionchange', (evt) => {
   console.log('Got subscription change event ', evt);
 });
 
-self.addEventListener('notificationclick', function(evt) {
+self.addEventListener('notificationclick', (evt) => {
   evt.notification.close();
-  evt.waitUntil(clients.matchAll({
-    type: "window"
-  })
-  .then(function(clients) {
-    clients.forEach((client) => {
-      if ('focus' in client) {
-        client.focus();
-      }
-    });
-  }));
+  evt.waitUntil(
+    self.clients.matchAll({ type: 'window' })
+      .then((clients) => {
+        clients.forEach((client) => {
+          if ('focus' in client) {
+            client.focus();
+          }
+        });
+      })
+  );
 });
 
 function processNotification(obj) {
   return notifyClient(obj)
     .then(() => {
-       return showNotification(obj);
+      return showNotification(obj);
     });
 }
 
@@ -53,7 +53,8 @@ function processNotification(obj) {
  * Notify the foxlink library of the message received via push.
  * This will notify all the windows/tabs opened with the app.
  *
- * @param {Object} obj Payload coming from the push notification
+ * @param {Object} obj Payload coming from the push notification.
+ * @return {Promise}
  */
 function notifyClient(obj) {
   return self.clients.matchAll()
@@ -68,18 +69,18 @@ function notifyClient(obj) {
  * Displays a notification based on the data coming from the
  * push.
  *
- * @param {object} obj Payload coming from the push notification
- * @return {Promise} Promise resolved once the notification is showed
+ * @param {Object} obj Payload coming from the push notification.
+ * @return {Promise} Promise resolved once the notification is showed.
  */
 function showNotification(obj) {
-  var title = 'Link: Notification';
-  var body = obj.message;
-  var icon = 'img/icon.svg';
-  var tag = obj.resource || obj.tag || 'link-push';
+  const title = 'Link: Notification';
+  const body = obj.message;
+  const icon = 'img/icon.svg';
+  const tag = obj.resource || obj.tag || 'link-push';
 
   return self.registration.showNotification(title, {
-    body: body,
-    icon: icon,
-    tag: tag
+    body,
+    icon,
+    tag,
   });
 }
