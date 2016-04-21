@@ -1,0 +1,14 @@
+[{
+ "id":"9be519db2d8c40fcb4f7a037260c92bb",
+ "name":"philips hue service",
+  "description":"Service for Philips Hue Light",
+  "http_url":"http://localhost/3000/services/9be519db2d8c40fcb4f7a037260c92bb/",
+  "ws_url":"ws://:::4000/services/9be519db2d8c40fcb4f7a037260c92bb/",
+  "properties":
+            {
+            "manufacturer":"Philips",
+            "model":"LST002",
+            "type":"Extended color light"
+            }
+ }]
+  
