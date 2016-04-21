@@ -77,7 +77,7 @@ export default class UserLogin extends BaseView {
         <img className="user-login__logo" src="img/icon.svg"/>
         {boxes}
         <button className="user-login__login-button"
-                disabled={!this.state.loginEnabled}>Log in</button>
+                disabled={!this.state.loginEnabled}>Connect to your box</button>
       </form>
     );
   }
