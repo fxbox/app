@@ -13,6 +13,8 @@ import WebPush from './webpush';
 import BaseService from './services/base';
 import IpCameraService from './services/ip-camera';
 import LightService from './services/light';
+import DoorLockService from './services/door-lock';
+import MotionSensorService from './services/motion-sensor';
 
 // Private members.
 const p = Object.freeze({
@@ -28,6 +30,7 @@ const p = Object.freeze({
   // Private methods.
   fetchServices: Symbol('fetchServices'),
   getServiceInstance: Symbol('getServiceInstance'),
+  hasDoorLockChannel: Symbol('hasDoorLockChannel'),
 });
 
 /**
@@ -471,8 +474,22 @@ export default class Foxbox extends Service {
       case 'philips_hue@link.mozilla.org':
         return new LightService(data, config);
 
+      case 'OpenZwave Adapter':
+        if (this[p.hasDoorLockChannel](data.getters) ||
+            this[p.hasDoorLockChannel](data.setters)) {
+          return new DoorLockService(data, config);
+        }
+
+        return new MotionSensorService(data, config);
+
       default:
         return new BaseService(data, config);
     }
+  }
+
+  [p.hasDoorLockChannel](channels) {
+    return Object.keys(channels).find(
+      (key) => channels[key].kind === 'DoorLocked'
+    );
   }
 }

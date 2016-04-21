@@ -28,13 +28,7 @@ export default class ServicesList extends React.Component {
       return false;
     }
 
-    switch (service.type) {
-      case 'ip-camera':
-      case 'light':
-        return true;
-      default:
-        return false;
-    }
+    return service.type !== 'unknown';
   }
 }
 

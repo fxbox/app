@@ -19,7 +19,7 @@ export default class CameraLatestImage extends BaseView {
       .then((service) => {
         this.setState({ service });
 
-        return service.takeSnapshot();
+        return service.getLatestImage();
       })
       .then((image) => {
         this.refs.snapshotPreview.src = URL.createObjectURL(image);

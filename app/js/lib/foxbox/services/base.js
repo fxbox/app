@@ -113,7 +113,12 @@ export default class BaseService {
       `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/get`,
       'PUT',
       body
-    );
+    )
+    .then((response) => {
+      // We request getter value by unique getter id, so we can have only
+      // results for this getter.
+      return response[getter.id];
+    });
   }
 
   /**

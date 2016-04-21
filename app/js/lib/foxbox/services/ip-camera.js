@@ -14,10 +14,6 @@ export default class IpCameraService extends BaseService {
     return TYPE;
   }
 
-  getImageList() {
-    return this.get('image_list');
-  }
-
   getLatestImage() {
     return this.get('latest image');
   }
