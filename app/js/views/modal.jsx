@@ -6,7 +6,7 @@ export default class Modal extends React.Component {
   }
 
   render() {
-    let style = 'modal' + (this.props.visible ? ' visible' : '');
+    let style = `modal${(this.props.visible ? ' visible' : '')}`;
 
     return (
       <div className={style}>

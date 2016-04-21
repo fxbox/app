@@ -14,13 +14,9 @@ describe('Recipes tests', function() {
       .then((servicesView) => servicesGeneralView = servicesView);
   });
 
-  afterEach(() => {
-    return app.cleanUp();
-  });
+  afterEach(() => app.cleanUp());
 
-  after(() => {
-    return app.stop();
-  });
+  after(() => app.stop());
 
   it('should be able to start creating a new recipe', () => {
     return servicesGeneralView.goToRecipesView()

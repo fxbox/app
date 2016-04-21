@@ -54,8 +54,8 @@ export default class Recipes {
       'POST',
       { getters: [{ kind: 'ThinkerbellRuleSource' }] }
     )
+    // Mark getters and setters with more friendly names.
     .then((services) => {
-      // Mark getters and setters with more friendly names.
       return services.map((service) => {
         const enabledGetterId = Object.keys(service.getters).find(
           (getterId) => service.getters[getterId].kind === 'ThinkerbellRuleOn'
@@ -152,7 +152,8 @@ export default class Recipes {
     )
     .then((getters) => {
       return getters.map((getter) => {
-        let name, options = [];
+        let name;
+        const options = [];
 
         // Assign user friendly name to every getter and it's value options.
         switch (getter.kind) {

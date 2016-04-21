@@ -72,7 +72,7 @@ function assertValidHandler(handler) {
 
 function assertAllowedEventName(allowedEvents, eventName) {
   if (allowedEvents && allowedEvents.indexOf(eventName) < 0) {
-    throw new Error('Event "' + eventName + '" is not allowed!');
+    throw new Error(`Event "${eventName}" is not allowed!`);
   }
 }
 

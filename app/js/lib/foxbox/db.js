@@ -35,7 +35,7 @@ export default class Db {
 
   init() {
     return new Promise((resolve, reject) => {
-      let req = indexedDB.open(DB_NAME, DB_VERSION);
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
       req.onupgradeneeded = this[p.upgradeSchema];
       req.onsuccess = (evt) => {
         this[p.db] = evt.target.result;
@@ -60,8 +60,8 @@ export default class Db {
   }
 
   [p.upgradeSchema](evt) {
-    let db = evt.target.result;
-    let fromVersion = evt.oldVersion;
+    const db = evt.target.result;
+    const fromVersion = evt.oldVersion;
     if (fromVersion < 1) {
       let store = db.createObjectStore(DB_SERVICE_STORE, { keyPath: 'id' });
       store.createIndex('id', 'id', { unique: true });
@@ -79,7 +79,7 @@ export default class Db {
     return new Promise((resolve, reject) => {
       this[p.db].close();
 
-      let req = indexedDB.deleteDatabase(DB_NAME);
+      const req = indexedDB.deleteDatabase(DB_NAME);
       req.onsuccess = resolve;
       req.onerror = reject;
       req.onblocked = reject;
@@ -129,14 +129,14 @@ export default class Db {
 
   [p.getAll](store) {
     return new Promise((resolve, reject) => {
-      let txn = this[p.db].transaction([store], 'readonly');
-      let results = [];
+      const txn = this[p.db].transaction([store], 'readonly');
+      const results = [];
       txn.onerror = reject;
       txn.oncomplete = () => {
         resolve(results);
       };
       txn.objectStore(store).openCursor().onsuccess = (evt) => {
-        let cursor = evt.target.result;
+        const cursor = evt.target.result;
         if (cursor) {
           results.push(cursor.value);
           cursor.continue();
@@ -147,7 +147,7 @@ export default class Db {
 
   [p.getById](store, id) {
     return new Promise((resolve, reject) => {
-      let txn = this[p.db].transaction([store], 'readonly');
+      const txn = this[p.db].transaction([store], 'readonly');
       txn.onerror = reject;
       txn.objectStore(store).get(id).onsuccess = (evt) => {
         resolve(evt.target.result);
@@ -158,7 +158,7 @@ export default class Db {
   [p.set](store, data) {
     return new Promise((resolve, reject) => {
       const id = data.id;
-      let txn = this[p.db].transaction([store], 'readwrite');
+      const txn = this[p.db].transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       try {
@@ -176,7 +176,7 @@ export default class Db {
 
   [p.remove](store, id) {
     return new Promise((resolve, reject) => {
-      let txn = this[p.db].transaction([store], 'readwrite');
+      const txn = this[p.db].transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       try {
@@ -190,7 +190,7 @@ export default class Db {
 
   [p.clearDb](store) {
     return new Promise((resolve, reject) => {
-      let txn = this[p.db].transaction([store], 'readwrite');
+      const txn = this[p.db].transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       txn.objectStore(store).clear();

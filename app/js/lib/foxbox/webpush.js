@@ -47,7 +47,7 @@ export default class WebPush {
           new Uint8Array(key)));
 
         // Send push information to the server
-        // @todo: We will need some library to write taxonomy messages
+        // @todo We will need some library to write taxonomy messages
         const pushConfigurationMsg = [[
             [{
               id: 'setter:subscribe.webpush@link.mozilla.org',
@@ -80,10 +80,10 @@ export default class WebPush {
       })
       .catch((error) => {
         if (Notification.permission === 'denied') {
-          throw 'Permission request was denied.';
+          throw new Error('Permission request was denied.');
         } else {
           console.error('Error while saving subscription ', error);
-          throw 'Subscription error: ' + error;
+          throw new Error(`Subscription error: ${error}`);
         }
       });
     });

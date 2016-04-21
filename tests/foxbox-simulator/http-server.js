@@ -6,7 +6,7 @@ var foxboxSimulator = express();
 foxboxSimulator.use(cors());
 
 foxboxSimulator.get('/', (req, res) => {
-  res.status(200).sendFile(path.join(__dirname + '/static/login.html'));
+  res.status(200).sendFile(path.join(`${__dirname}/static/login.html`));
 });
 
 foxboxSimulator.listen(3000);
