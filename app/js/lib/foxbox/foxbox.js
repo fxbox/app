@@ -56,7 +56,7 @@ export default class Foxbox extends Service {
     // Private properties.
     this[p.settings] = new Settings();
     this[p.db] = new Db();
-    this[p.net] = new Network(this[p.settings], foxboxOnline => {
+    this[p.net] = new Network(this[p.settings], (foxboxOnline) => {
       this._dispatchEvent('box-online', foxboxOnline);
     });
     this[p.boxes] = Object.freeze([]);
@@ -92,7 +92,7 @@ export default class Foxbox extends Service {
 
       this.recipes = new Recipes({
         settings: this[p.settings],
-        net: this[p.net]
+        net: this[p.net],
       });
     });
 
@@ -159,8 +159,8 @@ export default class Foxbox extends Service {
         const now = Math.floor(Date.now() / 1000) - 60 * 2;
         this[p.boxes] = Object.freeze(
           boxes
-            .filter(box => box.timestamp - now >= 0)
-            .map(box => {
+            .filter((box) => box.timestamp - now >= 0)
+            .map((box) => {
                 // NOTE(sgiles): There is consideration to allow
                 // only "local_origin" and "tunnel_origin", removing the
                 // need to parse message - this merges the relevant message
@@ -188,7 +188,7 @@ export default class Foxbox extends Service {
 
         this._dispatchEvent('box-online', true);
       })
-      .catch((e) => {
+      .catch((error) => {
         if (this[p.settings]._localOrigin ||
             this[p.settings]._tunnelOrigin) {
           // Default to a previously stored box registration.
@@ -196,7 +196,7 @@ export default class Foxbox extends Service {
         } else {
           // If there's no previously stored box registration, we schedule a
           // retry.
-          console.warn('Retrying box discovery... Reason is %o', e);
+          console.warn('Retrying box discovery... Reason is %o', error);
           return new Promise((resolve) => {
             setTimeout(() => {
               this._initDiscovery().then(resolve, resolve);
@@ -326,8 +326,9 @@ export default class Foxbox extends Service {
 
     this[p.nextPollTimeout] = setTimeout(() => {
       this.refreshServicesByPolling()
-        .catch((e) => {
-          console.error('Polling has failed, scheduling one more attempt: ', e);
+        .catch((error) => {
+          console.error('Polling has failed, scheduling one more attempt: ',
+            error);
         })
         .then(() => {
           this[p.nextPollTimeout] = null;
@@ -369,7 +370,7 @@ export default class Foxbox extends Service {
         let hasNewServices = fetchedServices.reduce(
           (hasNewServices, fetchedService) => {
             const storedService = storedServices.find(
-              s => s.id === fetchedService.id
+              (service) => service.id === fetchedService.id
             );
 
             const isExistingService = !!storedService;
@@ -414,7 +415,7 @@ export default class Foxbox extends Service {
   getServices() {
     return this[p.db].getServices()
       .then((services) => services.map(
-        service => this[p.getServiceInstance](service.data)
+        (service) => this[p.getServiceInstance](service.data)
       ));
   }
 
@@ -460,7 +461,7 @@ export default class Foxbox extends Service {
   [p.getServiceInstance](data) {
     const config = {
       net: this[p.net],
-      settings: this[p.settings]
+      settings: this[p.settings],
     };
 
     switch (data.adapter) {

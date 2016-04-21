@@ -5,7 +5,7 @@ export default class ThemesListItem extends React.Component {
     super(props);
 
     this.state = {
-      enabled: props.theme.enabled
+      enabled: props.theme.enabled,
     };
 
     this.foxbox = props.foxbox;
@@ -24,7 +24,7 @@ export default class ThemesListItem extends React.Component {
     this.setState({ enabled }); // Optimistic update.
 
     this.foxbox.recipes.toggle(this.props.theme, enabled)
-      .catch(error => {
+      .catch((error) => {
         this.setState({ enabled: !enabled }); // Revert back to previous value.
         console.error(error);
       });
@@ -64,5 +64,5 @@ export default class ThemesListItem extends React.Component {
 ThemesListItem.propTypes = {
   theme: React.PropTypes.object.isRequired,
   update: React.PropTypes.func.isRequired,
-  foxbox: React.PropTypes.object.isRequired
+  foxbox: React.PropTypes.object.isRequired,
 };

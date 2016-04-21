@@ -10,7 +10,7 @@ describe('Logout', function() {
   before(() => {
     app = new App();
     return app.init()
-      .then(defaultView => { loginView = defaultView; });
+      .then((defaultView) => { loginView = defaultView; });
   });
 
   after(() => {
@@ -19,6 +19,6 @@ describe('Logout', function() {
 
   it('should logout', () => {
     return loginView.loginSuccess(12345678)
-      .then(servicesView => servicesView.logoutSuccess());
+      .then((servicesView) => servicesView.logoutSuccess());
   });
 });

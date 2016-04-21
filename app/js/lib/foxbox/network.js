@@ -11,7 +11,7 @@ const p = Object.freeze({
   // Private methods.
   fetch: Symbol('fetch'),
   ping: Symbol('ping'),
-  pingBox: Symbol('pingBox')
+  pingBox: Symbol('pingBox'),
 });
 
 export default class Network {
@@ -104,7 +104,7 @@ export default class Network {
    */
   fetchJSON(url, method = 'GET', body = undefined) {
     return this[p.fetch](url, 'application/json', method, body)
-      .then(response => response.json());
+      .then((response) => response.json());
   }
 
   /**
@@ -118,7 +118,7 @@ export default class Network {
    */
   fetchBlob(url, blobType, method, body) {
     return this[p.fetch](url, blobType, method, body)
-      .then(response => response.blob());
+      .then((response) => response.blob());
   }
 
   /**
@@ -139,7 +139,7 @@ export default class Network {
     const req = {
       method,
       headers: { Accept: accept },
-      cache: 'no-store'
+      cache: 'no-store',
     };
 
     if (method === 'POST' || method === 'PUT') {
@@ -156,7 +156,7 @@ export default class Network {
     }
 
     return fetch(url, req)
-      .then(res => {
+      .then((res) => {
         if (!res.ok) {
           throw new TypeError(
             `The response returned a ${res.status} HTTP status code.`
@@ -165,7 +165,7 @@ export default class Network {
 
         return res;
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error occurred while fetching content: ', error);
         throw error;
       });
@@ -211,8 +211,8 @@ export default class Network {
    */
   [p.ping](url) {
     return fetch(url, { cache: 'no-store' })
-      .then(res => res.ok)
-      .catch(error => {
+      .then((res) => res.ok)
+      .catch((error) => {
         console.error('Error occurred while pinging content: ', error);
         throw error;
       });

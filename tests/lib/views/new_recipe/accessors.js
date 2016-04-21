@@ -7,9 +7,10 @@ function NewRecipeAccessors() {
 }
 
 NewRecipeAccessors.prototype = Object.assign({
+
   get doneButton() {
     return this.waitForElement(By.css('button.app-view__action'));
-  }
+  },
 
 }, Accessors.prototype);
 

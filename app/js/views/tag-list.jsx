@@ -10,7 +10,7 @@ export default class TagList extends React.Component {
   }
 
   render() {
-    let tagNodes = this.props.tags.map(tag => (
+    let tagNodes = this.props.tags.map((tag) => (
         <TagItem
           key={tag.id}
           id={tag.id}
@@ -30,5 +30,5 @@ export default class TagList extends React.Component {
 TagList.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
   tags: React.PropTypes.array.isRequired,
-  serviceId: React.PropTypes.string.isRequired
+  serviceId: React.PropTypes.string.isRequired,
 };

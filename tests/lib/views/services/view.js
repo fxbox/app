@@ -11,7 +11,6 @@ function ServicesView() {
 }
 
 ServicesView.prototype = Object.assign({
-
   logoutSuccess: function() {
     return this.accessors.logOutButton.click().then(() => {
       var LoginView = require('../login/view');
@@ -24,7 +23,7 @@ ServicesView.prototype = Object.assign({
       var RecipesView = require('../recipes/view');
       return new RecipesView(this.driver);
     });
-  }
-
+  },
 }, View.prototype);
+
 module.exports = ServicesView;

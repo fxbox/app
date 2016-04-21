@@ -6,7 +6,7 @@ export default class CameraService extends React.Component {
 
     this.state = {
       hasPreview: false,
-      hasPreviousSnapshot: false
+      hasPreviousSnapshot: false,
     };
 
     this.foxbox = props.foxbox;
@@ -25,7 +25,7 @@ export default class CameraService extends React.Component {
 
         let newState = {
           hasPreview: true,
-          hasPreviousSnapshot: false
+          hasPreviousSnapshot: false,
         };
 
         this.refs.snapshotPreview.src = URL.createObjectURL(image);
@@ -42,8 +42,8 @@ export default class CameraService extends React.Component {
 
         this.setState(newState);
       })
-      .catch((e) => {
-        console.error('Error occurred while making a snapshot: ', e);
+      .catch((error) => {
+        console.error('Error occurred while making a snapshot: ', error);
       });
   }
 

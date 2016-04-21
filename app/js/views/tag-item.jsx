@@ -6,7 +6,7 @@ export default class TagItem extends React.Component {
 
     this.props = props;
     this.state = {
-      checked: props.checked
+      checked: props.checked,
     };
 
     this.foxbox = props.foxbox;
@@ -17,13 +17,13 @@ export default class TagItem extends React.Component {
     this.setState({ checked });
 
     this.foxbox.getService(this.props.serviceId)
-      .then(service => {
+      .then((service) => {
         if (!service.data.tags) {
           service.data.tags = [];
         }
 
         service.data.tags = service.data.tags.filter(
-          tag => tag !== this.props.id
+          (tag) => tag !== this.props.id
         );
         if (checked) {
           service.data.tags.push(this.props.id);
@@ -31,7 +31,7 @@ export default class TagItem extends React.Component {
 
         this.foxbox.setService(service.data);
       })
-      .catch(error => {
+      .catch((error) => {
         this.setState({ checked: !checked }); // Revert back to original state.
         console.error(error);
       });
@@ -57,5 +57,5 @@ TagItem.propTypes = {
   checked: React.PropTypes.bool,
   id: React.PropTypes.number.isRequired,
   name: React.PropTypes.string.isRequired,
-  serviceId: React.PropTypes.string.isRequired
+  serviceId: React.PropTypes.string.isRequired,
 };

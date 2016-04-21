@@ -19,7 +19,7 @@ export default class ThemesNew extends BaseView {
       selectedGetterValueIndex: -1,
 
       selectedSetterIndex: -1,
-      selectedSetterValueIndex: -1
+      selectedSetterValueIndex: -1,
     };
 
     this.foxbox = props.foxbox;
@@ -35,9 +35,9 @@ export default class ThemesNew extends BaseView {
   componentDidMount() {
     Promise.all([
       this.foxbox.recipes.getGetters(),
-      this.foxbox.recipes.getSetters()
+      this.foxbox.recipes.getSetters(),
     ])
-    .then(services => this.updateServices(services))
+    .then((services) => this.updateServices(services))
     .catch(console.error.bind(console));
   }
 
@@ -57,7 +57,7 @@ export default class ThemesNew extends BaseView {
       selectedGetterValueIndex: -1,
 
       selectedSetterIndex: -1,
-      selectedSetterValueIndex: -1
+      selectedSetterValueIndex: -1,
     });
   }
 
@@ -72,7 +72,7 @@ export default class ThemesNew extends BaseView {
       selectedGetterValueIndex,
 
       selectedSetterIndex: -1,
-      selectedSetterValueIndex: -1
+      selectedSetterValueIndex: -1,
     });
   }
 
@@ -85,7 +85,7 @@ export default class ThemesNew extends BaseView {
 
     this.setState({
       selectedSetterIndex,
-      selectedSetterValueIndex: -1
+      selectedSetterValueIndex: -1,
     });
   }
 
@@ -97,7 +97,7 @@ export default class ThemesNew extends BaseView {
     }
 
     this.setState({
-      selectedSetterValueIndex
+      selectedSetterValueIndex,
     });
   }
 
@@ -120,13 +120,13 @@ export default class ThemesNew extends BaseView {
       getter,
       getterValue,
       setter,
-      setterValue
+      setterValue,
     })
     .then(() => {
       location.hash = '#themes';
     })
-    .catch(e => {
-      console.log('Error occurred while saving recipe: ', e);
+    .catch((error) => {
+      console.log('Error occurred while saving recipe: ', error);
     });
   }
 
@@ -272,5 +272,5 @@ export default class ThemesNew extends BaseView {
 }
 
 ThemesNew.propTypes = {
-  foxbox: React.PropTypes.object.isRequired
+  foxbox: React.PropTypes.object.isRequired,
 };

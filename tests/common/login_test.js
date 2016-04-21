@@ -13,7 +13,7 @@ describe('Login', function() {
 
   beforeEach(() => {
     return app.init()
-      .then(defaultView => { loginView = defaultView; });
+      .then((defaultView) => { loginView = defaultView; });
   });
 
   afterEach(() => {
@@ -33,5 +33,4 @@ describe('Login', function() {
   it('should login a second time', () => {
     return loginView.loginSuccess(12345678);
   });
-
 });

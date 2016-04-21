@@ -8,7 +8,7 @@ import ThemesNew from 'js/views/themes-new';
 export default class ThemesController extends Controller {
   main(action = 'list') {
     const props = {
-      foxbox: this.foxbox
+      foxbox: this.foxbox,
     };
 
     switch (action) {

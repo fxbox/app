@@ -10,7 +10,7 @@ export default class Service extends BaseView {
     super(props);
 
     this.state = {
-      service: null
+      service: null,
     };
 
     this.foxbox = props.foxbox;
@@ -21,8 +21,8 @@ export default class Service extends BaseView {
       .then((service) => {
         this.setState({ service });
       })
-      .catch((e) => {
-        console.error('Error occurred while retrieving service: ', e);
+      .catch((error) => {
+        console.error('Error occurred while retrieving service: ', error);
       });
   }
 
@@ -55,5 +55,5 @@ export default class Service extends BaseView {
 
 Service.propTypes = {
   foxbox: React.PropTypes.object.isRequired,
-  id: React.PropTypes.string.isRequired
+  id: React.PropTypes.string.isRequired,
 };

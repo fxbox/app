@@ -8,7 +8,7 @@ const p = Object.freeze({
 
   // Methods:
   listenForMessages: Symbol('listenForMessages'),
-  dispatchEvent: Symbol('dispatchEvent')
+  dispatchEvent: Symbol('dispatchEvent'),
 });
 
 export default class WebPush {
@@ -22,8 +22,8 @@ export default class WebPush {
 
   subscribeToNotifications(resubscribe = false) {
     const settings = this[p.settings];
-    const boxPath = 
-      `${this[p.net].origin}/api/v${settings.apiVersion}`;  
+    const boxPath =
+      `${this[p.net].origin}/api/v${settings.apiVersion}`;
 
     if (!navigator.serviceWorker) {
       return Promise.reject('No service worker supported');
@@ -50,15 +50,15 @@ export default class WebPush {
         // @todo: We will need some library to write taxonomy messages
         const pushConfigurationMsg = [[
             [{
-              id: 'setter:subscribe.webpush@link.mozilla.org'
+              id: 'setter:subscribe.webpush@link.mozilla.org',
             }], {
               Json: {
                 subscriptions: [{
                   public_key: settings.pushPubKey,
-                  push_uri: settings.pushEndpoint
-                }]
-              }
-            }
+                  push_uri: settings.pushEndpoint,
+                }],
+              },
+            },
           ]];
 
         return this[p.net].fetchJSON(`${boxPath}/channels/set`,
@@ -67,12 +67,12 @@ export default class WebPush {
           // Setup some common push resources
           const pushResourcesMsg = [[
               [{
-                id: 'setter:resource.webpush@link.mozilla.org'
+                id: 'setter:resource.webpush@link.mozilla.org',
               }], {
                 Json: {
-                  resources: ['res1']
-                }
-              }
+                  resources: ['res1'],
+                },
+              },
             ]];
           return this[p.net].fetchJSON(`${boxPath}/channels/set`,
            'PUT', pushResourcesMsg);

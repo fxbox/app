@@ -16,9 +16,9 @@ registrationServerSimulator.get('/ping', (req, res) => {
       'client': 'XXX',
       'message': JSON.stringify({
         'local_origin': 'http://127.0.0.1:3000',
-        'tunnel_origin': 'null'
+        'tunnel_origin': 'null',
       }),
-      'timestamp': Math.floor(Date.now()/1000)
+      'timestamp': Math.floor(Date.now() / 1000),
     }]
   );
 });

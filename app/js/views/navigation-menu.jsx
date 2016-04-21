@@ -22,16 +22,16 @@ export default class NavigationMenu extends React.Component {
     let menuNodes = [
       {
         id: 'services',
-        label: 'Home'
+        label: 'Home',
       },
       {
         id: 'themes',
-        label: 'Themes'
+        label: 'Themes',
       },
       {
         id: 'mr-fox',
-        label: 'Mr. Fox'
-      }
+        label: 'Mr. Fox',
+      },
     ].map((menu) => {
       let className = 'navigation-menu__item';
       if (route === menu.id) {
@@ -64,5 +64,5 @@ export default class NavigationMenu extends React.Component {
 }
 
 NavigationMenu.propTypes = {
-  foxbox: React.PropTypes.object.isRequired
+  foxbox: React.PropTypes.object.isRequired,
 };
