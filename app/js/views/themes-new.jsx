@@ -188,7 +188,7 @@ export default class ThemesNew extends BaseView {
 
   renderGetterValueSelector() {
     if (this.state.selectedGetterIndex < 0) {
-      // TODO: Rethink styling to avoid redundant element.
+      // @todo Rethink styling to avoid redundant element.
       return (
         <select className="new-theme__select new-theme__select--hidden">
         </select>

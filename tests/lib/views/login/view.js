@@ -11,7 +11,7 @@ function LoginView() {
 
 LoginView.prototype = Object.assign({
 
-  loginSuccess: function(password) {
+  loginSuccess(password) {
     return this.accessors.startLoginButton.click().then(() => {
       this.accessors.passwordField.sendKeys(password);
       this.accessors.submitButton.click();

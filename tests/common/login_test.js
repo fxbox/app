@@ -16,21 +16,13 @@ describe('Login', function() {
       .then((defaultView) => { loginView = defaultView; });
   });
 
-  afterEach(() => {
-    return app.cleanUp();
-  });
+  afterEach(() => app.cleanUp());
 
-  after(() => {
-    return app.stop();
-  });
+  after(() => app.stop());
 
-  it('should login', () => {
-    return loginView.loginSuccess(12345678);
-  });
+  it('should login', () => loginView.loginSuccess(12345678));
 
-  // TODO: Delete this test once a new one comes in. It was initially meant to
+  // @todo Delete this test once a new one comes in. It was initially meant to
   // make sure the clean up was correctly made.
-  it('should login a second time', () => {
-    return loginView.loginSuccess(12345678);
-  });
+  it('should login a second time', () => loginView.loginSuccess(12345678));
 });

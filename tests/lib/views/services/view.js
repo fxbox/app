@@ -11,14 +11,14 @@ function ServicesView() {
 }
 
 ServicesView.prototype = Object.assign({
-  logoutSuccess: function() {
+  logoutSuccess() {
     return this.accessors.logOutButton.click().then(() => {
       var LoginView = require('../login/view');
       return new LoginView(this.driver);
     });
   },
 
-   goToRecipesView: function() {
+   goToRecipesView() {
     return this.accessors.recipesViewButton.click().then(() => {
       var RecipesView = require('../recipes/view');
       return new RecipesView(this.driver);

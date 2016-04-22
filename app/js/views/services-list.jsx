@@ -4,7 +4,7 @@ import ServicesListItem from 'js/views/services-list-item';
 
 export default class ServicesList extends React.Component {
   render() {
-    let userFacingServices = this.props.services.filter(
+    const userFacingServices = this.props.services.filter(
       (service) => this.isUserFacingService(service)
     );
 

@@ -21,9 +21,9 @@ export default class CameraService extends React.Component {
   takeSnapshot() {
     this.service.takeSnapshot()
       .then((image) => {
-        let previousSnapshot = this.refs.snapshotPreview.src;
+        const previousSnapshot = this.refs.snapshotPreview.src;
 
-        let newState = {
+        const newState = {
           hasPreview: true,
           hasPreviousSnapshot: false,
         };

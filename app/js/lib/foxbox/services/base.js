@@ -114,11 +114,9 @@ export default class BaseService {
       'PUT',
       body
     )
-    .then((response) => {
       // We request getter value by unique getter id, so we can have only
       // results for this getter.
-      return response[getter.id];
-    });
+      .then((response) => response[getter.id]);
   }
 
   /**

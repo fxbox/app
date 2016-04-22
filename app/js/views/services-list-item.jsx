@@ -72,14 +72,16 @@ export default class ServicesListItem extends React.Component {
    * Convert colours from xy space to RGB.
    * See details at:
    * http://www.developers.meethue.com/documentation/color-conversions-rgb-xy
+   *
+   * @return {string}
    */
   getBulbColour() {
     const hue = /* this.service.hue */ 1;
     const sat = /* this.service.sat */ 1;
     const val = /* this.service.val */ 1;
-    let h = hue;
-    let s = Math.round(sat * 100);
-    let l = val;
+    const h = hue;
+    const s = Math.round(sat * 100);
+    const l = val;
 
     // We set the luminosity to 50% and use the brightness as the opacity. The
     // brighter, the more opaque. Pale shades get transparent.

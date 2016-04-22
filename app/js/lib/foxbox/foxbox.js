@@ -83,34 +83,34 @@ export default class Foxbox extends Service {
     // Once we discover a box we can connect to, we will start
     // polling and triggering box-online events with a boolean
     // indicating if we have access to box or not.
-    this._initDiscovery().then(() => {
-      return this[p.net].init();
-    })
-    .then(() => {
-      // Start polling.
-      this[p.settings].on('pollingEnabled', () => {
+    this._initDiscovery()
+      .then(() => this[p.net].init())
+      .then(() => {
+        // Start polling.
+        this[p.settings].on('pollingEnabled', () => {
+          this.togglePolling(this[p.settings].pollingEnabled);
+        });
         this.togglePolling(this[p.settings].pollingEnabled);
-      });
-      this.togglePolling(this[p.settings].pollingEnabled);
 
-      this.recipes = new Recipes({
-        settings: this[p.settings],
-        net: this[p.net],
+        this.recipes = new Recipes({
+          settings: this[p.settings],
+          net: this[p.net],
+        });
       });
-    });
 
     return this._initUserSession()
-      .then(() => {
-        // The DB is only initialised if there's no redirection to the box.
-        return this[p.db].init();
-      });
+      // The DB is only initialised if there's no redirection to the box.
+      .then(() => this[p.db].init());
   }
 
   /**
    * Clear all data/settings stored on the browser. Use with caution.
+   *
+   * @param {boolean} ignoreServiceWorker
+   * @return {Promise}
    */
   clear(ignoreServiceWorker) {
-    let promises = [this[p.settings].clear(), this[p.db].clear()];
+    const promises = [this[p.settings].clear(), this[p.db].clear()];
     if (!navigator.serviceWorker) {
       return Promise.all(promises);
     }
@@ -140,7 +140,7 @@ export default class Foxbox extends Service {
    * If it fails, we fallback to the previously set hostname.
    * It there isn't, we schedule a retry.
    *
-   * @returns {Promise}
+   * @return {Promise}
    * @private
    */
   _initDiscovery() {
@@ -170,7 +170,7 @@ export default class Foxbox extends Service {
                 // fields into the main object
                 const { local_origin, tunnel_origin } =
                   JSON.parse(box.message);
-                box.local_origin  = local_origin;
+                box.local_origin = local_origin;
                 box.tunnel_origin = tunnel_origin;
                 return Object.freeze(box);
             })
@@ -370,7 +370,7 @@ export default class Foxbox extends Service {
 
     return Promise.all([this.getServices(), this[p.fetchServices]()])
       .then(([storedServices, fetchedServices]) => {
-        let hasNewServices = fetchedServices.reduce(
+        const hasNewServices = fetchedServices.reduce(
           (hasNewServices, fetchedService) => {
             const storedService = storedServices.find(
               (service) => service.id === fetchedService.id
@@ -450,6 +450,7 @@ export default class Foxbox extends Service {
    * @param {boolean} resubscribe Parameter used for testing
    * purposes, and follow the whole subscription process even if
    * we have push subscription information.
+   * @return {Promise}
    */
   subscribeToNotifications(resubscribe = false) {
     return this[p.webPush].subscribeToNotifications(resubscribe);

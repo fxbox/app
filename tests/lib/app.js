@@ -9,7 +9,7 @@ function App(driver, url) {
 }
 
 App.prototype = {
-  init: function() {
+  init() {
     return this.driver.get(this.url)
       .then(() => {
         // Always set the fake registration server
@@ -20,7 +20,7 @@ App.prototype = {
       .then(() => this.defaultView);
   },
 
-  cleanUp: function() {
+  cleanUp() {
     return this.driver.executeAsyncScript(() => {
       var callback = arguments[arguments.length - 1];
       window.foxbox.clear(true /* ignore sw */)
@@ -29,7 +29,7 @@ App.prototype = {
     });
   },
 
-  stop: function() {
+  stop() {
     return this.driver.quit();
   },
 

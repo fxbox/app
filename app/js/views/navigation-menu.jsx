@@ -18,7 +18,7 @@ export default class NavigationMenu extends React.Component {
   }
 
   render() {
-    let route = location.hash.substr(1).split('/').shift();
+    const route = location.hash.substr(1).split('/').shift();
     let menuNodes = [
       {
         id: 'services',

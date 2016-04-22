@@ -13,9 +13,7 @@ describe('Logout', function() {
       .then((defaultView) => { loginView = defaultView; });
   });
 
-  after(() => {
-    return app.stop();
-  });
+  after(() => app.stop());
 
   it('should logout', () => {
     return loginView.loginSuccess(12345678)

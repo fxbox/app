@@ -22,12 +22,43 @@
     "no-undef": ["error"],
     "no-unused-vars": ["error", { "vars": "all", "args": "after-used" }],
     "no-use-before-define": ["error", { "functions": false, "classes": true }],
-    "no-var": ["error"],
     "quotes": ["error", "single"],
     "semi": ["error", "always"],
     "comma-dangle": ["error", "always-multiline"],
+    "guard-for-in": ["error"],
+    "valid-jsdoc": ["error",
+      {
+        "prefer": {
+          "return": "return"
+        },
+        "preferType": {
+          "String": "string",
+          "Number": "number",
+          "Boolean": "boolean",
+          "object": "Object",
+          "array": "Array"
+        },
+        "requireReturn": false,
+        "requireParamDescription": false,
+        "requireReturnDescription": false
+      }
+    ],
+    "eqeqeq": ["error"],
+    "no-case-declarations": ["error"],
+    "no-else-return": ["error"],
+    "no-extra-bind": ["error"],
+    "no-implicit-coercion": ["error", { "boolean": false }],
+    "no-multi-spaces": ["error"],
+    "no-throw-literal": ["error"],
+    "no-warning-comments": ["error", { "terms": ["todo", "@todo:", "fixme",
+      "xxx"] }],
+    "arrow-body-style": ["warn", "as-needed"],
     "arrow-parens": ["error", "always"],
-    "guard-for-in": ["error"]
+    "arrow-spacing": ["error"],
+    "no-var": ["error"],
+    "object-shorthand": ["error"],
+    "prefer-const": ["warn"],
+    "prefer-template": ["error"]
   },
 
   "env": {

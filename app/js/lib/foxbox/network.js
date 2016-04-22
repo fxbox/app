@@ -177,7 +177,7 @@ export default class Network {
    * @private
    */
   [p.pingBox]() {
-    let promises = [];
+    const promises = [];
     promises.push(this[p.ping](`${this.localOrigin}/ping`)
       .then(() => {
         this[p.local] = true;

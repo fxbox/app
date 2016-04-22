@@ -17,7 +17,7 @@ export default class DoorLockService extends BaseService {
   /**
    * Checks if the lock is locked.
    *
-   * @returns {Promise.<boolean>}
+   * @return {Promise.<boolean>}
    */
   isLocked() {
     return this.get('DoorLocked')
@@ -33,9 +33,9 @@ export default class DoorLockService extends BaseService {
   /**
    * Either locks or unlocks the lock depending on the "locked" parameter.
    *
-   * @param locked Boolean value indicating whether we want lock or unlock
-   * the lock.
-   * @returns {Promise}
+   * @param {boolean} locked Boolean value indicating whether we want lock or
+   * unlock the lock.
+   * @return {Promise}
    */
   lockUnlock(locked) {
     return this.set('DoorLocked', locked ? 'Locked': 'Unlocked');

@@ -26,7 +26,7 @@ describe('Service controller tests', function () {
 
     sinon.stub(ReactDOM, 'render');
     sinon.stub(React, 'createElement')
-      .withArgs(Service, { id: id, foxbox: foxboxStub })
+      .withArgs(Service, { id, foxbox: foxboxStub })
       .returns(createElementStub);
 
     controller.main(id);
