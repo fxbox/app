@@ -9,4 +9,8 @@ foxboxSimulator.get('/', (req, res) => {
   res.status(200).sendFile(path.join(`${__dirname}/static/login.html`));
 });
 
+foxboxSimulator.get('/ping', (req, res) => {
+  res.status(204).end();
+});
+
 foxboxSimulator.listen(3000);

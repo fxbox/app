@@ -11,7 +11,7 @@ const singleBox = [{
   public_ip: '1.1.1.1',
   client: 'abc',
   message: JSON.stringify({
-    local_origin: 'https://local.abc.box.knilxof.org:3000',
+    local_origin: 'http://127.0.0.1:3000',
     tunnel_origin: 'null',
   }),
   timestamp: Math.floor(Date.now() / 1000),

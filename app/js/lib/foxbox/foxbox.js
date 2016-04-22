@@ -9,12 +9,8 @@ import Db from './db';
 import Network from './network';
 import Recipes from './recipes';
 import WebPush from './webpush';
-
-import BaseService from './services/base';
-import IpCameraService from './services/ip-camera';
-import LightService from './services/light';
-import DoorLockService from './services/door-lock';
-import MotionSensorService from './services/motion-sensor';
+import Services from './services';
+import API from './api';
 
 // Private members.
 const p = Object.freeze({
@@ -23,34 +19,9 @@ const p = Object.freeze({
   db: Symbol('db'),
   net: Symbol('net'),
   boxes: Symbol('boxes'),
-  isPollingEnabled: Symbol('isPollingEnabled'),
-  nextPollTimeout: Symbol('nextPollTimeout'),
   webPush: Symbol('webPush'),
-
-  // Private methods.
-  fetchServices: Symbol('fetchServices'),
-  getServiceInstance: Symbol('getServiceInstance'),
-  hasDoorLockChannel: Symbol('hasDoorLockChannel'),
+  api: Symbol('api'),
 });
-
-/**
- * Compare 2 objects. Returns true if all properties of object A have the same
- * value in object B. Extraneous properties in object B are ignored.
- * Properties order is not important.
- *
- * @param {Object} objectA
- * @param {Object} objectB
- * @return {boolean}
- */
-const isSimilar = (objectA, objectB) => {
-  for (let prop in objectA) {
-    if (!(prop in objectB) || objectA[prop] !== objectB[prop]) {
-      return false;
-    }
-  }
-
-  return true;
-};
 
 export default class Foxbox extends Service {
   constructor({ settings, db, net } = {}) {
@@ -59,26 +30,27 @@ export default class Foxbox extends Service {
     // Private properties.
     this[p.settings] = settings || new Settings();
     this[p.db] = db || new Db();
-    this[p.net] = net ||
-      new Network(this[p.settings], (foxboxOnline) => {
-        this._dispatchEvent('box-online', foxboxOnline);
-      });
+    this[p.net] = net || new Network(this[p.settings]);
     this[p.boxes] = Object.freeze([]);
-    this[p.isPollingEnabled] = false;
-    this[p.nextPollTimeout] = null;
-    this[p.webPush] = new WebPush(this[p.net], this[p.settings],
-      (msg) => {
-        this._dispatchEvent('push-action', msg);
-      });
+    this[p.api] = new API(this[p.net], this[p.settings]);
+    this[p.webPush] = new WebPush(this[p.api], this[p.settings]);
 
-    // Public properties.
-    this.recipes = null;
+    this.services = new Services(this[p.db], this[p.api], this[p.settings]);
+    this.recipes = new Recipes(this[p.api]);
 
     Object.seal(this);
   }
 
   init() {
     window.foxbox = this;
+
+    this[p.net].on('online', (online) => {
+      this._dispatchEvent('online', online);
+    });
+
+    this[p.webPush].on('message', (msg) => {
+      this._dispatchEvent('push-message', msg);
+    });
 
     // No need to block the UI on the discovery process.
     // Once we discover a box we can connect to, we will start
@@ -88,15 +60,10 @@ export default class Foxbox extends Service {
       .then(() => this[p.net].init())
       .then(() => {
         // Start polling.
-        this[p.settings].on('pollingEnabled', () => {
-          this.togglePolling(this[p.settings].pollingEnabled);
+        this[p.settings].on('polling-setting', () => {
+          this.services.togglePolling(this[p.settings].pollingEnabled);
         });
-        this.togglePolling(this[p.settings].pollingEnabled);
-
-        this.recipes = new Recipes({
-          settings: this[p.settings],
-          net: this[p.net],
-        });
+        this.services.togglePolling(this[p.settings].pollingEnabled);
       });
 
     return this._initUserSession()
@@ -124,8 +91,8 @@ export default class Foxbox extends Service {
     return Promise.all(promises);
   }
 
-  get localOrigin() {
-    return this[p.settings].localOrigin;
+  get online() {
+    return this[p.net].online;
   }
 
   get client() {
@@ -176,36 +143,39 @@ export default class Foxbox extends Service {
             })
         );
 
+        // Fire event every time registration server returns a valid response.
+        // @todo We should improve this logic and check if boxes list has
+        // actually changed and if so only then override internal box list and
+        // fire event.
+        this._dispatchEvent('discovery');
+
         // If the registration server didn't give us any info and
         // we have no record of previous registrations, we schedule
         // a retry.
         if (!this[p.boxes].length &&
-            !this[p.settings]._localOrigin &&
-            !this[p.settings]._tunnelOrigin) {
+            !this[p.settings].localOrigin &&
+            !this[p.settings].tunnelOrigin) {
           throw new Error('Registration service did not return any boxes.');
         }
 
         if (!this[p.settings].configured && this[p.boxes].length === 1) {
           this.selectBox();
         }
-
-        this._dispatchEvent('box-online', true);
       })
       .catch((error) => {
-        if (this[p.settings]._localOrigin ||
-            this[p.settings]._tunnelOrigin) {
+        if (this[p.settings].localOrigin || this[p.settings].tunnelOrigin) {
           // Default to a previously stored box registration.
-          this._dispatchEvent('box-online', true);
-        } else {
-          // If there's no previously stored box registration, we schedule a
-          // retry.
-          console.warn('Retrying box discovery... Reason is %o', error);
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              this._initDiscovery().then(resolve, resolve);
-            }, 1000);
-          });
+          return;
         }
+
+        // If there's no previously stored box registration, we schedule a
+        // retry.
+        console.warn('Retrying box discovery... Reason is %o', error);
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this._initDiscovery().then(resolve, resolve);
+          }, 1000);
+        });
       });
   }
 
@@ -296,145 +266,8 @@ export default class Foxbox extends Service {
     this[p.settings].session = undefined;
   }
 
-  /**
-   * Start or stop polling.
-   *
-   * @param {boolean} pollingEnabled Flag that indicates whether polling should
-   * be started or stopped.
-   */
-  togglePolling(pollingEnabled) {
-    this[p.isPollingEnabled] = pollingEnabled;
-
-    if (pollingEnabled) {
-      this.schedulePoll();
-    } else {
-      // Cancel next poll attempt if it has been scheduled.
-      clearTimeout(this[p.nextPollTimeout]);
-      this[p.nextPollTimeout] = null;
-    }
-  }
-
-  /**
-   * Schedules an attempt to poll the server, does nothing if polling is not
-   * enabled or it has already been scheduled. New poll is scheduled only once
-   * previous one is completed or failed.
-   */
-  schedulePoll() {
-    // Return early if polling is not enabled or it has already been scheduled.
-    if (!this[p.isPollingEnabled]
-      || this[p.nextPollTimeout]
-      || !this.isLoggedIn) {
-      return;
-    }
-
-    this[p.nextPollTimeout] = setTimeout(() => {
-      this.refreshServicesByPolling()
-        .catch((error) => {
-          console.error('Polling has failed, scheduling one more attempt: ',
-            error);
-        })
-        .then(() => {
-          this[p.nextPollTimeout] = null;
-
-          this.schedulePoll();
-        });
-    }, this[p.settings].pollingInterval);
-  }
-
-  /**
-   * Detect changes in the services:
-   * * Emits a `service-change` event if a service is connected/disconnected.
-   * * Emits a `service-state-change` event if the state of a service changes.
-   *
-   * @return {Promise}
-   */
-  refreshServicesByPolling() {
-    if (!this.isLoggedIn) {
-      return Promise.resolve();
-    }
-
-    /*const fetchedServicesPromise = this[p.net]
-      .fetchJSON(`${this[p.net].origin}/services/list`)
-      .then((services) => {
-        // @todo We should ask for state only for services that actually support
-        // it.
-        return Promise.all(
-          services.map((service) => {
-            // Use empty state if service failed to return actual state.
-            return this.getServiceState(service.id)
-              .catch(() => ({}))
-              .then((state) => service.state = state);
-          })
-        ).then(() => services);
-      });*/
-
-    return Promise.all([this.getServices(), this[p.fetchServices]()])
-      .then(([storedServices, fetchedServices]) => {
-        const hasNewServices = fetchedServices.reduce(
-          (hasNewServices, fetchedService) => {
-            const storedService = storedServices.find(
-              (service) => service.id === fetchedService.id
-            );
-
-            const isExistingService = !!storedService;
-
-            if (isExistingService &&
-              isSimilar(fetchedService.state, storedService.state)) {
-              return hasNewServices;
-            }
-
-            fetchedService = isExistingService ?
-              Object.assign(storedService, fetchedService) : fetchedService;
-
-            this._dispatchEvent('service-state-change', fetchedService);
-
-            // Populate the db with the latest service.
-            this[p.db].setService(fetchedService);
-
-            return hasNewServices || !isExistingService;
-          },
-          false /* hasNewServices */
-        );
-
-        if (hasNewServices ||
-          fetchedServices.length !== storedServices.length) {
-          // The services changed.
-          fetchedServices = fetchedServices.map(
-            this[p.getServiceInstance].bind(this)
-          );
-          this._dispatchEvent('service-change', fetchedServices);
-        }
-
-        return fetchedServices;
-      });
-  }
-
-  /**
-   * Retrieve the list of the services available.
-   * Use the database as a source of truth.
-   *
-   * @return {Promise} A promise that resolves with an array of objects.
-   */
-  getServices() {
-    return this[p.db].getServices()
-      .then((services) => services.map(
-        (service) => this[p.getServiceInstance](service)
-      ));
-  }
-
   getTags() {
     return this[p.db].getTags.apply(this[p.db], arguments);
-  }
-
-  // @todo If service doesn't exist in the DB, fetch it from the box.
-  getService() {
-    // Get data from the DB so we get the attributes, the state and the tags.
-    return this[p.db].getService.apply(this[p.db], arguments)
-      .then((service) => this[p.getServiceInstance](service));
-  }
-
-  setService() {
-    return this[p.db].setService.apply(this[p.db], arguments);
   }
 
   setTag() {
@@ -454,43 +287,5 @@ export default class Foxbox extends Service {
    */
   subscribeToNotifications(resubscribe = false) {
     return this[p.webPush].subscribeToNotifications(resubscribe);
-  }
-
-  [p.fetchServices]() {
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`
-    );
-  }
-
-  [p.getServiceInstance](data) {
-    const config = {
-      net: this[p.net],
-      settings: this[p.settings],
-    };
-
-    switch (data.adapter) {
-      case 'ip-camera@link.mozilla.org':
-        return new IpCameraService(data, config);
-
-      case 'philips_hue@link.mozilla.org':
-        return new LightService(data, config);
-
-      case 'OpenZwave Adapter':
-        if (this[p.hasDoorLockChannel](data.getters) ||
-            this[p.hasDoorLockChannel](data.setters)) {
-          return new DoorLockService(data, config);
-        }
-
-        return new MotionSensorService(data, config);
-
-      default:
-        return new BaseService(data, config);
-    }
-  }
-
-  [p.hasDoorLockChannel](channels) {
-    return Object.keys(channels).find(
-      (key) => channels[key].kind === 'DoorLocked'
-    );
   }
 }

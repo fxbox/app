@@ -9,22 +9,25 @@ export default class UserLogin extends BaseView {
     this.state = {
       boxes: props.foxbox.boxes,
       selectedBox: null,
-      loginEnabled: false,
+      loginEnabled: props.foxbox.online,
     };
 
     this.foxbox = props.foxbox;
 
     this.onBoxOnline = this.onBoxOnline.bind(this);
+    this.onBoxDiscovery = this.onBoxDiscovery.bind(this);
     this.onSelectChange = this.onSelectChange.bind(this);
     this.onFormSubmit = this.onFormSubmit.bind(this);
   }
 
   componentDidMount() {
-    this.foxbox.addEventListener('box-online', this.onBoxOnline);
+    this.foxbox.addEventListener('online', this.onBoxOnline);
+    this.foxbox.addEventListener('discovery', this.onBoxDiscovery);
   }
 
   componentWillUnmount() {
-    this.foxbox.removeEventListener('box-online', this.onBoxOnline);
+    this.foxbox.removeEventListener('online', this.onBoxOnline);
+    this.foxbox.removeEventListener('discovery', this.onBoxDiscovery);
   }
 
   onSelectChange(evt) {
@@ -42,6 +45,10 @@ export default class UserLogin extends BaseView {
 
   onBoxOnline(loginEnabled) {
     this.setState({ loginEnabled });
+  }
+
+  onBoxDiscovery() {
+    this.setState({ boxes: this.foxbox.boxes });
   }
 
   renderHeader() {

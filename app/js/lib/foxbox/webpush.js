@@ -1,30 +1,28 @@
 'use strict';
 
+import EventDispatcher from './event-dispatcher';
+
 // Private members
 const p = Object.freeze({
   // Properties,
-  net: Symbol('net'),
+  api: Symbol('api'),
   settings: Symbol('settings'),
 
   // Methods:
   listenForMessages: Symbol('listenForMessages'),
-  dispatchEvent: Symbol('dispatchEvent'),
 });
 
-export default class WebPush {
-  constructor(network, settings, callback) {
-    this[p.net] = network;
+export default class WebPush extends EventDispatcher {
+  constructor(api, settings) {
+    super(['message']);
+
+    this[p.api] = api;
     this[p.settings] = settings;
-    this[p.dispatchEvent] = callback;
 
     Object.seal(this);
   }
 
   subscribeToNotifications(resubscribe = false) {
-    const settings = this[p.settings];
-    const boxPath =
-      `${this[p.net].origin}/api/v${settings.apiVersion}`;
-
     if (!navigator.serviceWorker) {
       return Promise.reject('No service worker supported');
     }
@@ -32,6 +30,7 @@ export default class WebPush {
     navigator.serviceWorker.addEventListener('message',
       this[p.listenForMessages].bind(this));
 
+    const settings = this[p.settings];
     if (settings.pushEndpoint && settings.pushPubKey && !resubscribe) {
       return Promise.resolve();
     }
@@ -61,8 +60,10 @@ export default class WebPush {
             },
           ]];
 
-        return this[p.net].fetchJSON(`${boxPath}/channels/set`,
-          'PUT', pushConfigurationMsg)
+        return this[p.api].put(
+          'channels/set',
+          pushConfigurationMsg
+        )
         .then(() => {
           // Setup some common push resources
           const pushResourcesMsg = [[
@@ -74,8 +75,8 @@ export default class WebPush {
                 },
               },
             ]];
-          return this[p.net].fetchJSON(`${boxPath}/channels/set`,
-           'PUT', pushResourcesMsg);
+
+          return this[p.api].put('channels/set', pushResourcesMsg);
         });
       })
       .catch((error) => {
@@ -96,6 +97,6 @@ export default class WebPush {
       return;
     }
 
-    this[p.dispatchEvent](msg);
+    this.emit('message', msg);
   }
 }

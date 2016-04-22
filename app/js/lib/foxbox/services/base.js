@@ -4,8 +4,7 @@ const TYPE = 'unknown';
 
 const p = Object.freeze({
   // Private properties.
-  net: Symbol('net'),
-  settings: Symbol('settings'),
+  api: Symbol('api'),
 
   // Public getter only properties.
   id: Symbol('id'),
@@ -23,10 +22,9 @@ const p = Object.freeze({
 });
 
 export default class BaseService {
-  constructor(props, config) {
+  constructor(props, api) {
     // Private properties.
-    this[p.net] = config.net;
-    this[p.settings] = config.settings;
+    this[p.api] = api;
 
     // Public getter only properties.
     this[p.id] = props.id;
@@ -81,9 +79,8 @@ export default class BaseService {
     const setter = this[p.getChannel](this[p.setters], selector);
     const setterType = this[p.getSetterValueType](setter.kind);
 
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
-      'PUT',
+    return this[p.api].put(
+      'channels/set',
       [[{ id: setter.id }, { [setterType]: value }]]
     );
   }
@@ -99,23 +96,12 @@ export default class BaseService {
     const body = { id: getter.id };
 
     if (getter.kind.type === 'Binary') {
-      return this[p.net].fetchBlob(
-        `${this[p.net].origin}/api/v${this[p.settings].apiVersion}` +
-        '/channels/get',
-        // For now we only support JPEG blobs.
-        'image/jpeg',
-        'PUT',
-        body
-      );
+      return this[p.api].blob('channels/get', body);
     }
 
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/get`,
-      'PUT',
-      body
-    )
-      // We request getter value by unique getter id, so we can have only
-      // results for this getter.
+    // We request getter value by unique getter id, so we can have only
+    // results for this getter.
+    return this[p.api].put('channels/get', body)
       .then((response) => response[getter.id]);
   }
 
