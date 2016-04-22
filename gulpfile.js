@@ -1,38 +1,31 @@
-/**
- * IMPORTANT: This file is installed into the app directory as part of the
- * npm install fxos-build process. Please do not try to modify this file
- * or create additional build steps without checking with the team first.
- *
- * For any build system feature requests or bugs, please open
- * an issue in the fxos-build project: https://github.com/fxos/build/issues
- */
+/* eslint-env node */
 
-var gulp = require('gulp');
+'use strict';
 
-var concat = require('gulp-concat');
-var babel = require('gulp-babel');
-var rename = require('gulp-rename');
-var eslint = require('gulp-eslint');
-var zip = require('gulp-zip');
-var del = require('del');
-var runSequence = require('run-sequence');
-var webserver = require('gulp-webserver');
-var exec = require('child_process').exec;
-var mocha = require('gulp-mocha');
-var gls = require('gulp-live-server');
-var gsww = require('gulp-sww');
-var package = require('./package.json');
+const gulp = require('gulp');
+
+const concat = require('gulp-concat');
+const babel = require('gulp-babel');
+const eslint = require('gulp-eslint');
+const zip = require('gulp-zip');
+const del = require('del');
+const runSequence = require('run-sequence');
+const webserver = require('gulp-webserver');
+const mocha = require('gulp-mocha');
+const gls = require('gulp-live-server');
+const gsww = require('gulp-sww');
+const pkg = require('./package.json');
 
 const APP_ROOT = './app/';
-const TESTS_UNIT_ROOT = './tests/unit/';
+const TESTS_ROOT = './tests/';
 
 const DIST_ROOT = './dist/';
 const DIST_APP_ROOT = './dist/app/';
-const DIST_TESTS_UNIT_ROOT = './dist/tests/unit/';
+const DIST_TESTS_ROOT = './dist/tests/';
 
-var webserverStream;
-var foxboxSimulator;
-var registrationServerSimulator;
+let webserverStream;
+let foxboxSimulator;
+let registrationServerSimulator;
 
 /**
  * Runs eslint on all javascript files found in the app and tests dirs.
@@ -41,10 +34,10 @@ gulp.task('lint', function() {
   // Note: To have the process exit with an error code (1) on lint error, return
   // the stream and pipe to failOnError last.
   return gulp.src([
-      'app/**/*.{js,jsx}',
-      'tests/**/*.js',
-      '!app/components/**',
-      '!app/hookSW.js'
+      `${APP_ROOT}**/*.{js,jsx}`,
+      `${TESTS_ROOT}**/*.js`,
+      './*.js',
+      `!${APP_ROOT}components/**`,
     ])
     .pipe(eslint())
     .pipe(eslint.format())
@@ -52,12 +45,15 @@ gulp.task('lint', function() {
 });
 
 /**
- * copies necessary files for the Babel amd loader to the app.
+ * Copies necessary files for the Babel amd loader to the app.
  */
 gulp.task('loader-polyfill', function() {
-  return gulp.src(['./node_modules/alameda/alameda.js', 'app/js/bootstrap.js'])
+  return gulp.src([
+      './node_modules/alameda/alameda.js',
+      `${APP_ROOT}js/bootstrap.js`,
+    ])
     .pipe(concat('initapp.js'))
-    .pipe(gulp.dest(DIST_APP_ROOT + 'js'));
+    .pipe(gulp.dest(`${DIST_APP_ROOT}js`));
 });
 
 /**
@@ -65,19 +61,18 @@ gulp.task('loader-polyfill', function() {
  */
 gulp.task('copy-app', function() {
   return gulp.src([
-      APP_ROOT + '**',
-      '!' + APP_ROOT + 'js/**/*.js' // do not copy js
+      `${APP_ROOT}**`,
+      `!${APP_ROOT}js/**/*.js`, // do not copy js
     ])
     .pipe(gulp.dest(DIST_APP_ROOT));
 });
 
 /**
- * converts javascript to es5. this allows us to use harmony classes and modules.
+ * Apply Babel transform to the JS and JSX files.
  */
 gulp.task('babel-app', function() {
-  var files = [
-    APP_ROOT + 'js/**/*.js',
-    APP_ROOT + 'js/**/*.jsx'
+  const files = [
+    `${APP_ROOT}js/**/*.{js,jsx}`,
   ];
 
   try {
@@ -86,7 +81,7 @@ gulp.task('babel-app', function() {
           console.log('error running Babel', e);
         })
       )
-      .pipe(gulp.dest(DIST_APP_ROOT + 'js/'));
+      .pipe(gulp.dest(`${DIST_APP_ROOT}js/`));
   } catch (e) {
     console.log('Got error in Babel', e);
   }
@@ -97,13 +92,13 @@ gulp.task('babel-app', function() {
  */
 gulp.task('babel-unit-tests', function() {
   try {
-    return gulp.src([TESTS_UNIT_ROOT + '**/*.js'])
+    return gulp.src([`${TESTS_ROOT}unit/**/*.js`])
       .pipe(
         babel().on('error', function(e) {
           console.error('Error occurred while running Babel', e);
         })
       )
-      .pipe(gulp.dest(DIST_TESTS_UNIT_ROOT));
+      .pipe(gulp.dest(`${DIST_TESTS_ROOT}unit/`));
   } catch (e) {
     console.error('Error occurred while process unit test files with Babel', e);
   }
@@ -111,8 +106,8 @@ gulp.task('babel-unit-tests', function() {
 
 gulp.task('remove-useless', function() {
   return del([
-    DIST_APP_ROOT + 'js/**/*.jsx',
-    DIST_APP_ROOT + '**/*.md'
+    `${DIST_APP_ROOT}js/**/*.jsx`,
+    `${DIST_APP_ROOT}**/*.md`,
   ]);
 });
 
@@ -126,7 +121,7 @@ gulp.task('zip', function() {
 });
 
 /**
- * Runs travis tests
+ * Runs travis tests.
  */
 gulp.task('travis', ['lint', 'loader-polyfill', 'babel-app']);
 
@@ -151,17 +146,17 @@ gulp.task('build-unit-tests', function(cb) {
  * Watch for changes on the file system, and rebuild if so.
  */
 gulp.task('watch', function() {
-  gulp.watch([APP_ROOT + '**'], ['build']);
+  gulp.watch([`${APP_ROOT}**`], ['build']);
 });
 
 gulp.task('webserver', function() {
-  webserverStream = gulp.src('dist/app')
+  webserverStream = gulp.src(DIST_APP_ROOT)
     .pipe(webserver({
       port: process.env.PORT || 8000,
       host: process.env.HOSTNAME || 'localhost',
       livereload: false,
       directoryListing: false,
-      open: false
+      open: false,
     }));
 });
 
@@ -181,22 +176,21 @@ gulp.task('default', function() {
  * Remove the distributable files.
  */
 gulp.task('clobber-app', function() {
-  return del('dist/app');
+  return del(DIST_APP_ROOT);
 });
 
 gulp.task('clobber-tests', function() {
-  return del('dist/tests');
+  return del(DIST_TESTS_ROOT);
 });
 
 /**
- * Add ServiceWorker support and cache all application
- * assets.
+ * Add ServiceWorker support and cache all application assets.
  */
 gulp.task('offline', ['build'], function() {
-  gulp.src(['**/*'], {cwd: DIST_APP_ROOT})
+  gulp.src(['**/*'], { cwd: DIST_APP_ROOT })
     .pipe(gsww({
-      version: package.version,
-      hookSW: 'hookSW.js'
+      version: pkg.version,
+      hookSW: 'hookSW.js',
     }))
     .pipe(gulp.dest(DIST_APP_ROOT));
 });
@@ -206,16 +200,21 @@ gulp.task('offline', ['build'], function() {
  */
 gulp.task('clean', function() {
   return del([
-    'dist/',
-    'node_modules/'
+    DIST_ROOT,
+    'node_modules/',
   ]);
 });
 
 gulp.task('start-simulators', function() {
-  foxboxSimulator = gls('tests/foxbox-simulator/http-server.js', undefined, false);
+  foxboxSimulator = gls(
+    `${TESTS_ROOT}foxbox-simulator/http-server.js`, undefined, false
+  );
   foxboxSimulator.start();
 
-  registrationServerSimulator = gls('tests/registration-server-simulator/http-server.js', undefined, false);
+  registrationServerSimulator = gls(
+    `${TESTS_ROOT}registration-server-simulator/http-server.js`, undefined,
+    false
+  );
   registrationServerSimulator.start();
 });
 
@@ -224,26 +223,32 @@ gulp.task('stop-simulators', function() {
   registrationServerSimulator.stop();
 });
 
-gulp.task('run-unit-tests', function (cb) {
+gulp.task('run-unit-tests', function(cb) {
   runSequence('build-unit-tests', function() {
-    var Server = require('karma').Server;
+    const Server = require('karma').Server;
 
     (new Server(
-      { configFile: __dirname + '/karma.conf.js', singleRun: true }, cb
+      { configFile: `${__dirname}/karma.conf.js`, singleRun: true }, cb
     )).start();
   });
 });
 
 gulp.task('run-test-integration', function() {
-  return gulp.src('./tests/{common,integration}/**/*_test.js', { read: false }).pipe(mocha());
+  return gulp.src(
+    `${TESTS_ROOT}{common,integration}/**/*_test.js`, { read: false }
+    )
+    .pipe(mocha());
 });
 
 gulp.task('test-integration', function(cb) {
-  return runSequence('start-simulators', 'run-test-integration', 'stop-simulators', cb);
+  return runSequence(
+    'start-simulators', 'run-test-integration', 'stop-simulators', cb
+  );
 });
 
 gulp.task('run-test-e2e', function() {
-  return gulp.src('./tests/{common,e2e}/**/*_test.js', { read: false }).pipe(mocha());
+  return gulp.src(`${TESTS_ROOT}{common,e2e}/**/*_test.js`, { read: false })
+    .pipe(mocha());
 });
 
 gulp.task('test', function(cb) {
@@ -257,7 +262,7 @@ gulp.task('test', function(cb) {
   );
 });
 
-// TODO: Should be included in 'test' once less manual steps are required
+// @todo Should be included in 'test' once less manual steps are required.
 gulp.task('test-e2e', function() {
   runSequence('build', 'webserver', 'run-test-e2e', 'stop-webserver');
 });

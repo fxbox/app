@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 module.exports = function(config) {
   config.set({
 
@@ -5,7 +7,7 @@ module.exports = function(config) {
     basePath: '',
 
     frameworks: [
-      'mocha', 'requirejs', 'chai', 'chai-as-promised', 'chai-sinon'
+      'mocha', 'requirejs', 'chai', 'chai-as-promised', 'chai-sinon',
     ],
 
     // List of files / patterns to load in the browser.
@@ -13,7 +15,7 @@ module.exports = function(config) {
       { pattern: 'dist/**/*.js', included: false },
       { pattern: 'node_modules/react/dist/*.js', included: false },
       { pattern: 'node_modules/rxjs/bundles/Rx.umd.js', included: false },
-      'tests/unit/test-main.js'
+      'tests/unit/test-main.js',
     ],
 
     // Test results reporter to use.
@@ -44,6 +46,6 @@ module.exports = function(config) {
     singleRun: false,
 
     // Concurrency level, how many browsers can be started simultaneously.
-    concurrency: Infinity
+    concurrency: Infinity,
   });
 };
