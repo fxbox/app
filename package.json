@@ -8,7 +8,6 @@
     "url": "git+https://github.com/fxbox/app.git"
   },
   "scripts": {
-    "postinstall": "git checkout -- .babelrc gulpfile.js deploy.sh",
     "build": "gulp build",
     "test": "gulp test",
     "offline": "gulp offline",
