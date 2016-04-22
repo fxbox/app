@@ -1,16 +1,11 @@
 /*
  * This file provides an helper to add custom events to any object.
  *
- * In order to use this functionality with any object consumer can either
- * inherit target object class from EventDispatcher or mix necessary methods
- * into object directly using the 'EventDispatcher.mixin' static method:
+ * In order to use this functionality with any object consumer should extend
+ * target object class with EventDispatcher:
  *
  * class Obj extends EventDispatcher {}
  * const obj = new Obj();
- *
- * or
- *
- * const obj = EventDispatcher.mixin(new SomeObj());
  *
  * A list of events can be optionally provided and it is recommended to do so.
  * If a list is provided then only the events present in the list will be
@@ -19,23 +14,13 @@
  *
  * class Obj extends EventDispatcher {
  *   constructor() {
- *     super([
- *       'somethinghappened',
- *       'somethingelsehappened'
- *     ]);
+ *     super(['somethinghappened', 'somethingelsehappened']);
  *   }
  * }
  * const obj = new Obj();
  *
- * or
- *
- * const obj = EventDispatcher.mixin(new SomeObj(), [
- *   'somethinghappened',
- *   'somethingelsehappened'
- * ]);
- *
- * The wrapped object will have five new methods: 'on', 'once', 'off', 'offAll'
- * and 'emit'. Use 'on' to register a new event-handler:
+ * The object will have five new methods: 'on', 'once', 'off', 'offAll' and
+ * 'emit'. Use 'on' to register a new event-handler:
  *
  * obj.on("somethinghappened", function onSomethingHappened() { ... });
  *
@@ -73,19 +58,19 @@
  * obj.emit("somethinghappened", 123);
  */
 
-function ensureValidEventName(eventName) {
+function assertValidEventName(eventName) {
   if (!eventName || typeof eventName !== 'string') {
     throw new Error('Event name should be a valid non-empty string!');
   }
 }
 
-function ensureValidHandler(handler) {
+function assertValidHandler(handler) {
   if (typeof handler !== 'function') {
     throw new Error('Handler should be a function!');
   }
 }
 
-function ensureAllowedEventName(allowedEvents, eventName) {
+function assertAllowedEventName(allowedEvents, eventName) {
   if (allowedEvents && allowedEvents.indexOf(eventName) < 0) {
     throw new Error('Event "' + eventName + '" is not allowed!');
   }
@@ -108,13 +93,14 @@ export default class EventDispatcher {
 
   /**
    * Registers listener function to be executed once event occurs.
+   *
    * @param {string} eventName Name of the event to listen for.
    * @param {function} handler Handler to be executed once event occurs.
    */
   on(eventName, handler) {
-    ensureValidEventName(eventName);
-    ensureAllowedEventName(this[p.allowedEvents], eventName);
-    ensureValidHandler(handler);
+    assertValidEventName(eventName);
+    assertAllowedEventName(this[p.allowedEvents], eventName);
+    assertValidHandler(handler);
 
     let handlers = this[p.listeners].get(eventName);
     if (!handlers) {
@@ -129,16 +115,17 @@ export default class EventDispatcher {
   /**
    * Registers listener function to be executed only first time when event
    * occurs.
+   *
    * @param {string} eventName Name of the event to listen for.
    * @param {function} handler Handler to be executed once event occurs.
    */
   once(eventName, handler) {
-    ensureValidHandler(handler);
+    assertValidHandler(handler);
 
     const once = (parameters) => {
       this.off(eventName, once);
 
-      handler(parameters);
+      handler.call(this, parameters);
     };
 
     this.on(eventName, once);
@@ -146,14 +133,15 @@ export default class EventDispatcher {
 
   /**
    * Removes registered listener for the specified event.
+   *
    * @param {string} eventName Name of the event to remove listener for.
    * @param {function} handler Handler to remove, so it won't be executed
    * next time event occurs.
    */
   off(eventName, handler) {
-    ensureValidEventName(eventName);
-    ensureAllowedEventName(this[p.allowedEvents], eventName);
-    ensureValidHandler(handler);
+    assertValidEventName(eventName);
+    assertAllowedEventName(this[p.allowedEvents], eventName);
+    assertValidHandler(handler);
 
     const handlers = this[p.listeners].get(eventName);
     if (!handlers) {
@@ -169,7 +157,8 @@ export default class EventDispatcher {
 
   /**
    * Removes all registered listeners for the specified event.
-   * @param {string} eventName Name of the event to remove all listeners for.
+   *
+   * @param {string=} eventName Name of the event to remove all listeners for.
    */
   offAll(eventName) {
     if (typeof eventName === 'undefined') {
@@ -177,8 +166,8 @@ export default class EventDispatcher {
       return;
     }
 
-    ensureValidEventName(eventName);
-    ensureAllowedEventName(this[p.allowedEvents], eventName);
+    assertValidEventName(eventName);
+    assertAllowedEventName(this[p.allowedEvents], eventName);
 
     const handlers = this[p.listeners].get(eventName);
     if (!handlers) {
@@ -193,55 +182,39 @@ export default class EventDispatcher {
   /**
    * Emits specified event so that all registered handlers will be called
    * with the specified parameters.
+   *
    * @param {string} eventName Name of the event to call handlers for.
-   * @param {Object} parameters Optional parameters that will be passed to
+   * @param {Object=} parameters Optional parameters that will be passed to
    * every registered handler.
    */
   emit(eventName, parameters) {
-    ensureValidEventName(eventName);
-    ensureAllowedEventName(this[p.allowedEvents], eventName);
+    assertValidEventName(eventName);
+    assertAllowedEventName(this[p.allowedEvents], eventName);
 
     const handlers = this[p.listeners].get(eventName);
     if (!handlers) {
       return;
     }
 
-    handlers.forEach(function(handler) {
+    handlers.forEach((handler) => {
       try {
-        handler(parameters);
+        handler.call(this, parameters);
       } catch (error) {
         console.error(error);
       }
     });
   }
+
+  /**
+   * Checks if there are any listeners that listen for the specified event.
+   *
+   * @param {string} eventName Name of the event to check listeners for.
+   * @returns {boolean}
+   */
+  hasListeners(eventName) {
+    assertValidEventName(eventName);
+    assertAllowedEventName(this[p.allowedEvents], eventName);
+
+    return this[p.listeners].has(eventName);
+  }
 }
-
-/**
- * Mixes dispatcher methods into target object.
- * @param {Object} target Object to mix dispatcher methods into.
- * @param {Array.<string>} allowedEvents Optional list of the allowed event
- * names that can be emitted and listened for.
- * @returns {Object} Target object with added dispatcher methods.
- */
-EventDispatcher.mixin = function(target, allowedEvents) {
-  if (!target || typeof target !== 'object') {
-    throw new Error('Object to mix into should be valid object!');
-  }
-
-  if (typeof allowedEvents !== 'undefined' &&
-    !Array.isArray(allowedEvents)) {
-    throw new Error('Allowed events should be a valid array of strings!');
-  }
-
-  const eventDispatcher = new EventDispatcher(allowedEvents);
-  Object.keys(eventDispatcher).forEach((method) => {
-    if (typeof target[method] !== 'undefined') {
-      throw new Error(
-        'Object to mix into already has "' + method + '" property defined!'
-      );
-    }
-    target[method] = eventDispatcher[method].bind(eventDispatcher);
-  });
-
-  return target;
-};
