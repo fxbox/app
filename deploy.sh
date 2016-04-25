@@ -4,6 +4,7 @@
 
 BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
 git checkout -b deploy
+npm install
 npm run offline
 rm .gitignore
 git add dist/app
