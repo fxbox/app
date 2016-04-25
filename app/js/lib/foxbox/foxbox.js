@@ -53,15 +53,16 @@ const isSimilar = (objectA, objectB) => {
 };
 
 export default class Foxbox extends Service {
-  constructor() {
+  constructor({ settings, db, net } = {}) {
     super();
 
     // Private properties.
-    this[p.settings] = new Settings();
-    this[p.db] = new Db();
-    this[p.net] = new Network(this[p.settings], (foxboxOnline) => {
-      this._dispatchEvent('box-online', foxboxOnline);
-    });
+    this[p.settings] = settings || new Settings();
+    this[p.db] = db || new Db();
+    this[p.net] = net ||
+      new Network(this[p.settings], (foxboxOnline) => {
+        this._dispatchEvent('box-online', foxboxOnline);
+      });
     this[p.boxes] = Object.freeze([]);
     this[p.isPollingEnabled] = false;
     this[p.nextPollTimeout] = null;
@@ -127,8 +128,8 @@ export default class Foxbox extends Service {
     return this[p.settings].localOrigin;
   }
 
-  get clientId() {
-    return this[p.settings].clientId;
+  get client() {
+    return this[p.settings].client;
   }
 
   get boxes() {
@@ -164,15 +165,14 @@ export default class Foxbox extends Service {
           boxes
             .filter((box) => box.timestamp - now >= 0)
             .map((box) => {
-                // NOTE(sgiles): There is consideration to allow
-                // only "local_origin" and "tunnel_origin", removing the
-                // need to parse message - this merges the relevant message
-                // fields into the main object
-                const { local_origin, tunnel_origin } =
-                  JSON.parse(box.message);
-                box.local_origin = local_origin;
-                box.tunnel_origin = tunnel_origin;
-                return Object.freeze(box);
+              // NOTE(sgiles): There is consideration to allow
+              // only "local_origin" and "tunnel_origin", removing the
+              // need to parse message - this merges the relevant message
+              // fields into the main object
+              const { local_origin, tunnel_origin } = JSON.parse(box.message);
+              const client = box.client;
+
+              return Object.freeze({ local_origin, tunnel_origin, client });
             })
         );
 
@@ -238,7 +238,7 @@ export default class Foxbox extends Service {
       this[p.settings].tunnelOrigin = '';
     }
 
-    this[p.settings].clientId = box.client;
+    this[p.settings].client = box.client;
     this[p.settings].configured = true;
   }
 

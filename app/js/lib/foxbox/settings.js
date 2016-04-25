@@ -43,7 +43,7 @@ export default class Settings extends Model {
 
       _localOrigin: localOrigin,
       _tunnelOrigin: storage.getItem(`${PREFIX}tunnelOrigin`) || '',
-      _clientId: storage.getItem(`${PREFIX}clientId`) || '',
+      _client: storage.getItem(`${PREFIX}client`) || '',
 
       _session: storage.getItem(`${PREFIX}session`),
       _skipDiscovery: storage.getItem(`${PREFIX}skipDiscovery`) === 'true',
@@ -107,13 +107,13 @@ export default class Settings extends Model {
     }
   }
 
-  get clientId() {
-    return this._clientId;
+  get client() {
+    return this._client;
   }
 
-  set clientId(id) {
-    this._clientId = String(id);
-    storage.setItem(`${PREFIX}clientId`, this._clientId);
+  set client(id) {
+    this._client = String(id);
+    storage.setItem(`${PREFIX}client`, this._client);
   }
 
   get session() {
