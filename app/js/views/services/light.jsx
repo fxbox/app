@@ -44,8 +44,7 @@ export default class LightService extends React.Component {
     this.foxbox.getTags()
       .then((tags) => {
         tags.forEach((tag) => {
-          tag.data.checked = !!(this.state.data &&
-            this.state.data.includes(tag.id));
+          tag.checked = !!(this.state.data && this.state.data.includes(tag.id));
         });
 
         this.setState({ tags });

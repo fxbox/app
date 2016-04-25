@@ -65,7 +65,6 @@ export default class Db {
     if (fromVersion < 1) {
       let store = db.createObjectStore(DB_SERVICE_STORE, { keyPath: 'id' });
       store.createIndex('id', 'id', { unique: true });
-      store.createIndex('type', 'type', { unique: false });
 
       store = db.createObjectStore(DB_TAG_STORE, {
         keyPath: 'id',
@@ -157,16 +156,11 @@ export default class Db {
 
   [p.set](store, data) {
     return new Promise((resolve, reject) => {
-      const id = data.id;
       const txn = this[p.db].transaction([store], 'readwrite');
       txn.oncomplete = resolve;
       txn.onerror = reject;
       try {
-        if (id) {
-          txn.objectStore(store).put({ id, data });
-        } else {
-          txn.objectStore(store).put({ data });
-        }
+        txn.objectStore(store).put(data);
       } catch (error) {
         console.error(`Error putting data in ${DB_NAME}:`, error);
         resolve();

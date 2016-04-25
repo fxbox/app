@@ -418,7 +418,7 @@ export default class Foxbox extends Service {
   getServices() {
     return this[p.db].getServices()
       .then((services) => services.map(
-        (service) => this[p.getServiceInstance](service.data)
+        (service) => this[p.getServiceInstance](service)
       ));
   }
 
@@ -430,7 +430,7 @@ export default class Foxbox extends Service {
   getService() {
     // Get data from the DB so we get the attributes, the state and the tags.
     return this[p.db].getService.apply(this[p.db], arguments)
-      .then((service) => this[p.getServiceInstance](service.data));
+      .then((service) => this[p.getServiceInstance](service));
   }
 
   setService() {
