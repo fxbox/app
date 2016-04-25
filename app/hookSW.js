@@ -75,7 +75,7 @@ function notifyClient(obj) {
 function showNotification(obj) {
   const title = 'Link: Notification';
   const body = obj.message;
-  const icon = 'img/icon.svg';
+  const icon = 'img/icons/512.png';
   const tag = obj.resource || obj.tag || 'link-push';
 
   return self.registration.showNotification(title, {
