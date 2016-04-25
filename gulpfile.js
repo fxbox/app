@@ -241,9 +241,10 @@ gulp.task('run-test-integration', function() {
 });
 
 gulp.task('test-integration', function(cb) {
-  return runSequence(
-    'start-simulators', 'run-test-integration', 'stop-simulators', cb
-  );
+  runSequence('start-simulators', 'run-test-integration', () => {
+    // Tear down whatever the result is
+    runSequence('stop-simulators', cb);
+  });
 });
 
 gulp.task('run-test-e2e', function() {
@@ -257,8 +258,9 @@ gulp.task('test', function(cb) {
     'run-unit-tests',
     'webserver',
     'test-integration',
-    'stop-webserver',
-    cb
+    () => { // Tear down whatever the result is
+      runSequence('stop-webserver', cb);
+    }
   );
 });
 
