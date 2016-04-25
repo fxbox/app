@@ -185,7 +185,7 @@ export default class Foxbox extends Service {
           throw new Error('Registration service did not return any boxes.');
         }
 
-        if (!this[p.settings].configured) {
+        if (!this[p.settings].configured && this[p.boxes].length === 1) {
           this.selectBox();
         }
 
