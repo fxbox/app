@@ -4,11 +4,7 @@
 
 .service-list__item {
   display: flex;
-  padding: 0;
   position: relative;
-}
-
-.service-list__item[data-icon] {
   padding-left: 4rem;
 
   background-size: 2.5rem;

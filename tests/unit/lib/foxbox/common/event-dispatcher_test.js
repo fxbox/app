@@ -1,4 +1,4 @@
-import EventDispatcher from 'js/lib/foxbox/event-dispatcher';
+import EventDispatcher from 'js/lib/foxbox/common/event-dispatcher';
 
 describe('EventDispatcher >', function () {
   const allowedEvents = ['allowed-event-1', 'allowed-event-2'];

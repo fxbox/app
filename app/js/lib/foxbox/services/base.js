@@ -1,5 +1,7 @@
 'use strict';
 
+import EventDispatcher from '../common/event-dispatcher';
+
 const TYPE = 'unknown';
 
 const p = Object.freeze({
@@ -21,8 +23,10 @@ const p = Object.freeze({
   getSetterValueType: Symbol('getSetterValueType'),
 });
 
-export default class BaseService {
-  constructor(props, api) {
+export default class BaseService extends EventDispatcher {
+  constructor(props, api, allowedEvents) {
+    super(allowedEvents);
+
     // Private properties.
     this[p.api] = api;
 
@@ -104,6 +108,38 @@ export default class BaseService {
     return this[p.api].put('channels/get', body)
       .then((response) => response[getter.id]);
   }
+
+  /**
+   * Setups value watcher for the getter matching specified selector.
+   *
+   * @param {Object} selector Selector to match getter which value we would like
+   * to watch.
+   * @param {function} handler Function to be called once getter value changes.
+   */
+  watch(selector, handler) {
+    const { id: getterId } = this[p.getChannel](this[p.getters], selector);
+    this[p.api].watch(getterId, handler);
+  }
+
+  /**
+   * Removes value watcher for the getter matching specified selector.
+   *
+   * @param {Object} selector Selector to match getter for which we would like
+   * to remove value watcher.
+   * @param {function} handler Function that was used in corresponding watch
+   * call.
+   */
+  unwatch(selector, handler) {
+    const { id: getterId } = this[p.getChannel](this[p.getters], selector);
+    this[p.api].unwatch(getterId, handler);
+  }
+
+  /**
+   * Method that should be called when service instance is not needed anymore.
+   * Classes that extend BaseService and override this method should always call
+   * super.teardown() method as well.
+   */
+  teardown() {}
 
   /**
    * @param {Object} channels

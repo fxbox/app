@@ -1,6 +1,6 @@
 'use strict';
 
-import Defer from './defer';
+import Defer from './common/defer';
 
 // Private members.
 const p = Object.freeze({

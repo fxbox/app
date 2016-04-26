@@ -60,23 +60,23 @@
  * obj.emit("somethinghappened", 123);
  */
 
-function assertValidEventName(eventName) {
+const assertValidEventName = function(eventName) {
   if (!eventName || typeof eventName !== 'string') {
     throw new Error('Event name should be a valid non-empty string!');
   }
-}
+};
 
-function assertValidHandler(handler) {
+const assertValidHandler = function(handler) {
   if (typeof handler !== 'function') {
     throw new Error('Handler should be a function!');
   }
-}
+};
 
-function assertAllowedEventName(allowedEvents, eventName) {
+const assertAllowedEventName = function(allowedEvents, eventName) {
   if (allowedEvents && allowedEvents.indexOf(eventName) < 0) {
     throw new Error(`Event "${eventName}" is not allowed!`);
   }
-}
+};
 
 const p = Object.freeze({
   allowedEvents: Symbol('allowedEvents'),

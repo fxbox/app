@@ -1,5 +1,4 @@
 import React from 'components/react';
-
 import CameraServiceView from 'js/views/services/camera';
 
 import { waitFor } from '../../test-utils';
@@ -19,6 +18,12 @@ describe('Camera service view tests', function() {
 
     component = TestUtils.renderIntoDocument(
       <CameraServiceView service={serviceMock} foxbox={foxboxStub}/>
+    );
+
+    assert.isDefined(
+      component,
+      'ReactDOM.render() did not render component ' +
+        '(see https://github.com/fxbox/app/issues/133).'
     );
   });
 

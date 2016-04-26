@@ -1,6 +1,6 @@
 'use strict';
 
-import EventDispatcher from './event-dispatcher';
+import EventDispatcher from './common/event-dispatcher';
 
 // Private members
 const p = Object.freeze({

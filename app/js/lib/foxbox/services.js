@@ -1,6 +1,7 @@
 'use strict';
 
-import EventDispatcher from './event-dispatcher';
+import EventDispatcher from './common/event-dispatcher';
+import SequentialTimer from './common/sequential-timer';
 import BaseService from './services/base';
 import IpCameraService from './services/ip-camera';
 import LightService from './services/light';
@@ -12,11 +13,9 @@ const p = Object.freeze({
   settings: Symbol('settings'),
   db: Symbol('db'),
   cache: Symbol('services'),
-  isPollingEnabled: Symbol('isPollingEnabled'),
-  nextPollTimeout: Symbol('nextPollTimeout'),
+  pollingTimer: Symbol('pollingTimer'),
 
   // Private methods.
-  schedulePoll: Symbol('schedulePoll'),
   getServiceInstance: Symbol('getServiceInstance'),
   hasDoorLockChannel: Symbol('hasDoorLockChannel'),
   updateServiceList: Symbol('updateServiceList'),
@@ -67,8 +66,11 @@ export default class Services extends EventDispatcher {
     this[p.settings] = settings;
 
     this[p.cache] = null;
-    this[p.isPollingEnabled] = false;
-    this[p.nextPollTimeout] = null;
+    this[p.pollingTimer] = new SequentialTimer(
+      this[p.settings].pollingInterval
+    );
+
+    this[p.updateServiceList] = this[p.updateServiceList].bind(this);
 
     Object.seal(this);
   }
@@ -102,14 +104,14 @@ export default class Services extends EventDispatcher {
    * be started or stopped.
    */
   togglePolling(pollingEnabled) {
-    this[p.isPollingEnabled] = pollingEnabled;
+    if (pollingEnabled === this[p.pollingTimer].started) {
+      return;
+    }
 
     if (pollingEnabled) {
-      this[p.schedulePoll]();
+      this[p.pollingTimer].start(this[p.updateServiceList]);
     } else {
-      // Cancel next poll attempt if it has been scheduled.
-      clearTimeout(this[p.nextPollTimeout]);
-      this[p.nextPollTimeout] = null;
+      this[p.pollingTimer].stop();
     }
   }
 
@@ -138,91 +140,66 @@ export default class Services extends EventDispatcher {
   }
 
   /**
-   * Schedules an attempt to poll the server, does nothing if polling is not
-   * enabled or it has already been scheduled. New poll is scheduled only once
-   * previous one is completed or failed.
-   *
-   * @private
-   */
-  [p.schedulePoll]() {
-    // Return early if polling is not enabled or it has already been scheduled.
-    if (!this[p.isPollingEnabled] || this[p.nextPollTimeout]) {
-      return;
-    }
-
-    this[p.nextPollTimeout] = setTimeout(() => {
-      Promise.all([this[p.db].getServices(), this[p.api].get('services')])
-        .then(([storedServices, fetchedServices]) => {
-          return this[p.updateServiceList](storedServices, fetchedServices);
-        })
-        .catch((error) => {
-          console.error(
-            'Polling has failed, scheduling one more attempt: ',
-            error
-          );
-        })
-        .then(() => {
-          this[p.nextPollTimeout] = null;
-          this[p.schedulePoll]();
-        });
-    }, this[p.settings].pollingInterval);
-  }
-
-  /**
    * Tries to update service list and emits appropriate events.
    *
-   * @param {Array<Object>} storedServices Services currently stored in DB.
-   * @param {Array<Object>} fetchedServices Services returned from the server.
    * @return {Promise}
    * @private
    */
-  [p.updateServiceList](storedServices, fetchedServices) {
-    return this[p.getCache]()
-      .then((cache) => {
-        let servicesToAddCount = 0;
-        fetchedServices.forEach((fetchedService) => {
-          const storedService = storedServices.find(
-            (storedService) => storedService.id === fetchedService.id
-          );
+  [p.updateServiceList]() {
+    return Promise.all([
+      this[p.api].get('services'),
+      this[p.db].getServices(),
+      this[p.getCache](),
+    ])
+    .then(([fetchedServices, storedServices, cache]) => {
+      let servicesToAddCount = 0;
+      fetchedServices.forEach((fetchedService) => {
+        const storedService = storedServices.find(
+          (storedService) => storedService.id === fetchedService.id
+        );
 
-          const isExistingService = !!storedService;
+        const isExistingService = !!storedService;
 
-          if (isExistingService && isSimilar(fetchedService, storedService)) {
-            return;
-          }
-
-          // Populate the db with the latest service.
-          this[p.db].setService(fetchedService);
-
-          const service = this[p.getServiceInstance](fetchedService);
-          cache.set(service.id, service);
-
-          if (isExistingService) {
-            this.emit('service-changed', service);
-          } else {
-            servicesToAddCount++;
-          }
-        });
-
-        const servicesToRemoveCount = storedServices.length +
-          servicesToAddCount - fetchedServices.length;
-        if (servicesToRemoveCount > 0) {
-          storedServices.forEach((storedService) => {
-            const fetchedService = fetchedServices.find(
-              (fetchedService) => fetchedService.id === storedService.id
-            );
-
-            if (!fetchedService) {
-              this[p.db].deleteService(storedService);
-              cache.delete(storedService.id);
-            }
-          });
+        if (isExistingService && isSimilar(fetchedService, storedService)) {
+          return;
         }
 
-        if (servicesToAddCount > 0 || servicesToRemoveCount > 0) {
-          this.emit('services-changed');
+        // Populate the db with the latest service.
+        this[p.db].setService(fetchedService);
+
+        const service = this[p.getServiceInstance](fetchedService);
+        cache.set(service.id, service);
+
+        if (isExistingService) {
+          this.emit('service-changed', service);
+        } else {
+          servicesToAddCount++;
         }
       });
+
+      const servicesToRemoveCount = storedServices.length +
+        servicesToAddCount - fetchedServices.length;
+      if (servicesToRemoveCount > 0) {
+        storedServices.forEach((storedService) => {
+          const fetchedService = fetchedServices.find(
+            (fetchedService) => fetchedService.id === storedService.id
+          );
+
+          if (!fetchedService) {
+            this[p.db].deleteService(storedService);
+
+            // We should teardown service instance and remove it from the cache.
+            const cachedService = cache.get(storedService.id);
+            cachedService.teardown();
+            cache.delete(cachedService.id);
+          }
+        });
+      }
+
+      if (servicesToAddCount > 0 || servicesToRemoveCount > 0) {
+        this.emit('services-changed');
+      }
+    });
   }
 
   /**
