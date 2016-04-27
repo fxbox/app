@@ -14,8 +14,8 @@ export default class TagList extends React.Component {
         <TagItem
           key={tag.id}
           id={tag.id}
-          name={tag.data.name}
-          checked={tag.data.checked}
+          name={tag.name}
+          checked={tag.checked}
           serviceId={this.props.serviceId}
           foxbox={this.foxbox}/>
       )

@@ -18,18 +18,18 @@ export default class TagItem extends React.Component {
 
     this.foxbox.getService(this.props.serviceId)
       .then((service) => {
-        if (!service.data.tags) {
-          service.data.tags = [];
+        if (!service.tags) {
+          service.tags = [];
         }
 
-        service.data.tags = service.data.tags.filter(
+        service.tags = service.tags.filter(
           (tag) => tag !== this.props.id
         );
         if (checked) {
-          service.data.tags.push(this.props.id);
+          service.tags.push(this.props.id);
         }
 
-        this.foxbox.setService(service.data);
+        this.foxbox.setService(service);
       })
       .catch((error) => {
         this.setState({ checked: !checked }); // Revert back to original state.
