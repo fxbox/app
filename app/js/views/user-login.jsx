@@ -8,13 +8,15 @@ export default class UserLogin extends BaseView {
 
     this.state = {
       boxes: props.foxbox.boxes,
-      value: null,
+      selectedBox: null,
       loginEnabled: false,
     };
 
     this.foxbox = props.foxbox;
 
     this.onBoxOnline = this.onBoxOnline.bind(this);
+    this.onSelectChange = this.onSelectChange.bind(this);
+    this.onFormSubmit = this.onFormSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -25,21 +27,21 @@ export default class UserLogin extends BaseView {
     this.foxbox.removeEventListener('box-online', this.onBoxOnline);
   }
 
-  handleOnChange(evt) {
-    const value = evt.target.selectedIndex;
+  onSelectChange(evt) {
+    const selectedBox = evt.target.selectedIndex;
 
-    this.setState({ value });
-    this.foxbox.selectBox(value);
+    this.setState({ selectedBox });
+    this.foxbox.selectBox(selectedBox);
   }
 
-  handleOnSubmit(evt) {
+  onFormSubmit(evt) {
     evt.preventDefault(); // Avoid redirection to /?.
 
     this.foxbox.login();
   }
 
-  onBoxOnline(online) {
-    this.setState({ loginEnabled: online });
+  onBoxOnline(loginEnabled) {
+    this.setState({ loginEnabled });
   }
 
   renderHeader() {
@@ -51,33 +53,34 @@ export default class UserLogin extends BaseView {
   }
 
   renderBody() {
-    let boxes = (<div hidden></div>);
+    let boxNodes = null;
 
     if (this.state.boxes.length > 1) {
-      let value = this.state.value !== null ? 0 : this.state.value;
-      const options = this.state.boxes.map((box, index) => {
-        if (box.clientId === this.foxbox.clientId) {
-          value = index;
+      let selectedBox = this.state.selectedBox || 0;
+      const optionNodes = this.state.boxes.map((box, index) => {
+        if (box.client === this.foxbox.client) {
+          selectedBox = index;
         }
 
         return (
-          <option key={box.clientId} value={index}>{box.clientId}</option>
+          <option key={box.client} value={index}>{box.client}</option>
         );
       });
 
-      boxes = (<select
+      boxNodes = (<select
         className="user-login__box-selector"
-        value={value}
-        onChange={this.handleOnChange.bind(this)}>{options}</select>);
+        value={selectedBox}
+        onChange={this.onSelectChange}>{optionNodes}</select>);
     }
 
     return (
       <form className="app-view__fill-body user-login"
-            onSubmit={this.handleOnSubmit.bind(this)}>
+            onSubmit={this.onFormSubmit}>
         <img className="user-login__logo" src="img/icon.svg"/>
-        {boxes}
+        {boxNodes}
         <button className="user-login__login-button"
-                disabled={!this.state.loginEnabled}>Connect to your box</button>
+                disabled={!this.state.loginEnabled}>Connect to your box
+        </button>
       </form>
     );
   }
