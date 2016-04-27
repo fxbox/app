@@ -5,8 +5,8 @@ import BaseService from './base';
 const TYPE = 'ip-camera';
 
 export default class IpCameraService extends BaseService {
-  constructor(props, config) {
-    super(props, config);
+  constructor(props, api) {
+    super(props, api);
     Object.seal(this);
   }
 

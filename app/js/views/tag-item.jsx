@@ -13,28 +13,9 @@ export default class TagItem extends React.Component {
   }
 
   handleSetTag(evt) {
-    const checked = evt.target.checked;
-    this.setState({ checked });
+    this.setState({ checked: evt.target.checked });
 
-    this.foxbox.getService(this.props.serviceId)
-      .then((service) => {
-        if (!service.tags) {
-          service.tags = [];
-        }
-
-        service.tags = service.tags.filter(
-          (tag) => tag !== this.props.id
-        );
-        if (checked) {
-          service.tags.push(this.props.id);
-        }
-
-        this.foxbox.setService(service);
-      })
-      .catch((error) => {
-        this.setState({ checked: !checked }); // Revert back to original state.
-        console.error(error);
-      });
+    console.error('Tag management is not supported yet!');
   }
 
   render() {

@@ -28,6 +28,7 @@ describe('Foxbox >', function() {
     netStub = sinon.stub({
       init: () => {},
       fetchJSON: () => {},
+      on: () => {},
     });
     foxbox = new Foxbox({ net: netStub });
   });

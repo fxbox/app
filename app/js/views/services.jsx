@@ -16,39 +16,28 @@ export default class Services extends BaseView {
 
     this.foxbox = props.foxbox;
 
-    this.updateService = this.updateService.bind(this);
+    this.updateServiceList = this.updateServiceList.bind(this);
     this.updateServiceState = this.updateServiceState.bind(this);
   }
 
   componentDidMount() {
-    this.foxbox.getServices()
-      .then((services) => {
-        console.log(services);
-        this.updateService(services);
-      })
-      .catch(console.error.bind(console));
+    this.updateServiceList();
 
-    this.foxbox.getTags()
-      .then((tags) => {
-        console.log(tags);
-      })
-      .catch(console.error.bind(console));
-
-    this.foxbox.addEventListener('service-change', this.updateService);
-    this.foxbox.addEventListener(
-      'service-state-change', this.updateServiceState
-    );
+    this.foxbox.services.on('services-changed', this.updateServiceList);
+    this.foxbox.services.on('service-changed', this.updateServiceState);
   }
 
   componentWillUnmount() {
-    this.foxbox.removeEventListener('service-change', this.updateService);
-    this.foxbox.removeEventListener(
-      'service-state-change', this.updateServiceState
-    );
+    this.foxbox.services.off('services-changed', this.updateServiceList);
+    this.foxbox.services.off('service-changed', this.updateServiceState);
   }
 
-  updateService(services = []) {
-    this.setState({ services });
+  updateServiceList() {
+    this.foxbox.services.getAll()
+      .then((services) => this.setState({ services }))
+      .catch((error) => {
+        console.error('Could not update service list: %o', error);
+      });
   }
 
   updateServiceState(state) {

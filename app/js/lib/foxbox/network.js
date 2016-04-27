@@ -1,5 +1,7 @@
 'use strict';
 
+import EventDispatcher from './event-dispatcher';
+
 // Private members.
 const p = Object.freeze({
   // Private properties.
@@ -12,10 +14,13 @@ const p = Object.freeze({
   fetch: Symbol('fetch'),
   ping: Symbol('ping'),
   pingBox: Symbol('pingBox'),
+  onPong: Symbol('onPong'),
 });
 
-export default class Network {
-  constructor(settings, pingCallback) {
+export default class Network extends EventDispatcher {
+  constructor(settings) {
+    super(['online']);
+
     // Private properties.
     this[p.settings] = settings;
     // Whether we can connect to the box via a local connection.
@@ -24,8 +29,6 @@ export default class Network {
     this[p.remote] = false;
     // A reference to the interval to get the online status.
     this[p.pingInterval] = null;
-    // A callback triggered on each ping response.
-    this[p.pingCallback] = pingCallback;
 
     Object.seal(this);
   }
@@ -81,7 +84,7 @@ export default class Network {
     return settings.tunnelOrigin;
   }
 
-  get connected() {
+  get online() {
     return this[p.local] || this[p.remote];
   }
 
@@ -112,8 +115,8 @@ export default class Network {
    *
    * @param {string} url The URL to send the request to.
    * @param {string} blobType The Blob mime type (eg. image/jpeg).
-   * @param {string} method The HTTP method (defaults to "GET").
-   * @param {Object} body An object of key/value.
+   * @param {string=} method The HTTP method (defaults to "GET").
+   * @param {Object=} body An object of key/value.
    * @return {Promise<Blob>}
    */
   fetchBlob(url, blobType, method, body) {
@@ -172,49 +175,70 @@ export default class Network {
   }
 
   /**
-   * Ping the box to detect whether we connect locally or remotely.
+   * Ping the box to detect whether we connect locally or remotely. Since
+   * 'online' state depends on two factors: local and remote server
+   * availability, there is a slight chance that this method will cause two
+   * events e.g. if previously box was available only locally and now it's
+   * available only remotely we'll likely generate event indicating that box
+   * went offline following by another event indicating that box is online
+   * again.
    *
    * @private
    */
   [p.pingBox]() {
-    const promises = [];
-    promises.push(this[p.ping](`${this.localOrigin}/ping`)
-      .then(() => {
-        this[p.local] = true;
-      })
-      .catch(() => {
-        this[p.local] = false;
-      }));
+    const previousState = this[p.local] || this[p.remote];
+
+    this[p.ping](`${this.localOrigin}/ping`)
+      .then((isOnline) => this[p.onPong](previousState, p.local, isOnline));
 
     // @todo Find a better way to detect if a tunnel connection is active.
     if (this[p.settings].tunnelOrigin) {
-      promises.push(this[p.ping](`${this.tunnelOrigin}/ping`)
-        .then(() => {
-          this[p.remote] = true;
-        })
-        .catch(() => {
-          this[p.remote] = false;
-        }));
+      this[p.ping](`${this.tunnelOrigin}/ping`)
+        .then((isOnline) => this[p.onPong](previousState, p.remote, isOnline));
     }
-
-    Promise.all(promises).then(() => {
-      this[p.pingCallback](this[p.local] || this[p.remote]);
-    });
   }
 
   /**
-   * Get a URL but don't process the response.
+   * Performs HTTP 'GET' request to the specified URL. Returns 'true' if
+   * response was successful (any of 200-299 status codes) or 'false'
+   * otherwise.
    *
    * @param {string} url The URL to send the request to.
-   * @return {Promise}
+   * @return {Promise<boolean>}
    * @private
    */
   [p.ping](url) {
     return fetch(url, { cache: 'no-store' })
       .then((res) => res.ok)
       .catch((error) => {
-        console.error('Error occurred while pinging content: ', error);
-        throw error;
+        console.error('Error occurred while pinging content: %o', error);
+        return false;
       });
+  }
+
+  /**
+   * Process ping response (pong). If 'online' state is changed we emit 'online'
+   * event.
+   *
+   * @param {boolean} previousOnlineState Previous 'online' state.
+   * @param {Symbol} localOrRemote Symbol indicating whether we process local
+   * pong or remote one.
+   * @param {boolean} isOnline Flag that indicates whether pinged server
+   * successfully responded to ping request.
+   * @private
+   */
+  [p.onPong](previousOnlineState, localOrRemote, isOnline) {
+    // If value hasn't changed, there is no reason to think that overall
+    // 'online' state has changed.
+    if (this[localOrRemote] === isOnline) {
+      return;
+    }
+
+    this[localOrRemote] = isOnline;
+
+    const currentOnlineState = this[p.local] || this[p.remote];
+    if (previousOnlineState !== currentOnlineState) {
+      this.emit('online', currentOnlineState);
+    }
   }
 }

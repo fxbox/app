@@ -44,16 +44,19 @@ foxbox.getService(serviceId)
 
 ## Events
 
-### `service-change`
+### `services-changed`
 
 Triggers when a new service is connected to the box or when an existing service
 is disconnected from it.
 
-### `service-state-change`
+### `service-changed`
 
-This event is emitted when a service states change.
+This event is emitted when a service is changed.
 
-### `box-online`
+### `online`
 
-This event is emitted once a box is discovered on the local network or every
-time we get a response from a ping to a previously discovered box url (local or remote).
+This event is emitted when box (local or remote) online status changes.
+
+### `discovery`
+
+This event is emitted every time registration server returns a valid response.

@@ -1,6 +1,6 @@
 'use strict';
 
-import { Model } from 'components/mvc';
+import EventDispatcher from './event-dispatcher';
 
 // Prefix all entries to avoid collisions.
 const PREFIX = 'foxbox-';
@@ -29,29 +29,26 @@ const storage = localStorage ? localStorage : {
   clear: () => {},
 };
 
-export default class Settings extends Model {
+export default class Settings extends EventDispatcher {
   constructor() {
+    super(['session', 'polling-setting']);
+
     const localOrigin = storage.getItem(`${PREFIX}localOrigin`);
 
     const pollingEnabled = storage.getItem(`${PREFIX}pollingEnabled`) !== null ?
       storage.getItem(`${PREFIX}pollingEnabled`) === 'true' :
       DEFAULT_POLLING_ENABLED;
 
-    super({
-      _configured: storage.getItem(`${PREFIX}configured`) !== null ?
-      storage.getItem(`${PREFIX}configured`) === 'true' : false,
-
-      _localOrigin: localOrigin,
-      _tunnelOrigin: storage.getItem(`${PREFIX}tunnelOrigin`) || '',
-      _client: storage.getItem(`${PREFIX}client`) || '',
-
-      _session: storage.getItem(`${PREFIX}session`),
-      _skipDiscovery: storage.getItem(`${PREFIX}skipDiscovery`) === 'true',
-      _pollingEnabled: pollingEnabled,
-
-      _pushEndpoint: storage.getItem(`${PREFIX}push_endpoint`) || null,
-      _pushPubKey: storage.getItem(`${PREFIX}push_pubKey`) || null,
-    });
+    this._configured = storage.getItem(`${PREFIX}configured`) !== null ?
+      storage.getItem(`${PREFIX}configured`) === 'true' : false;
+    this._localOrigin = localOrigin;
+    this._tunnelOrigin = storage.getItem(`${PREFIX}tunnelOrigin`) || '';
+    this._client = storage.getItem(`${PREFIX}client`) || '';
+    this._session = storage.getItem(`${PREFIX}session`);
+    this._skipDiscovery = storage.getItem(`${PREFIX}skipDiscovery`) === 'true';
+    this._pollingEnabled = pollingEnabled;
+    this._pushEndpoint = storage.getItem(`${PREFIX}push_endpoint`) || null;
+    this._pushPubKey = storage.getItem(`${PREFIX}push_pubKey`) || null;
   }
 
   clear() {
@@ -62,13 +59,6 @@ export default class Settings extends Model {
 
       resolve();
     });
-  }
-
-  on(property, handler) {
-    const prototype = Object.getPrototypeOf(this);
-    const parent = Object.getPrototypeOf(prototype);
-
-    parent.on.call(this, `_${property}`, handler);
   }
 
   get configured() {
@@ -121,13 +111,19 @@ export default class Settings extends Model {
   }
 
   set session(session) {
-    if (session === undefined) {
-      this._session = undefined;
-      storage.removeItem(`${PREFIX}session`);
-    } else {
-      this._session = session;
-      storage.setItem(`${PREFIX}session`, this._session);
+    if (this._session === session) {
+      return;
     }
+
+    this._session = session;
+
+    if (this._session) {
+      storage.setItem(`${PREFIX}session`, this._session);
+    } else {
+      storage.removeItem(`${PREFIX}session`);
+    }
+
+    this.emit('session');
   }
 
   get skipDiscovery() {
@@ -145,9 +141,14 @@ export default class Settings extends Model {
   }
 
   set pollingEnabled(value) {
-    value = !!value;
+    if (value === this._pollingEnabled) {
+      return;
+    }
+
     this._pollingEnabled = value;
     storage.setItem(`${PREFIX}pollingEnabled`, value);
+
+    this.emit('polling-setting');
   }
 
   get pushEndpoint() {

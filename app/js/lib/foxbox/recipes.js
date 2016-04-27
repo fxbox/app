@@ -5,8 +5,7 @@
 // Private members.
 const p = Object.freeze({
   // Private properties.
-  settings: Symbol('settings'),
-  net: Symbol('net'),
+  api: Symbol('api'),
 
   // Recipe private properties.
   service: Symbol('service'),
@@ -35,10 +34,8 @@ export class Recipe {
 }
 
 export default class Recipes {
-  constructor(props) {
-    // Private properties.
-    this[p.settings] = props.settings;
-    this[p.net] = props.net;
+  constructor(api) {
+    this[p.api] = api;
 
     Object.seal(this);
   }
@@ -49,9 +46,8 @@ export default class Recipes {
    * @return {Promise}
    */
   getAll() {
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/services`,
-      'POST',
+    return this[p.api].post(
+      'services',
       { getters: [{ kind: 'ThinkerbellRuleSource' }] }
     )
     // Mark getters and setters with more friendly names.
@@ -96,12 +92,9 @@ export default class Recipes {
         { enabledSelectors: [], sourceSelectors: [] }
       );
 
-      const getterURL = `${this[p.net].origin}/api/` +
-        `v${this[p.settings].apiVersion}/channels/get`;
-
       return Promise.all([
-        this[p.net].fetchJSON(getterURL, 'PUT', enabledSelectors),
-        this[p.net].fetchJSON(getterURL, 'PUT', sourceSelectors),
+        this[p.api].put('channels/get', enabledSelectors),
+        this[p.api].put('channels/get', sourceSelectors),
       ])
       .then(([statuses, sources]) => {
         return services.map((service) => {
@@ -144,11 +137,8 @@ export default class Recipes {
       'DoorLocked',
     ];
 
-    const gettersURL = `${this[p.net].origin}/api/` +
-      `v${this[p.settings].apiVersion}/channels/getters`;
-
-    return this[p.net].fetchJSON(
-      gettersURL, 'POST', supportedKinds.map((kind) => ({ kind }))
+    return this[p.api].post(
+      'channels/getters', supportedKinds.map((kind) => ({ kind }))
     )
     .then((getters) => {
       return getters.map((getter) => {
@@ -215,11 +205,8 @@ export default class Recipes {
       'DoorLocked',
     ];
 
-    const settersURL = `${this[p.net].origin}/api/` +
-      `v${this[p.settings].apiVersion}/channels/setters`;
-
-    return this[p.net].fetchJSON(
-      settersURL, 'POST', supportedKinds.map((kind) => ({ kind }))
+    return this[p.api].post(
+      'channels/setters', supportedKinds.map((kind) => ({ kind }))
     )
     .then((setters) => {
       return setters.map((setter) => {
@@ -354,9 +341,8 @@ export default class Recipes {
       ],
     };
 
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
-      'PUT',
+    return this[p.api].put(
+      'channels/set',
       {
         select: {
           kind: 'AddThinkerbellRule',
@@ -378,9 +364,8 @@ export default class Recipes {
    * @return {Promise}
    */
   remove(recipe) {
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
-      'PUT',
+    return this[p.api].put(
+      'channels/set',
       {
         select: { id: recipe[p.service].remove },
         value: null,
@@ -397,9 +382,8 @@ export default class Recipes {
    */
   toggle(recipe, value = true) {
     const textValue = value ? 'On' : 'Off';
-    return this[p.net].fetchJSON(
-      `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/channels/set`,
-      'PUT',
+    return this[p.api].put(
+      'channels/set',
       {
         select: { id: recipe[p.service].setEnabled },
         value: { OnOff: textValue },
@@ -489,10 +473,8 @@ export default class Recipes {
 
         console.log('Recipe for the demo', recipe);
 
-        return this[p.net].fetchJSON(
-          `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/` +
+        return this[p.api].put(
           'channels/set',
-          'PUT',
           {
             select: {
               kind: 'AddThinkerbellRule',
@@ -583,10 +565,8 @@ export default class Recipes {
         ],
       };
 
-      return this[p.net].fetchJSON(
-        `${this[p.net].origin}/api/v${this[p.settings].apiVersion}/` +
+      return this[p.api].put(
         'channels/set',
-        'PUT',
         {
           select: {
             kind: 'AddThinkerbellRule',

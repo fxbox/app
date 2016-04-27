@@ -1,24 +1,16 @@
-import Rx from 'rxjs';
 import React from 'components/react';
 
 import CameraServiceView from 'js/views/services/camera';
 
+import { waitFor } from '../../test-utils';
+
 // See capabilities at https://facebook.github.io/react/docs/test-utils.html
 const TestUtils = React.addons.TestUtils;
-
-function waitFor(fn) {
-  return new Promise((resolve) => {
-    Rx.Observable.interval(1)
-      .filter(() => fn())
-      .take(1)
-      .subscribe(resolve);
-  });
-}
 
 describe('Camera service view tests', function() {
   let foxboxStub, serviceMock, component;
 
-  before(function() {
+  beforeEach(function() {
     foxboxStub = sinon.stub({});
 
     serviceMock = {

@@ -38,7 +38,7 @@ export default class MainController extends RoutingController {
           if (location.hash === '') {
             location.hash = '#services';
           }
-          this.foxbox.addEventListener('push-action', (msg) => {
+          this.foxbox.addEventListener('push-message', (msg) => {
             if (msg.action) {
               location.hash = msg.action;
             }

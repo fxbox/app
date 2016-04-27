@@ -20,15 +20,11 @@ export default class LightService extends React.Component {
   componentDidMount() {
     this.populateTags();
 
-    this.foxbox.addEventListener(
-      'service-state-change', this.onServiceStateChanged
-    );
+    this.foxbox.services.on('service-changed', this.onServiceStateChanged);
   }
 
   componentWillUnmount() {
-    this.foxbox.removeEventListener(
-      'service-state-change', this.onServiceStateChanged
-    );
+    this.foxbox.services.off('service-changed', this.onServiceStateChanged);
   }
 
   onServiceStateChanged(service) {

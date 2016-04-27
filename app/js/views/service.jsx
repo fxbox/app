@@ -17,7 +17,7 @@ export default class Service extends BaseView {
   }
 
   componentDidMount() {
-    this.foxbox.getService(this.props.id)
+    this.foxbox.services.get(this.props.id)
       .then((service) => {
         this.setState({ service });
       })

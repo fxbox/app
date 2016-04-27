@@ -5,8 +5,8 @@ import BaseService from './base';
 const TYPE = 'door-lock';
 
 export default class DoorLockService extends BaseService {
-  constructor(props, config) {
-    super(props, config);
+  constructor(props, api) {
+    super(props, api);
     Object.seal(this);
   }
 

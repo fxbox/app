@@ -5,8 +5,8 @@ import BaseService from './base';
 const TYPE = 'light';
 
 export default class LightService extends BaseService {
-  constructor(props, config) {
-    super(props, config);
+  constructor(props, api) {
+    super(props, api);
     Object.seal(this);
   }
 

@@ -1,11 +1,12 @@
-/* global indexedDB */
-
 'use strict';
+
+import Defer from './defer';
 
 // Private members.
 const p = Object.freeze({
   // Private properties.
   db: Symbol('db'),
+  initializationStarted: Symbol('initializationStarted'),
 
   // Private methods.
   upgradeSchema: Symbol('upgradeSchema'),
@@ -27,18 +28,26 @@ const DB_TAG_STORE = 'tags';
 
 export default class Db {
   constructor() {
-    // Private properties.
-    this[p.db] = null;
+    this[p.db] = new Defer();
+    this[p.initializationStarted] = false;
 
     Object.seal(this);
   }
 
   init() {
-    return new Promise((resolve, reject) => {
+    // We don't to expose internal DB object outside of DB class.
+    const initializationPromise = this[p.db].promise.then(() => {});
+
+    if (this[p.initializationStarted]) {
+      return initializationPromise;
+    }
+
+    try {
       const req = indexedDB.open(DB_NAME, DB_VERSION);
+
       req.onupgradeneeded = this[p.upgradeSchema];
       req.onsuccess = (evt) => {
-        this[p.db] = evt.target.result;
+        this[p.db].resolve(evt.target.result);
 
         // Prepopulate the tags with common values.
         this.getTags()
@@ -48,41 +57,36 @@ export default class Db {
               this.setTag({ name: 'Bedroom' });
               this.setTag({ name: 'Living room' });
             }
-
-            return resolve();
           });
       };
-      req.onerror = (error) => {
-        console.error('Error opening database:', error);
-        return reject(error);
-      };
-    });
-  }
-
-  [p.upgradeSchema](evt) {
-    const db = evt.target.result;
-    const fromVersion = evt.oldVersion;
-    if (fromVersion < 1) {
-      let store = db.createObjectStore(DB_SERVICE_STORE, { keyPath: 'id' });
-      store.createIndex('id', 'id', { unique: true });
-
-      store = db.createObjectStore(DB_TAG_STORE, {
-        keyPath: 'id',
-        autoIncrement: true,
-      });
-      store.createIndex('name', 'name', { unique: true });
+      req.onerror = (error) => this[p.db].reject(error);
+    } catch(error) {
+      this[p.db].reject(error);
     }
+
+    return initializationPromise
+      .catch((error) => {
+        console.error('Error opening database: %o', error);
+        throw error;
+      });
   }
 
   clear() {
-    return new Promise((resolve, reject) => {
-      this[p.db].close();
+    return this[p.db].promise
+      .then((db) => {
+        db.close();
 
-      const req = indexedDB.deleteDatabase(DB_NAME);
-      req.onsuccess = resolve;
-      req.onerror = reject;
-      req.onblocked = reject;
-    });
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.deleteDatabase(DB_NAME);
+          req.onsuccess = resolve;
+          req.onerror = reject;
+          req.onblocked = reject;
+        });
+      })
+      .then(() => {
+        this[p.db] = new Defer();
+        this[p.initializationStarted] = false;
+      });
   }
 
   getServices() {
@@ -110,8 +114,7 @@ export default class Db {
   }
 
   deleteService(data) {
-    // Is useful?!
-    return this[p.remove](DB_SERVICE_STORE, data);
+    return this[p.remove](DB_SERVICE_STORE, data.id);
   }
 
   deleteTag(data) {
@@ -126,68 +129,96 @@ export default class Db {
     return this[p.clearDb](DB_TAG_STORE);
   }
 
+  [p.upgradeSchema](evt) {
+    const db = evt.target.result;
+    const fromVersion = evt.oldVersion;
+    if (fromVersion < 1) {
+      let store = db.createObjectStore(DB_SERVICE_STORE, { keyPath: 'id' });
+      store.createIndex('id', 'id', { unique: true });
+
+      store = db.createObjectStore(DB_TAG_STORE, {
+        keyPath: 'id',
+        autoIncrement: true,
+      });
+      store.createIndex('name', 'name', { unique: true });
+    }
+  }
+
   [p.getAll](store) {
-    return new Promise((resolve, reject) => {
-      const txn = this[p.db].transaction([store], 'readonly');
-      const results = [];
-      txn.onerror = reject;
-      txn.oncomplete = () => {
-        resolve(results);
-      };
-      txn.objectStore(store).openCursor().onsuccess = (evt) => {
-        const cursor = evt.target.result;
-        if (cursor) {
-          results.push(cursor.value);
-          cursor.continue();
-        }
-      };
-    });
+    return this[p.db].promise
+      .then((db) => {
+        return new Promise((resolve, reject) => {
+          const txn = db.transaction([store], 'readonly');
+          const results = [];
+          txn.onerror = reject;
+          txn.oncomplete = () => resolve(results);
+          txn.objectStore(store).openCursor().onsuccess = (evt) => {
+            const cursor = evt.target.result;
+            if (cursor) {
+              results.push(cursor.value);
+              cursor.continue();
+            }
+          };
+        });
+      });
   }
 
   [p.getById](store, id) {
-    return new Promise((resolve, reject) => {
-      const txn = this[p.db].transaction([store], 'readonly');
-      txn.onerror = reject;
-      txn.objectStore(store).get(id).onsuccess = (evt) => {
-        resolve(evt.target.result);
-      };
-    });
+    return this[p.db].promise
+      .then((db) => {
+        return new Promise((resolve, reject) => {
+          const txn = db.transaction([store], 'readonly');
+          txn.onerror = reject;
+          txn.objectStore(store).get(id).onsuccess = (evt) => {
+            resolve(evt.target.result);
+          };
+        });
+      });
   }
 
   [p.set](store, data) {
-    return new Promise((resolve, reject) => {
-      const txn = this[p.db].transaction([store], 'readwrite');
-      txn.oncomplete = resolve;
-      txn.onerror = reject;
-      try {
-        txn.objectStore(store).put(data);
-      } catch (error) {
-        console.error(`Error putting data in ${DB_NAME}:`, error);
-        resolve();
-      }
-    });
+    return this[p.db].promise
+      .then((db) => {
+        return new Promise((resolve, reject) => {
+          const txn = db.transaction([store], 'readwrite');
+          txn.oncomplete = resolve;
+          txn.onerror = reject;
+          try {
+            txn.objectStore(store).put(data);
+          } catch (error) {
+            console.error(`Error putting data in ${DB_NAME}:`, error);
+            resolve();
+          }
+        });
+      });
   }
 
   [p.remove](store, id) {
-    return new Promise((resolve, reject) => {
-      const txn = this[p.db].transaction([store], 'readwrite');
-      txn.oncomplete = resolve;
-      txn.onerror = reject;
-      try {
-        txn.objectStore(store).delete(id);
-      } catch (error) {
-        console.error(`Error deleting data from ${DB_NAME}:`, error);
-        resolve();
-      }
-    });
+    return this[p.db].promise
+      .then((db) => {
+        return new Promise((resolve, reject) => {
+          const txn = db.transaction([store], 'readwrite');
+          txn.oncomplete = resolve;
+          txn.onerror = reject;
+          try {
+            txn.objectStore(store).delete(id);
+          } catch (error) {
+            console.error(`Error deleting data from ${DB_NAME}:`, error);
+            resolve();
+          }
+        });
+      });
   }
 
   [p.clearDb](store) {
-    return new Promise((resolve, reject) => {
-      const txn = this[p.db].transaction([store], 'readwrite');
-      txn.oncomplete = resolve;
-      txn.onerror = reject;
-      txn.objectStore(store).clear();
-    });
+    return this[p.db].promise
+      .then((db) => {
+        return new Promise((resolve, reject) => {
+          const txn = db.transaction([store], 'readwrite');
+          txn.oncomplete = resolve;
+          txn.onerror = reject;
+          txn.objectStore(store).clear();
+        });
+      });
   }
 }
