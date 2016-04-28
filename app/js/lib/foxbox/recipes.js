@@ -257,7 +257,7 @@ export default class Recipes {
                       message: JSON.stringify({
                         message: 'Your bedroom patio door has just been ' +
                           'opened. Here is a picture of what I see.',
-                        action: `dev/${setter.service}/camera-latest-image`,
+                        action: `dev/camera-latest-image/${setter.service}`,
                       }),
                       resource: 'res1',
                     },
