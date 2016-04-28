@@ -1,4 +1,4 @@
-import Defer from 'js/lib/foxbox/defer';
+import Defer from 'js/lib/foxbox/common/defer';
 
 describe('Defer >', function () {
   let defer, onResolve, onReject;

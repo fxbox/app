@@ -1,6 +1,7 @@
 'use strict';
 
-import EventDispatcher from './event-dispatcher';
+import EventDispatcher from './common/event-dispatcher';
+import SequentialTimer from './common/sequential-timer';
 
 // Private members.
 const p = Object.freeze({
@@ -8,12 +9,16 @@ const p = Object.freeze({
   settings: Symbol('settings'),
   local: Symbol('local'),
   remote: Symbol('remote'),
-  pingInterval: Symbol('pingInterval'),
+
+  localPingTimer: Symbol('localPingTimer'),
+  remotePingTimer: Symbol('remotePingTimer'),
 
   // Private methods.
   fetch: Symbol('fetch'),
   ping: Symbol('ping'),
-  pingBox: Symbol('pingBox'),
+  pingLocalBox: Symbol('pingLocalBox'),
+  pingRemoteBox: Symbol('pingRemoteBox'),
+  pingAllBoxes: Symbol('pingAllBoxes'),
   onPong: Symbol('onPong'),
 });
 
@@ -27,8 +32,13 @@ export default class Network extends EventDispatcher {
     this[p.local] = false;
     // Whether we can connect to the box via a remote connection.
     this[p.remote] = false;
-    // A reference to the interval to get the online status.
-    this[p.pingInterval] = null;
+
+    this[p.localPingTimer] = null;
+    this[p.remotePingTimer] = null;
+
+    this[p.pingLocalBox] = this[p.pingLocalBox].bind(this);
+    this[p.pingRemoteBox] = this[p.pingRemoteBox].bind(this);
+    this[p.pingAllBoxes] = this[p.pingAllBoxes].bind(this);
 
     Object.seal(this);
   }
@@ -39,24 +49,30 @@ export default class Network extends EventDispatcher {
    * @return {Promise}
    */
   init() {
-    const pingBox = this[p.pingBox].bind(this);
+    window.addEventListener('online', this[p.pingAllBoxes]);
+    window.addEventListener('offline', this[p.pingAllBoxes]);
 
-    window.addEventListener('online', pingBox);
-    window.addEventListener('offline', pingBox);
-
+    let pingInterval;
     if ('connection' in navigator && 'onchange' in navigator.connection) {
-      navigator.connection.addEventListener('change', pingBox);
+      navigator.connection.addEventListener('change', this[p.pingAllBoxes]);
 
       // We also ping the box every few minutes to make sure it's still there.
-      this[p.pingInterval] = setInterval(pingBox,
-        this[p.settings].onlineCheckingLongInterval);
+      pingInterval = this[p.settings].onlineCheckingLongInterval;
     } else {
       // If the Network Information API is not implemented, fallback to polling.
-      this[p.pingInterval] = setInterval(pingBox,
-        this[p.settings].onlineCheckingInterval);
+      pingInterval = this[p.settings].onlineCheckingInterval;
     }
 
-    this[p.pingBox]();
+    // @todo Settings should emit event when it changes "tunnelOrigin" or
+    // "localOrigin" setting and we should listen for this change and start or
+    // stop timers according to these settings.
+    this[p.localPingTimer] = new SequentialTimer(pingInterval);
+    this[p.localPingTimer].start(this[p.pingLocalBox]);
+
+    this[p.remotePingTimer] = new SequentialTimer(pingInterval);
+    this[p.remotePingTimer].start(this[p.pingRemoteBox]);
+
+    this[p.pingAllBoxes]();
 
     return Promise.resolve();
   }
@@ -73,15 +89,11 @@ export default class Network extends EventDispatcher {
   }
 
   get localOrigin() {
-    const settings = this[p.settings];
-
-    return settings.localOrigin;
+    return this[p.settings].localOrigin;
   }
 
   get tunnelOrigin() {
-    const settings = this[p.settings];
-
-    return settings.tunnelOrigin;
+    return this[p.settings].tunnelOrigin;
   }
 
   get online() {
@@ -175,27 +187,45 @@ export default class Network extends EventDispatcher {
   }
 
   /**
-   * Ping the box to detect whether we connect locally or remotely. Since
-   * 'online' state depends on two factors: local and remote server
-   * availability, there is a slight chance that this method will cause two
-   * events e.g. if previously box was available only locally and now it's
-   * available only remotely we'll likely generate event indicating that box
-   * went offline following by another event indicating that box is online
-   * again.
+   * Ping the local box to detect whether it's still alive.
+   *
+   * @return {Promise}
+   * @private
+   */
+  [p.pingLocalBox]() {
+    // @todo Find a better way to detect if a local connection is active.
+    if (!this[p.settings].localOrigin) {
+      return Promise.resolve();
+    }
+
+    return this[p.ping](`${this.localOrigin}/ping`)
+      .then((isOnline) => this[p.onPong](p.local, isOnline));
+  }
+
+  /**
+   * Ping the remote box to detect whether it's still alive.
+   *
+   * @return {Promise}
+   * @private
+   */
+  [p.pingRemoteBox]() {
+    // @todo Find a better way to detect if a tunnel connection is active.
+    if (!this[p.settings].tunnelOrigin) {
+      return Promise.resolve();
+    }
+
+    return this[p.ping](`${this.tunnelOrigin}/ping`)
+      .then((isOnline) => this[p.onPong](p.remote, isOnline));
+  }
+
+  /**
+   * Pings both local and remote boxes simultaneously (if discovered).
    *
    * @private
    */
-  [p.pingBox]() {
-    const previousState = this[p.local] || this[p.remote];
-
-    this[p.ping](`${this.localOrigin}/ping`)
-      .then((isOnline) => this[p.onPong](previousState, p.local, isOnline));
-
-    // @todo Find a better way to detect if a tunnel connection is active.
-    if (this[p.settings].tunnelOrigin) {
-      this[p.ping](`${this.tunnelOrigin}/ping`)
-        .then((isOnline) => this[p.onPong](previousState, p.remote, isOnline));
-    }
+  [p.pingAllBoxes]() {
+    this[p.pingLocalBox]();
+    this[p.pingRemoteBox]();
   }
 
   /**
@@ -218,21 +248,27 @@ export default class Network extends EventDispatcher {
 
   /**
    * Process ping response (pong). If 'online' state is changed we emit 'online'
-   * event.
+   * event. Since 'online' state depends on two factors: local and remote server
+   * availability, there is a slight chance that this method will cause two
+   * events e.g. if previously box was available only locally and now it's
+   * available only remotely we'll likely generate event indicating that box
+   * went offline following by another event indicating that box is online
+   * again.
    *
-   * @param {boolean} previousOnlineState Previous 'online' state.
    * @param {Symbol} localOrRemote Symbol indicating whether we process local
    * pong or remote one.
    * @param {boolean} isOnline Flag that indicates whether pinged server
    * successfully responded to ping request.
    * @private
    */
-  [p.onPong](previousOnlineState, localOrRemote, isOnline) {
+  [p.onPong](localOrRemote, isOnline) {
     // If value hasn't changed, there is no reason to think that overall
     // 'online' state has changed.
     if (this[localOrRemote] === isOnline) {
       return;
     }
+
+    const previousOnlineState = this[p.local] || this[p.remote];
 
     this[localOrRemote] = isOnline;
 

@@ -1,12 +1,13 @@
 'use strict';
 
-import EventDispatcher from './event-dispatcher';
+import EventDispatcher from './common/event-dispatcher';
 
 // Prefix all entries to avoid collisions.
 const PREFIX = 'foxbox-';
 
 const DEFAULT_POLLING_ENABLED = true;
 const POLLING_INTERVAL = 2000;
+const WATCH_INTERVAL = 3000;
 const ONLINE_CHECKING_INTERVAL = 5000;
 const ONLINE_CHECKING_LONG_INTERVAL = 1000 * 60 * 5;
 const REGISTRATION_SERVICE = 'https://knilxof.org:4443/ping';
@@ -185,6 +186,14 @@ export default class Settings extends EventDispatcher {
 
   get onlineCheckingLongInterval() {
     return ONLINE_CHECKING_LONG_INTERVAL;
+  }
+
+  /**
+   * Minimal interval between consequent value watcher requests.
+   * @return {number}
+   */
+  get watchInterval() {
+    return WATCH_INTERVAL;
   }
 
   get queryStringAuthTokenName() {

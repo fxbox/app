@@ -1,4 +1,4 @@
-import { waitFor } from '../../test-utils';
+import { waitForNextMacroTask } from '../../test-utils';
 
 import Services from 'js/lib/foxbox/services';
 import BaseService from 'js/lib/foxbox/services/base';
@@ -117,19 +117,24 @@ describe('Services >', function () {
       services.togglePolling(true);
     });
 
+    afterEach(function() {
+      this.sinon.clock.restore();
+    });
+
     it('new service should be added to the list', function(done) {
       apiStub.get.withArgs('services').returns(
         Promise.resolve([...dbServices, doorLockServiceRaw])
       );
 
-      // Tick 2000 and immediately restore clock so that 'waitFor' can use real
-      // setTimeout and setInterval.
       this.sinon.clock.tick(2000);
-      this.sinon.clock.restore();
 
       // Wait until services cache is updated.
-      waitFor(() => onServicesChangedStub.called)
-        .then(() => services.getAll())
+      waitForNextMacroTask()
+        .then(() => {
+          sinon.assert.calledOnce(onServicesChangedStub);
+
+          return services.getAll();
+        })
         .then((services) => {
           assert.lengthOf(services, 3);
 
@@ -162,14 +167,15 @@ describe('Services >', function () {
         Promise.resolve([dbServices[0]])
       );
 
-      // Tick 2000 and immediately restore clock so that 'waitFor' can use real
-      // setTimeout and setInterval.
       this.sinon.clock.tick(2000);
-      this.sinon.clock.restore();
 
       // Wait until services cache is updated.
-      waitFor(() => onServicesChangedStub.called)
-        .then(() => services.getAll())
+      waitForNextMacroTask()
+        .then(() => {
+          sinon.assert.calledOnce(onServicesChangedStub);
+
+          return services.getAll();
+        })
         .then((services) => {
           assert.lengthOf(services, 1);
 

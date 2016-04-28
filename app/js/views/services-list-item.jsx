@@ -8,10 +8,13 @@ export default class ServicesListItem extends React.Component {
       available: false,
       on: true,
       locked: true,
+      motionDetected: false,
     };
 
     this.service = props.service;
     this.foxbox = props.foxbox;
+
+    this.onMotion = this.onMotion.bind(this);
   }
 
   componentDidMount() {
@@ -29,6 +32,11 @@ export default class ServicesListItem extends React.Component {
           })
           .catch(console.error.bind(console));
         break;
+      case 'motion-sensor':
+        this.service.isMotionDetected()
+          .then(this.onMotion);
+        this.service.on('motion', this.onMotion);
+        break;
       case 'door-lock':
         this.service.isLocked()
           .then((locked) => {
@@ -37,6 +45,14 @@ export default class ServicesListItem extends React.Component {
           .catch((error) => {
             console.error('Can not retrieve door lock status: %o', error);
           });
+        break;
+    }
+  }
+
+  componentWillUnmount() {
+    switch (this.service.type) {
+      case 'motion-sensor':
+        this.service.off('motion', this.onMotion);
         break;
     }
   }
@@ -66,6 +82,10 @@ export default class ServicesListItem extends React.Component {
         this.setState({ locked: !locked });
         console.error('Could not change door lock status: %o', error);
       });
+  }
+
+  onMotion(motionDetected) {
+    this.setState({ motionDetected });
   }
 
   /**
@@ -235,6 +255,27 @@ export default class ServicesListItem extends React.Component {
     );
   }
 
+  renderMotionSensor() {
+    const motionSensorNameNode = this.service.name ?
+      (<small>{` (${this.service.name})`}</small>) :
+      null;
+
+    let motionSensorClassName = 'service-list__item motion-sensor-item';
+    if (this.state.motionDetected) {
+      motionSensorClassName += ' motion-sensor-item--motion-detected';
+    }
+
+    return (
+      <li className={motionSensorClassName}>
+        <a className="service-list__item-link"
+           href={`#services/${this.service.id}`}>
+          Motion Sensor
+          {motionSensorNameNode}
+        </a>
+      </li>
+    );
+  }
+
   renderGenericService(type = 'Unknown service', icon = 'unknown') {
     const serviceNameNode = this.service.name ?
       (<small>{` (${this.service.name})`}</small>) :
@@ -260,7 +301,7 @@ export default class ServicesListItem extends React.Component {
       case 'light':
         return this.renderLightService();
       case 'motion-sensor':
-        return this.renderGenericService('Motion Sensor', 'motion-sensor');
+        return this.renderMotionSensor();
       default:
         return this.renderGenericService();
     }
