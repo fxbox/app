@@ -157,6 +157,7 @@ gulp.task('webserver', function() {
       livereload: false,
       directoryListing: false,
       open: false,
+      https: { key: './certs/key.pem', cert: './certs/cert.pem' },
     }));
 });
 

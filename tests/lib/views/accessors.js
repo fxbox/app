@@ -1,4 +1,7 @@
-var until = require('selenium-webdriver').until;
+'use strict';
+
+const until = require('selenium-webdriver').until;
+
 
 function Accessors(driver) {
   this.driver = driver;
@@ -6,7 +9,7 @@ function Accessors(driver) {
 
 Accessors.prototype = {
   waitForElement(locator) {
-    var element = this.driver.wait(until.elementLocated(locator));
+    const element = this.driver.wait(until.elementLocated(locator));
     return this.driver.wait(until.elementIsEnabled(element));
   },
 };

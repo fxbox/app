@@ -2,6 +2,9 @@
 
 const express = require('express');
 const cors = require('cors');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 // Fake registration server:
 // To avoid the new implementation of multiboxes
@@ -11,7 +14,7 @@ const singleBox = [{
   public_ip: '1.1.1.1',
   client: 'abc',
   message: JSON.stringify({
-    local_origin: 'http://127.0.0.1:3000',
+    local_origin: 'https://127.0.0.1:3000',
     tunnel_origin: 'null',
   }),
   timestamp: Math.floor(Date.now() / 1000),
@@ -25,4 +28,10 @@ registrationServerSimulator.get('/ping', (req, res) => {
   res.json(singleBox);
 });
 
-registrationServerSimulator.listen(4455);
+https.createServer(
+  {
+    key: fs.readFileSync(path.join(__dirname, '../../certs/key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '../../certs/cert.pem')),
+  },
+  registrationServerSimulator
+).listen(4455);

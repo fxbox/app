@@ -36,7 +36,24 @@ $ npm install
 $ gulp
 ```
 
-Then point your browser to [http://localhost:8000](http://localhost:8000/).
+Then point your browser to [https://localhost:8000](https://localhost:8000/) and accept security exception for self-signed
+development certificate.
+
+By default app is served via `https` using self-signed certificate from `certs` folder. Certificate is valid for ~100
+years and generated with the following command:
+
+```bash
+$ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 36500 -nodes
+```
+
+In case custom certificate is required you can either override respective files in `certs` folder or change certificate
+and private key paths in `webserver` gulp task in `gulpfile.js`.
+
+Even though it's not recommended sometimes you may want to switch to `http`, for that purpose just comment out `https`
+config property in `webserver` gulp task in `gulpfile.js`. Check out official [gulp-webserver module page](https://www.npmjs.com/package/gulp-webserver)
+for possible options as well. And don't forget to flip it back while running integration tests as they will still assume
+that app is run via `https`.
+
 
 Note: The app is built in the `dist/app` folder.
 

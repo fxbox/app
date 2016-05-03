@@ -1,10 +1,10 @@
 'use strict';
 
-var App = require('../lib/app');
+const App = require('../lib/app');
 
 describe('Login', function() {
-  var app;
-  var loginView;
+  let app;
+  let loginView;
   this.timeout(30000);
 
   before(() => {
