@@ -26,12 +26,9 @@ const motionStateToBoolean = function(motionState) {
 
 export default class MotionSensorService extends BaseService {
   constructor(props, api) {
-    super(props, api, ['motion']);
-
-    this[p.onMotionStateChanged] = this[p.onMotionStateChanged].bind(this);
-
-    // Let's watch for motion sensor value changes.
-    this.watch('OpenClosed', this[p.onMotionStateChanged]);
+    super(props, api, undefined, new Map([
+      ['motion', ['OpenClosed', p.onMotionStateChanged]],
+    ]));
 
     Object.freeze(this);
   }
@@ -50,22 +47,15 @@ export default class MotionSensorService extends BaseService {
   }
 
   /**
-   * Removes motion sensor state watcher.
-   */
-  teardown() {
-    super.teardown();
-
-    this.unwatch('OpenClosed', this[p.onMotionStateChanged]);
-  }
-
-  /**
-   * Function that is called whenever motion state changes.
+   * Function that is called whenever motion state changes. It is intended to
+   * convert raw getter value into simple boolean.
    *
    * @param {Object} motionState State that indicates whether motion detected
    * or not.
+   * @return {boolean}
    * @private
    */
   [p.onMotionStateChanged](motionState) {
-    this.emit('motion', motionStateToBoolean(motionState));
+    return motionStateToBoolean(motionState);
   }
 }

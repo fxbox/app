@@ -35,9 +35,14 @@ export default class MainController extends RoutingController {
       .then(() => {
         if (this.foxbox.isLoggedIn) {
           this.foxbox.subscribeToNotifications();
+
+          // Let's schedule service list sync as soon as possible.
+          this.foxbox.services.sync();
+
           if (location.hash === '') {
             location.hash = '#services';
           }
+
           this.foxbox.addEventListener('push-message', (msg) => {
             if (msg.action) {
               location.hash = msg.action;

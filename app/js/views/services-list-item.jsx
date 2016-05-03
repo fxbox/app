@@ -35,7 +35,7 @@ export default class ServicesListItem extends React.Component {
       case 'motion-sensor':
         this.service.isMotionDetected()
           .then(this.onMotion);
-        this.service.on('motion', this.onMotion);
+        this.service.watch('motion', this.onMotion);
         break;
       case 'door-lock':
         this.service.isLocked()
@@ -52,7 +52,7 @@ export default class ServicesListItem extends React.Component {
   componentWillUnmount() {
     switch (this.service.type) {
       case 'motion-sensor':
-        this.service.off('motion', this.onMotion);
+        this.service.unwatch('motion', this.onMotion);
         break;
     }
   }

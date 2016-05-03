@@ -57,14 +57,7 @@ export default class Foxbox extends Service {
     // polling and triggering box-online events with a boolean
     // indicating if we have access to box or not.
     this._initDiscovery()
-      .then(() => this[p.net].init())
-      .then(() => {
-        // Start polling.
-        this[p.settings].on('service-polling-enabled', () => {
-          this.services.togglePolling(this[p.settings].servicePollingEnabled);
-        });
-        this.services.togglePolling(this[p.settings].servicePollingEnabled);
-      });
+      .then(() => this[p.net].init());
 
     return this._initUserSession()
       // The DB is only initialised if there's no redirection to the box.
@@ -223,24 +216,22 @@ export default class Foxbox extends Service {
       return Promise.resolve();
     }
 
-    const queryString = location.search.substring(1);
-    const searchParams = new URLSearchParams(queryString);
-
-    if (searchParams.has('session_token')) {
-      // There is a session token in the URL, let's remember it.
-      // @todo Find a better way to handle URL escape.
-      this[p.settings].session = searchParams.get('session_token')
-        .replace(/ /g, '+');
-
-      // Remove the session param from the current location.
-      searchParams.delete('session_token');
-      location.search = searchParams.toString();
-
-      // Throwing here to abort the promise chain.
-      throw(new Error('Redirecting to a URL without session'));
+    const url = new URL(location.href);
+    if (!url.searchParams.has('session_token')) {
+      return Promise.resolve();
     }
 
-    return Promise.resolve();
+    // There is a session token in the URL, let's remember it.
+    // @todo Find a better way to handle URL escape.
+    this[p.settings].session = url.searchParams.get('session_token')
+      .replace(/ /g, '+');
+
+    // Remove the session param from the current location.
+    url.searchParams.delete('session_token');
+    location.replace(url.href);
+
+    // Returning rejected promise here the promise chain.
+    return Promise.reject();
   }
 
   get isLoggedIn() {

@@ -18,7 +18,6 @@ const p = Object.freeze({
   // Private methods.
   getServiceInstance: Symbol('getServiceInstance'),
   hasDoorLockChannel: Symbol('hasDoorLockChannel'),
-  updateServiceList: Symbol('updateServiceList'),
   getCache: Symbol('getCache'),
 });
 
@@ -70,8 +69,6 @@ export default class Services extends EventDispatcher {
       this[p.settings].servicePollingInterval
     );
 
-    this[p.updateServiceList] = this[p.updateServiceList].bind(this);
-
     Object.seal(this);
   }
 
@@ -109,43 +106,19 @@ export default class Services extends EventDispatcher {
     }
 
     if (pollingEnabled) {
-      this[p.pollingTimer].start(this[p.updateServiceList]);
+      this[p.pollingTimer].start(this.sync.bind(this));
     } else {
       this[p.pollingTimer].stop();
     }
   }
 
   /**
-   * Returns in-memory service cache. When cache is not initialized we fill it
-   * in with the content of local IndexedDB.
-   *
-   * @return {Promise<Map<string, BaseService>>}
-   * @private
-   */
-  [p.getCache]() {
-    if (this[p.cache]) {
-      return Promise.resolve(this[p.cache]);
-    }
-
-    const cache = this[p.cache] = new Map();
-
-    return this[p.db].getServices()
-      .then((dbServices) => {
-        dbServices.forEach((dbService) => {
-          cache.set(dbService.id, this[p.getServiceInstance](dbService));
-        });
-
-        return cache;
-      });
-  }
-
-  /**
-   * Tries to update service list and emits appropriate events.
+   * Tries to sync local service list with the actual remote one and emits
+   * appropriate events.
    *
    * @return {Promise}
-   * @private
    */
-  [p.updateServiceList]() {
+  sync() {
     return Promise.all([
       this[p.api].get('services'),
       this[p.db].getServices(),
@@ -200,6 +173,35 @@ export default class Services extends EventDispatcher {
         this.emit('services-changed');
       }
     });
+  }
+
+  /**
+   * Returns in-memory service cache. When cache is not initialized we fill it
+   * in with the content of local IndexedDB.
+   *
+   * @return {Promise<Map<string, BaseService>>}
+   * @private
+   */
+  [p.getCache]() {
+    if (this[p.cache]) {
+      return this[p.cache];
+    }
+
+    return this[p.cache] = this[p.db].getServices()
+      .catch((err) => {
+        console.error('Could not load services from the local DB: %o', err);
+        // Don't consider IndexedDB failure as critical error.
+        return [];
+      })
+      .then((dbServices) => {
+        const cache = new Map();
+
+        dbServices.forEach((dbService) => {
+          cache.set(dbService.id, this[p.getServiceInstance](dbService));
+        });
+
+        return cache;
+      });
   }
 
   /**

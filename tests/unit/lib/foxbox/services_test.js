@@ -122,6 +122,8 @@ describe('Services >', function() {
     });
 
     afterEach(function() {
+      services.togglePolling(false);
+
       this.sinon.restore();
       this.sinon = null;
     });
@@ -167,7 +169,7 @@ describe('Services >', function() {
         .then(done, done);
     });
 
-    it('old service should be remove from the list', function(done) {
+    it('old service should be removed from the list', function(done) {
       apiStub.get.withArgs('services').returns(
         Promise.resolve([dbServices[0]])
       );
