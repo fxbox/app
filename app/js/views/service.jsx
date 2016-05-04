@@ -27,10 +27,25 @@ export default class Service extends BaseView {
   }
 
   renderHeader() {
-    return super.renderHeader(
-      this.state.service && this.state.service.name ?
-        this.state.service.name :
-        'Unknown Service'
+    if (!this.state.service) {
+      return super.renderHeader('Unknown Service');
+    }
+
+    const serviceName = this.state.service.name ?
+      this.state.service.name :
+      'Unknown Service';
+
+    return (
+      <header className="app-view__header">
+        <h1>{serviceName}</h1>
+        <a href={`#services/${this.state.service.id}/tags`}
+           title="Edit tags"
+           className="service__edit-tags-link">
+          <img className="app-view__action-icon"
+               src="css/icons/tag.svg"
+               alt="Edit tags"/>
+        </a>
+      </header>
     );
   }
 

@@ -14,6 +14,7 @@ const p = Object.freeze({
   model: Symbol('model'),
   name: Symbol('name'),
   watchers: Symbol('watchers'),
+  tags: Symbol('tags'),
   channels: Symbol('channels'),
 
   // Private methods.
@@ -38,6 +39,7 @@ export default class BaseService extends EventDispatcher {
     // Some service don't have name, but can have product_name instead.
     this[p.name] = props.properties && props.properties.name ||
       props.properties.product_name || '';
+    this[p.tags] = new Set(props.tags);
     this[p.channels] = props.channels;
     this[p.watchers] = watchers || new Map();
   }
@@ -148,6 +150,80 @@ export default class BaseService extends EventDispatcher {
 
     const { id: getterId } = this[p.getFetchChannel](selector);
     this[p.api].unwatch(getterId, wrappedHandler);
+  }
+
+  /**
+   * Returns list of service tags.
+   *
+   * @return {Array<string>}
+   */
+  getTags() {
+    // Return a copy of the set in the form of plain array, to avoid side
+    // modifications.
+    return Array.from(this[p.tags]);
+  }
+
+  /**
+   * Adds specified tag to the service/all its channels tag list.
+   *
+   * @param {string} tag Tag to add.
+   * @return {Promise}
+   */
+  addTag(tag) {
+    if (!tag || typeof tag !== 'string') {
+      throw new Error('Tag should be valid non-empty string.');
+    }
+
+    if (this[p.tags].has(tag)) {
+      return Promise.resolve();
+    }
+
+    this[p.tags].add(tag);
+
+    // For now we mark channels with the specified tag as well, so that tag can
+    // be picked up from the places that don't have access to the service
+    // instance (eg. recipes view).
+    const servicesSelector = { services: { id: this[p.id] }, tags: tag };
+    const channelsSelector = { channels: { service: this[p.id] }, tags: tag };
+
+    return Promise.all([
+      this[p.api].post('services/tags', servicesSelector),
+      this[p.api].post('channels/tags', channelsSelector),
+    ])
+    .catch((error) => {
+      this[p.tags].delete(tag);
+      throw error;
+    });
+  }
+
+  /**
+   * Removes specified tag from the service/all its channels tag list.
+   *
+   * @param {string} tag Tag to remove.
+   * @return {Promise}
+   */
+  removeTag(tag) {
+    if (!tag || typeof tag !== 'string') {
+      throw new Error('Tag should be valid non-empty string.');
+    }
+
+    if (!this[p.tags].has(tag)) {
+      return Promise.resolve();
+    }
+
+    this[p.tags].delete(tag);
+
+    const servicesSelector = { services: { id: this[p.id] }, tags: tag };
+    const channelsSelector = { channels: { service: this[p.id] }, tags: tag };
+
+    return Promise.all([
+      this[p.api].delete('services/tags', servicesSelector),
+      this[p.api].delete('channels/tags', channelsSelector),
+    ])
+    .catch((error) => {
+      this[p.tags].add(tag);
+      throw error;
+    });
   }
 
   /**

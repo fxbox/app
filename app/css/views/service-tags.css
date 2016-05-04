@@ -1,0 +1,12 @@
+.add-tag-button {
+  padding: 0 7rem;
+
+  color: #000;
+  text-align: left;
+
+  background: url(../icons/plus.svg) 3.5rem no-repeat;
+  background-size: 2rem;
+  border: none;
+  filter: brightness(0);
+  -webkit-filter: brightness(0);
+}

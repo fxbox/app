@@ -1,14 +1,11 @@
 import React from 'components/react';
 
-import TagList from 'js/views/tag-list';
-
 export default class LightService extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      data: props.service.tags,
-      tags: [],
+      name: props.service.name,
     };
 
     this.foxbox = props.foxbox;
@@ -18,8 +15,6 @@ export default class LightService extends React.Component {
   }
 
   componentDidMount() {
-    this.populateTags();
-
     this.foxbox.services.on('service-changed', this.onServiceStateChanged);
   }
 
@@ -33,44 +28,15 @@ export default class LightService extends React.Component {
     }
 
     this.service = service;
-    this.setState({ data: service.tags });
-  }
-
-  populateTags() {
-    this.foxbox.getTags()
-      .then((tags) => {
-        tags.forEach((tag) => {
-          tag.checked = !!(this.state.data && this.state.data.includes(tag.id));
-        });
-
-        this.setState({ tags });
-      });
-  }
-
-  handleAddTag() {
-    let name = prompt('Enter new tag name');
-
-    if (!name || !name.trim()) {
-      return;
-    }
-
-    name = name.trim();
-    this.foxbox.setTag({ name })
-      .then(() => {
-        this.populateTags(); // Needed to get the newly added tag ID.
-      });
+    this.setState({ name: service.name });
   }
 
   render() {
     return (
-      <div className="app-view__fill-body">
-        <h2>Tags</h2>
-        <TagList tags={this.state.tags} serviceId={this.service.id}
-                 foxbox={this.foxbox}/>
-        <button className="add-tag-button" type="button"
-                onClick={this.handleAddTag.bind(this)}>
-          Create a new tag
-        </button>
+      <div className="app-view__fill-body default-service__body">
+        <p className="default-service__notice">
+          Oops, there are no settings available for this service.
+        </p>
       </div>
     );
   }

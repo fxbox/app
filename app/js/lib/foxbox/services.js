@@ -52,6 +52,13 @@ const isSimilar = (objectA, objectB) => {
       return valueA !== valueB;
     }
 
+    if (Array.isArray(valueA)) {
+      // We don't sort arrays here since changed order likely means that array
+      // has changed.
+      return valueA.length !== valueB.length ||
+        valueA.some((itemA, index) => itemA !== valueB[index]);
+    }
+
     return !isSimilar(valueA, valueB);
   });
 };

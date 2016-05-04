@@ -136,7 +136,7 @@ export default class Network extends EventDispatcher {
       cache: 'no-store',
     };
 
-    if (method === 'POST' || method === 'PUT') {
+    if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
       req.headers['Content-Type'] = 'application/json;charset=UTF-8';
     }
 
