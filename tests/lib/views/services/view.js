@@ -1,5 +1,7 @@
-var View = require('../view');
-var ServicesAccessors = require('./accessors');
+'use strict';
+
+const View = require('../view');
+const ServicesAccessors = require('./accessors');
 
 
 function ServicesView() {
@@ -13,14 +15,14 @@ function ServicesView() {
 ServicesView.prototype = Object.assign({
   logoutSuccess() {
     return this.accessors.logOutButton.click().then(() => {
-      var LoginView = require('../login/view');
+      const LoginView = require('../login/view');
       return new LoginView(this.driver);
     });
   },
 
    goToRecipesView() {
     return this.accessors.recipesViewButton.click().then(() => {
-      var RecipesView = require('../recipes/view');
+      const RecipesView = require('../recipes/view');
       return new RecipesView(this.driver);
     });
   },

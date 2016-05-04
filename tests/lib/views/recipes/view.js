@@ -1,5 +1,7 @@
-var View = require('../view');
-var RecipesAccessors = require('./accessors');
+'use strict';
+
+const View = require('../view');
+const RecipesAccessors = require('./accessors');
 
 
 function RecipesView() {
@@ -13,7 +15,7 @@ RecipesView.prototype = Object.assign({
 
   goToNewRecipe() {
     return this.accessors.newRecipeButton.click().then(() => {
-      var NewRecipeView = require('../new_recipe/view');
+      const NewRecipeView = require('../new_recipe/view');
       return new NewRecipeView(this.driver);
     });
   },

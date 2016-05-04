@@ -1,9 +1,11 @@
-var App = require('../lib/app');
+'use strict';
+
+const App = require('../lib/app');
 
 describe('Recipes tests', function() {
-  var app;
-  var loginView;
-  var servicesGeneralView;
+  let app;
+  let loginView;
+  let servicesGeneralView;
   this.timeout(30000);
 
   before(() => {

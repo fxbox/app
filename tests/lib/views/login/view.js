@@ -1,5 +1,7 @@
-var View = require('../view');
-var LoginAccessors = require('./accessors');
+'use strict';
+
+const View = require('../view');
+const LoginAccessors = require('./accessors');
 
 
 function LoginView() {
@@ -16,7 +18,7 @@ LoginView.prototype = Object.assign({
       this.accessors.passwordField.sendKeys(password);
       this.accessors.submitButton.click();
     }).then(() => {
-      var ServicesView = require('../services/view');
+      const ServicesView = require('../services/view');
       return new ServicesView(this.driver);
     });
   },

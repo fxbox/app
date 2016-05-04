@@ -1,5 +1,7 @@
-var View = require('../view');
-var NewRecipeAccessors = require('./accessors');
+'use strict';
+
+const View = require('../view');
+const NewRecipeAccessors = require('./accessors');
 
 
 function NewRecipeView() {

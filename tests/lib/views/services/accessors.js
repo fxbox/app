@@ -1,5 +1,7 @@
-var By = require('selenium-webdriver').By;
-var Accessors = require('../accessors');
+'use strict';
+
+const By = require('selenium-webdriver').By;
+const Accessors = require('../accessors');
 
 
 function ServicesAccessors() {

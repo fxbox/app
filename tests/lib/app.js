@@ -1,11 +1,13 @@
-var webdriver = require('selenium-webdriver');
+'use strict';
+
+const webdriver = require('selenium-webdriver');
 
 const ASYNC_SCRIPT_TIMEOUT_IN_MS = 10000;
 
 function App(driver, url) {
   this.driver = driver || new webdriver.Builder().forBrowser('firefox').build();
   this.driver.manage().timeouts().setScriptTimeout(ASYNC_SCRIPT_TIMEOUT_IN_MS);
-  this.url = url || 'http://localhost:8000';
+  this.url = url || 'https://localhost:8000';
 }
 
 App.prototype = {
@@ -14,7 +16,7 @@ App.prototype = {
       .then(() => {
         // Always set the fake registration server
         this.driver.executeScript(() => {
-          localStorage.registrationServer = 'http://localhost:4455/ping';
+          localStorage.registrationServer = 'https://localhost:4455/ping';
         });
       })
       .then(() => this.defaultView);
@@ -22,7 +24,7 @@ App.prototype = {
 
   cleanUp() {
     return this.driver.executeAsyncScript(() => {
-      var callback = arguments[arguments.length - 1];
+      const callback = arguments[arguments.length - 1];
       window.foxbox.clear(true /* ignore sw */)
         .then(callback)
         .catch(callback);
@@ -34,7 +36,7 @@ App.prototype = {
   },
 
   get defaultView() {
-    var LoginView = require('./views/login/view');
+    const LoginView = require('./views/login/view');
     return new LoginView(this.driver);
   },
 };

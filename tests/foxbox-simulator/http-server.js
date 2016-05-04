@@ -1,8 +1,12 @@
-var express = require('express');
-var cors = require('cors');
-var path = require('path');
+'use strict';
 
-var foxboxSimulator = express();
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const https = require('https');
+const fs = require('fs');
+
+const foxboxSimulator = express();
 foxboxSimulator.use(cors());
 
 foxboxSimulator.get('/', (req, res) => {
@@ -13,4 +17,10 @@ foxboxSimulator.get('/ping', (req, res) => {
   res.status(204).end();
 });
 
-foxboxSimulator.listen(3000);
+https.createServer(
+  {
+    key: fs.readFileSync(path.join(__dirname, '../../certs/key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '../../certs/cert.pem')),
+  },
+  foxboxSimulator
+).listen(3000);
