@@ -1,12 +1,13 @@
 import { waitForNextMacroTask } from '../../test-utils';
 import API from 'js/lib/foxbox/api';
 
-describe('API >', function () {
+/** @test {API} */
+describe('API >', function() {
   let netStub, settingsStub, api;
 
   const testBlob = new Blob([], { type: 'image/jpeg' });
 
-  beforeEach(function () {
+  beforeEach(function() {
     this.sinon = sinon.sandbox.create();
     this.sinon.useFakeTimers();
 
@@ -36,6 +37,7 @@ describe('API >', function () {
   });
 
   describe('when online and authenticated >', function() {
+    /** @test {API#get} */
     describe('get >', function() {
       it('throws if wrong path is used', function(done) {
         const noArgsPromise = api.get()
@@ -80,6 +82,7 @@ describe('API >', function () {
       });
     });
 
+    /** @test {API#post} */
     describe('post >', function() {
       it('throws if wrong path is used', function(done) {
         const noArgsPromise = api.post()
@@ -126,6 +129,7 @@ describe('API >', function () {
       });
     });
 
+    /** @test {API#put} */
     describe('put >', function() {
       it('throws if wrong path is used', function(done) {
         const noArgsPromise = api.put()
@@ -172,6 +176,7 @@ describe('API >', function () {
       });
     });
 
+    /** @test {API#blob} */
     describe('blob >', function() {
       it('throws if wrong path is used', function(done) {
         const noArgsPromise = api.blob()
@@ -238,6 +243,7 @@ describe('API >', function () {
       });
     });
 
+    /** @test {API#watch} */
     describe('watch >', function() {
       const testGetterId1 = 'getter-id-1';
       const testGetterId2 = 'getter-id-2';
@@ -396,6 +402,7 @@ describe('API >', function () {
       });
     });
 
+    /** @test {API#unwatch} */
     describe('unwatch >', function() {
       const testGetterId1 = 'getter-id-1';
       const testGetterId2 = 'getter-id-2';
@@ -498,6 +505,7 @@ describe('API >', function () {
       settingsStub.session = '';
     });
 
+    /** @test {API#get} */
     it('"get" correctly waits for the api readiness', function(done) {
       const resourcePromise = api.get('resource');
 
@@ -529,6 +537,7 @@ describe('API >', function () {
         .then(done, done);
     });
 
+    /** @test {API#post} */
     it('"post" correctly waits for the api readiness', function(done) {
       const resourcePromise = api.post(
         'resource-post', { parameters: 'parameters' }
@@ -564,6 +573,7 @@ describe('API >', function () {
         .then(done, done);
     });
 
+    /** @test {API#put} */
     it('"put" correctly waits for the api readiness', function(done) {
       const resourcePromise = api.put(
         'resource-put', { parameters: 'parameters' }
@@ -599,6 +609,7 @@ describe('API >', function () {
         .then(done, done);
     });
 
+    /** @test {API#blob} */
     it('"blob" correctly waits for the api readiness', function(done) {
       const resourcePromise = api.blob(
         'resource-blob-put',
@@ -637,6 +648,7 @@ describe('API >', function () {
         .then(done, done);
     });
 
+    /** @test {API#watch} */
     it('"watch" correctly waits for the api readiness', function(done) {
       const getterToWatchId = 'getter-id-1';
       const onWatchStub = sinon.stub();

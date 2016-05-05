@@ -1,31 +1,34 @@
 import EventDispatcher from 'js/lib/foxbox/common/event-dispatcher';
 
-describe('EventDispatcher >', function () {
+/** @test {EventDispatcher} */
+describe('EventDispatcher >', function() {
   const allowedEvents = ['allowed-event-1', 'allowed-event-2'];
 
   let eventTarget = null,
     restrictedEventTarget = null;
 
-  beforeEach(function () {
+  beforeEach(function() {
     eventTarget = new EventDispatcher();
     restrictedEventTarget = new EventDispatcher(allowedEvents);
   });
 
-  afterEach(function () {
+  afterEach(function() {
     eventTarget.offAll();
     restrictedEventTarget.offAll();
   });
 
-  describe('constructor >', function () {
-    it('throws if invalid array is passed for allowedEvents', function () {
+  /** @test {EventDispatcher#constructor} */
+  describe('constructor >', function() {
+    it('throws if invalid array is passed for allowedEvents', function() {
       assert.throws(() => new EventDispatcher(null));
       assert.throws(() => new EventDispatcher('event'));
       assert.throws(() => new EventDispatcher(new Set()));
     });
   });
 
-  describe('on >', function () {
-    it('throws if event name is not valid string', function () {
+  /** @test {EventDispatcher#on} */
+  describe('on >', function() {
+    it('throws if event name is not valid string', function() {
       assert.throws(() => eventTarget.on());
       assert.throws(() => eventTarget.on('', () => {
       }));
@@ -33,13 +36,13 @@ describe('EventDispatcher >', function () {
       }));
     });
 
-    it('throws if handler is not function', function () {
+    it('throws if handler is not function', function() {
       assert.throws(() => eventTarget.on('event'));
       assert.throws(() => eventTarget.on('event', null));
       assert.throws(() => eventTarget.on('event', {}));
     });
 
-    it('successfully registers handler', function () {
+    it('successfully registers handler', function() {
       const expectedHandler = sinon.stub();
       const unexpectedHandler = sinon.stub();
 
@@ -54,7 +57,7 @@ describe('EventDispatcher >', function () {
       sinon.assert.notCalled(unexpectedHandler);
     });
 
-    it('successfully registers multiple handlers', function () {
+    it('successfully registers multiple handlers', function() {
       const expectedHandler1 = sinon.stub();
       const expectedHandler2 = sinon.stub();
       const unexpectedHandler = sinon.stub();
@@ -71,12 +74,12 @@ describe('EventDispatcher >', function () {
       sinon.assert.callOrder(expectedHandler1, expectedHandler2);
     });
 
-    describe('with allowed events >', function () {
-      it('throws if event name is not allowed', function () {
+    describe('with allowed events >', function() {
+      it('throws if event name is not allowed', function() {
         assert.throws(() => restrictedEventTarget.on('event'));
       });
 
-      it('successfully registers handler for allowed event', function () {
+      it('successfully registers handler for allowed event', function() {
         const expectedHandler = sinon.stub();
         const unexpectedHandler = sinon.stub();
 
@@ -93,20 +96,21 @@ describe('EventDispatcher >', function () {
     });
   });
 
-  describe('once >', function () {
-    it('throws if event name is not valid string', function () {
+  /** @test {EventDispatcher#once} */
+  describe('once >', function() {
+    it('throws if event name is not valid string', function() {
       assert.throws(() => eventTarget.once());
       assert.throws(() => eventTarget.once('', () => {}));
       assert.throws(() => eventTarget.once(null, () => {}));
     });
 
-    it('throws if handler is not function', function () {
+    it('throws if handler is not function', function() {
       assert.throws(() => eventTarget.once('event'));
       assert.throws(() => eventTarget.once('event', null));
       assert.throws(() => eventTarget.once('event', {}));
     });
 
-    it('successfully registers handler', function () {
+    it('successfully registers handler', function() {
       const expectedHandler = sinon.stub();
       const unexpectedHandler = sinon.stub();
 
@@ -122,7 +126,7 @@ describe('EventDispatcher >', function () {
       sinon.assert.notCalled(unexpectedHandler);
     });
 
-    it('successfully registers multiple handlers', function () {
+    it('successfully registers multiple handlers', function() {
       const expectedHandler1 = sinon.stub();
       const expectedHandler2 = sinon.stub();
       const unexpectedHandler = sinon.stub();
@@ -139,7 +143,7 @@ describe('EventDispatcher >', function () {
       sinon.assert.callOrder(expectedHandler1, expectedHandler2);
     });
 
-    it('correctly passes parameters', function () {
+    it('correctly passes parameters', function() {
       const handler = sinon.stub();
 
       eventTarget.once('event', handler);
@@ -149,18 +153,18 @@ describe('EventDispatcher >', function () {
       sinon.assert.calledWithExactly(handler, undefined);
 
       eventTarget.once('event', handler);
-      eventTarget.emit('event', {a: 'b'});
+      eventTarget.emit('event', { a: 'b' });
 
       sinon.assert.calledTwice(handler);
-      sinon.assert.calledWithExactly(handler, {a: 'b'});
+      sinon.assert.calledWithExactly(handler, { a: 'b' });
     });
 
-    describe('with allowed events >', function () {
-      it('throws if event name is not allowed', function () {
+    describe('with allowed events >', function() {
+      it('throws if event name is not allowed', function() {
         assert.throws(() => restrictedEventTarget.once('event'));
       });
 
-      it('successfully registers handler for allowed event', function () {
+      it('successfully registers handler for allowed event', function() {
         const expectedHandler = sinon.stub();
         const unexpectedHandler = sinon.stub();
 
@@ -178,6 +182,7 @@ describe('EventDispatcher >', function () {
     });
   });
 
+  /** @test {EventDispatcher#off} */
   describe('off >', function() {
     it('throws if event name is not valid string', function() {
       assert.throws(() => eventTarget.off());
@@ -257,6 +262,7 @@ describe('EventDispatcher >', function () {
     });
   });
 
+  /** @test {EventDispatcher#offAll} */
   describe('offAll >', function() {
     it('throws if event name is not valid string', function() {
       assert.throws(() => eventTarget.offAll(''));
@@ -337,6 +343,7 @@ describe('EventDispatcher >', function () {
     });
   });
 
+  /** @test {EventDispatcher#emit} */
   describe('emit >', function() {
     it('throws if event name is not valid string', function() {
       assert.throws(() => eventTarget.emit());
@@ -422,6 +429,7 @@ describe('EventDispatcher >', function () {
     });
   });
 
+  /** @test {EventDispatcher#hasListeners} */
   describe('hasListeners >', function() {
     it('throws if event name is not valid string', function() {
       assert.throws(() => eventTarget.hasListeners());
