@@ -146,7 +146,7 @@ gulp.task('build-unit-tests', function(cb) {
  * Watch for changes on the file system, and rebuild if so.
  */
 gulp.task('watch', function() {
-  gulp.watch([`${APP_ROOT}**`], ['build']);
+  gulp.watch([`${APP_ROOT}**`], ['offline']);
 });
 
 gulp.task('webserver', function() {
@@ -170,7 +170,7 @@ gulp.task('stop-webserver', function() {
  * Adds a listener which will re-build on a file save.
  */
 gulp.task('default', function() {
-  runSequence('build', 'webserver', 'watch');
+  runSequence('offline', 'webserver', 'watch');
 });
 
 /**
