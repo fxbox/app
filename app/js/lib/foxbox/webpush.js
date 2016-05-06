@@ -41,9 +41,12 @@ export default class WebPush extends EventDispatcher {
       .then((subscription) => {
         const endpoint = subscription.endpoint;
         const key = subscription.getKey ? subscription.getKey('p256dh') : '';
+        const auth = subscription.getKey ? subscription.getKey('auth') : '';
         settings.pushEndpoint = endpoint;
         settings.pushPubKey = btoa(String.fromCharCode.apply(null,
           new Uint8Array(key)));
+        settings.pushAuth = btoa(String.fromCharCode.apply(null,
+          new Uint8Array(auth)));
 
         // Send push information to the server
         // @todo We will need some library to write taxonomy messages
@@ -55,6 +58,7 @@ export default class WebPush extends EventDispatcher {
                 subscriptions: [{
                   public_key: settings.pushPubKey,
                   push_uri: settings.pushEndpoint,
+                  auth: settings.pushAuth,
                 }],
               },
             },
