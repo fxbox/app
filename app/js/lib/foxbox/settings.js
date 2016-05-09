@@ -5,12 +5,11 @@ import EventDispatcher from './common/event-dispatcher';
 // Prefix all entries to avoid collisions.
 const PREFIX = 'foxbox-';
 
-const DEFAULT_POLLING_ENABLED = true;
-const POLLING_INTERVAL = 2000;
-const WATCH_INTERVAL = 3000;
-const ONLINE_CHECKING_INTERVAL = 5000;
-const ONLINE_CHECKING_LONG_INTERVAL = 1000 * 60 * 5;
-const REGISTRATION_SERVICE = 'https://knilxof.org:4443/ping';
+/**
+ * API version to use (currently not configurable).
+ * @type {number}
+ * @const
+ */
 const API_VERSION = 1;
 
 /**
@@ -22,170 +21,195 @@ const API_VERSION = 1;
  */
 const QUERY_STRING_AUTH_TOKEN_NAME = 'auth';
 
-// Not all browsers have localStorage supported or activated.
-const storage = localStorage ? localStorage : {
-  getItem: () => undefined,
-  setItem: () => {},
-  removeItem: () => {},
-  clear: () => {},
-};
+/**
+ * Regex to match upper case literals.
+ * @type {RegExp}
+ * @const
+ */
+const UPPER_CASE_REGEX = /([A-Z])/g;
+
+const p = Object.freeze({
+  values: Symbol('values'),
+  storage: Symbol('storage'),
+
+  // Private methods.
+  updateSetting: Symbol('updateSetting'),
+  stringToSettingTypedValue: Symbol('stringToSettingTypedValue'),
+  getDefaultSettingValue: Symbol('getDefaultSettingValue'),
+  onStorage: Symbol('onStorage'),
+});
+
+// Definition of all available settings and their default values (if needed).
+const settings = Object.freeze({
+  // Boolean settings.
+  CONFIGURED: Object.freeze({ key: 'configured', type: 'boolean' }),
+  SKIP_DISCOVERY: Object.freeze({ key: 'skipDiscovery', type: 'boolean' }),
+  SERVICE_POLLING_ENABLED: Object.freeze({
+    key: 'servicePollingEnabled',
+    type: 'boolean',
+    defaultValue: true,
+  }),
+
+  // Number settings.
+  SERVICE_POLLING_INTERVAL: Object.freeze({
+    key: 'servicePollingInterval',
+    type: 'number',
+    defaultValue: 2000,
+  }),
+  WATCH_INTERVAL: Object.freeze({
+    key: 'watchInterval',
+    type: 'number',
+    defaultValue: 3000,
+  }),
+  ONLINE_CHECKING_INTERVAL: Object.freeze({
+    key: 'onlineCheckingInterval',
+    type: 'number',
+    defaultValue: 5000,
+  }),
+  ONLINE_CHECKING_LONG_INTERVAL: Object.freeze({
+    key: 'onlineCheckingLongInterval',
+    type: 'number',
+    defaultValue: 1000 * 60 * 5,
+  }),
+
+  // String settings.
+  LOCAL_ORIGIN: Object.freeze({ key: 'localOrigin' }),
+  TUNNEL_ORIGIN: Object.freeze({ key: 'tunnelOrigin' }),
+  CLIENT: Object.freeze({ key: 'client' }),
+  SESSION: Object.freeze({ key: 'session' }),
+  PUSH_ENDPOINT: Object.freeze({ key: 'pushEndpoint' }),
+  PUSH_PUB_KEY: Object.freeze({ key: 'pushPubKey' }),
+  REGISTRATION_SERVICE: Object.freeze({
+    key: 'registrationService',
+    defaultValue: 'https://knilxof.org:4443/ping',
+  }),
+});
 
 export default class Settings extends EventDispatcher {
-  constructor() {
-    super(['session', 'polling-setting']);
+  constructor(storage = localStorage) {
+    super();
 
-    const localOrigin = storage.getItem(`${PREFIX}localOrigin`);
+    // Not all browsers have localStorage supported or activated.
+    this[p.storage] = storage || {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+      clear: () => {},
+    };
 
-    const pollingEnabled = storage.getItem(`${PREFIX}pollingEnabled`) !== null ?
-      storage.getItem(`${PREFIX}pollingEnabled`) === 'true' :
-      DEFAULT_POLLING_ENABLED;
+    this[p.values] = new Map();
 
-    this._configured = storage.getItem(`${PREFIX}configured`) !== null ?
-      storage.getItem(`${PREFIX}configured`) === 'true' : false;
-    this._localOrigin = localOrigin;
-    this._tunnelOrigin = storage.getItem(`${PREFIX}tunnelOrigin`) || '';
-    this._client = storage.getItem(`${PREFIX}client`) || '';
-    this._session = storage.getItem(`${PREFIX}session`);
-    this._skipDiscovery = storage.getItem(`${PREFIX}skipDiscovery`) === 'true';
-    this._pollingEnabled = pollingEnabled;
-    this._pushEndpoint = storage.getItem(`${PREFIX}push_endpoint`) || null;
-    this._pushPubKey = storage.getItem(`${PREFIX}push_pubKey`) || null;
-  }
+    Object.keys(settings).forEach((settingName) => {
+      const setting = settings[settingName];
+      const settingStringValue = this[p.storage].getItem(
+        `${PREFIX}${setting.key}`
+      );
 
-  clear() {
-    return new Promise((resolve) => {
-      // @todo Remove only the items set here.
-      storage.clear();
-      this._session = null;
-
-      resolve();
+      // Setting values directly to avoid firing events on startup.
+      this[p.values].set(
+        setting,
+        this[p.stringToSettingTypedValue](setting, settingStringValue)
+      );
     });
+
+    window.addEventListener('storage', this[p.onStorage].bind(this));
+
+    Object.seal(this);
   }
 
   get configured() {
-    return this._configured;
+    return this[p.values].get(settings.CONFIGURED);
   }
 
   set configured(value) {
-    value = !!value;
-    this._configured = value;
-    storage.setItem(`${PREFIX}configured`, value);
+    this[p.updateSetting](settings.CONFIGURED, value);
   }
 
   get localOrigin() {
-    return this._localOrigin;
+    return this[p.values].get(settings.LOCAL_ORIGIN);
   }
 
-  set localOrigin(origin) {
-    this._localOrigin = origin ? (new URL(origin)).origin : null;
-    if (this._localOrigin) {
-      storage.setItem(`${PREFIX}localOrigin`, this._localOrigin);
-    } else {
-      storage.removeItem(`${PREFIX}localOrigin`);
-    }
+  set localOrigin(value) {
+    this[p.updateSetting](
+      settings.LOCAL_ORIGIN,
+      value ? (new URL(value)).origin : null
+    );
   }
 
   get tunnelOrigin() {
-    return this._tunnelOrigin;
+    return this[p.values].get(settings.TUNNEL_ORIGIN);
   }
 
-  set tunnelOrigin(origin) {
-    this._tunnelOrigin = origin ? (new URL(origin)).origin : null;
-    if (this._tunnelOrigin) {
-      storage.setItem(`${PREFIX}tunnelOrigin`, this._tunnelOrigin);
-    } else {
-      storage.removeItem(`${PREFIX}tunnelOrigin`);
-    }
+  set tunnelOrigin(value) {
+    this[p.updateSetting](
+      settings.TUNNEL_ORIGIN,
+      value ? (new URL(value)).origin : null
+    );
   }
 
   get client() {
-    return this._client;
+    return this[p.values].get(settings.CLIENT);
   }
 
-  set client(id) {
-    this._client = String(id);
-    storage.setItem(`${PREFIX}client`, this._client);
+  set client(value) {
+    this[p.updateSetting](settings.CLIENT, value ? String(value) : null);
   }
 
   get session() {
-    return this._session;
+    return this[p.values].get(settings.SESSION);
   }
 
-  set session(session) {
-    if (this._session === session) {
-      return;
-    }
-
-    this._session = session;
-
-    if (this._session) {
-      storage.setItem(`${PREFIX}session`, this._session);
-    } else {
-      storage.removeItem(`${PREFIX}session`);
-    }
-
-    this.emit('session');
+  set session(value) {
+    this[p.updateSetting](settings.SESSION, value);
   }
 
   get skipDiscovery() {
-    return this._skipDiscovery;
+    return this[p.values].get(settings.SKIP_DISCOVERY);
   }
 
   set skipDiscovery(value) {
-    value = !!value;
-    this._skipDiscovery = value;
-    storage.setItem(`${PREFIX}skipDiscovery`, value);
+    this[p.updateSetting](settings.SKIP_DISCOVERY, value);
   }
 
-  get pollingEnabled() {
-    return this._pollingEnabled;
+  get servicePollingEnabled() {
+    return this[p.values].get(settings.SERVICE_POLLING_ENABLED);
   }
 
-  set pollingEnabled(value) {
-    if (value === this._pollingEnabled) {
-      return;
-    }
-
-    this._pollingEnabled = value;
-    storage.setItem(`${PREFIX}pollingEnabled`, value);
-
-    this.emit('polling-setting');
+  set servicePollingEnabled(value) {
+    this[p.updateSetting](settings.SERVICE_POLLING_ENABLED, value);
   }
 
   get pushEndpoint() {
-    return this._pushEndpoint;
+    return this[p.values].get(settings.PUSH_ENDPOINT);
   }
 
   set pushEndpoint(value) {
-    this._pushEndpoint = value;
-    storage.setItem(`${PREFIX}push_endpoint`, value);
+    this[p.updateSetting](settings.PUSH_ENDPOINT, value);
   }
 
   get pushPubKey() {
-    return this._pushPubKey;
+    return this[p.values].get(settings.PUSH_PUB_KEY);
   }
 
   set pushPubKey(value) {
-    this._pushPubKey = value;
-    storage.setItem(`${PREFIX}push_pubKey`, value);
+    this[p.updateSetting](settings.PUSH_PUB_KEY, value);
   }
 
   // Getters only.
   get registrationService() {
-    return localStorage.registrationServer ||
-      REGISTRATION_SERVICE;
+    return this[p.values].get(settings.REGISTRATION_SERVICE);
   }
 
-  get pollingInterval() {
-    return POLLING_INTERVAL;
+  get servicePollingInterval() {
+    return this[p.values].get(settings.SERVICE_POLLING_INTERVAL);
   }
 
   get onlineCheckingInterval() {
-    return ONLINE_CHECKING_INTERVAL;
+    return this[p.values].get(settings.ONLINE_CHECKING_INTERVAL);
   }
 
   get onlineCheckingLongInterval() {
-    return ONLINE_CHECKING_LONG_INTERVAL;
+    return this[p.values].get(settings.ONLINE_CHECKING_LONG_INTERVAL);
   }
 
   /**
@@ -193,7 +217,7 @@ export default class Settings extends EventDispatcher {
    * @return {number}
    */
   get watchInterval() {
-    return WATCH_INTERVAL;
+    return this[p.values].get(settings.WATCH_INTERVAL);
   }
 
   get queryStringAuthTokenName() {
@@ -202,5 +226,125 @@ export default class Settings extends EventDispatcher {
 
   get apiVersion() {
     return API_VERSION;
+  }
+
+  /**
+   * Iterates through all known settings and sets default value for all of them.
+   *
+   * @return {Promise}
+   */
+  clear() {
+    return new Promise((resolve) => {
+      Object.keys(settings).forEach((settingName) => {
+        const setting = settings[settingName];
+        this[p.updateSetting](setting, this[p.getDefaultSettingValue](setting));
+      });
+      resolve();
+    });
+  }
+
+  /**
+   * Tries to update setting with new value. If value has changed corresponding
+   * event will be emitted. New value is also persisted to the local storage.
+   *
+   * @param {Object} setting Setting description object.
+   * @param {number|boolean|string?} newValue New value for specified setting.
+   * @private
+   */
+  [p.updateSetting](setting, newValue) {
+    const currentValue = this[p.values].get(setting);
+    if (currentValue === newValue) {
+      return;
+    }
+
+    this[p.values].set(setting, newValue);
+
+    if (newValue !== this[p.getDefaultSettingValue](setting)) {
+      this[p.storage].setItem(`${PREFIX}${setting.key}`, newValue);
+    } else {
+      this[p.storage].removeItem(`${PREFIX}${setting.key}`);
+    }
+
+    this.emit(
+      setting.key.replace(UPPER_CASE_REGEX, (part) => `-${part.toLowerCase()}`),
+      newValue
+    );
+  }
+
+  /**
+   * Converts setting raw string value to the typed one depending on the setting
+   * type.
+   *
+   * @param {Object} setting Setting description object.
+   * @param {string?} stringValue Raw string setting value or null.
+   * @return {number|boolean|string|null}
+   * @private
+   */
+  [p.stringToSettingTypedValue](setting, stringValue) {
+    // If string is null, we should return default value for this setting or
+    // default value for setting type.
+    if (stringValue === null) {
+      return this[p.getDefaultSettingValue](setting);
+    } else if (setting.type === 'boolean') {
+      return stringValue === 'true';
+    } else if (setting.type === 'number') {
+      return Number(stringValue);
+    }
+
+    return stringValue;
+  }
+
+  /**
+   * Gets default typed value for the specified setting.
+   *
+   * @param {Object} setting Setting description object.
+   * @return {number|boolean|string|null}
+   * @private
+   */
+  [p.getDefaultSettingValue](setting) {
+    if (setting.defaultValue !== undefined) {
+      return setting.defaultValue;
+    }
+
+    // Default value for this setting is not specified, let's return default
+    // value for setting type (boolean, number or string).
+    if (setting.type === 'boolean') {
+      return false;
+    } else if (setting.type === 'number') {
+      return 0;
+    }
+
+    return null;
+  }
+
+  /**
+   * Handles localStorage "storage" event.
+   *
+   * @param {StorageEvent} evt StorageEvent instance.
+   * @private
+   */
+  [p.onStorage](evt) {
+    if (!evt.key.startsWith(PREFIX)) {
+      return;
+    }
+
+    const key = evt.key.substring(PREFIX.length);
+    const settingName = Object.keys(settings).find((settingName) => {
+      return settings[settingName].key === key;
+    });
+
+    if (!settingName) {
+      console.warn(
+        `Changed unknown storage entry with app specific prefix: ${evt.key}`
+      );
+      return;
+    }
+
+    const setting = settings[settingName];
+
+    this[p.updateSetting](
+      setting,
+      this[p.stringToSettingTypedValue](setting, evt.newValue)
+    );
   }
 }

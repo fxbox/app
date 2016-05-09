@@ -44,7 +44,7 @@ describe('Services >', function () {
 
     apiStub = sinon.stub({ get: () => {} });
 
-    settingsStub = sinon.stub({ pollingInterval: 2000 });
+    settingsStub = sinon.stub({ servicePollingInterval: 2000 });
 
     services = new Services(dbStub, apiStub, settingsStub);
   });
@@ -118,7 +118,8 @@ describe('Services >', function () {
     });
 
     afterEach(function() {
-      this.sinon.clock.restore();
+      this.sinon.restore();
+      this.sinon = null;
     });
 
     it('new service should be added to the list', function(done) {

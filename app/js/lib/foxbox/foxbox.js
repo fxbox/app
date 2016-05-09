@@ -60,10 +60,10 @@ export default class Foxbox extends Service {
       .then(() => this[p.net].init())
       .then(() => {
         // Start polling.
-        this[p.settings].on('polling-setting', () => {
-          this.services.togglePolling(this[p.settings].pollingEnabled);
+        this[p.settings].on('service-polling-enabled', () => {
+          this.services.togglePolling(this[p.settings].servicePollingEnabled);
         });
-        this.services.togglePolling(this[p.settings].pollingEnabled);
+        this.services.togglePolling(this[p.settings].servicePollingEnabled);
       });
 
     return this._initUserSession()
@@ -263,7 +263,7 @@ export default class Foxbox extends Service {
    * Log out the user.
    */
   logout() {
-    this[p.settings].session = undefined;
+    this[p.settings].session = null;
   }
 
   getTags() {
