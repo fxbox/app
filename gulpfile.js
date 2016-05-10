@@ -131,8 +131,20 @@ gulp.task('travis', ['lint', 'loader-polyfill', 'babel-app']);
 gulp.task('build', function(cb) {
   runSequence(
     ['lint'], ['clobber-app'], ['loader-polyfill', 'copy-app'], ['babel-app'],
-    ['remove-useless'], cb
+    ['remove-useless'], ['offline'], cb
   );
+});
+
+/**
+ * Add Service Worker and offline support
+ */
+gulp.task('offline', () => {
+  gulp.src(['**/*'], { cwd: DIST_APP_ROOT })
+    .pipe(gsww({
+      version: pkg.version,
+      hookSW: 'hookSW.js',
+    }))
+    .pipe(gulp.dest(DIST_APP_ROOT));
 });
 
 /**
@@ -182,18 +194,6 @@ gulp.task('clobber-app', function() {
 
 gulp.task('clobber-tests', function() {
   return del(DIST_TESTS_ROOT);
-});
-
-/**
- * Add ServiceWorker support and cache all application assets.
- */
-gulp.task('offline', ['build'], function() {
-  gulp.src(['**/*'], { cwd: DIST_APP_ROOT })
-    .pipe(gsww({
-      version: pkg.version,
-      hookSW: 'hookSW.js',
-    }))
-    .pipe(gulp.dest(DIST_APP_ROOT));
 });
 
 /**
