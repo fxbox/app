@@ -70,15 +70,25 @@ Note: The app is built in the `dist/app` folder.
 
 ### Prerequisites
 
-There are a couple of steps that you must do in order to have push notifications working. As they rely on ServiceWorkers, make sure you follow the next steps:
+There are a couple of steps that you must do in order to have push notifications
+ working. As they rely on Service Workers, make sure you follow the next steps:
 
-* Push Notification will need **HTTPS everywhere**, so be sure your `foxbox` is running over SSL.
-* Visit `https://knilxof.org:4443/ping` and add a permanent exception for the certificate.
-* When developing locally (https://localhost:8000) add permanent exception for the self self-signed certificate.
+* Push Notification will need **HTTPS everywhere**, so be sure your `foxbox` is
+running over SSL.
+* Visit `https://knilxof.org:4443/ping` and add a permanent exception for the
+certificate.
+* When developing locally (https://localhost:8000) add permanent exception for
+the self self-signed certificate.
 
 ### Tips and tricks
-* To start over with a new test, clean the web push database in the foxbox: ```rm -rf $HOME/.local/share/foxbox/webpush.sqlite``` and start a Firefox instance with a new profile ```<path to firefox bin> --profile /tmp/<ramdon>```.
-* If you want to perform multiple tries with same profile try to use a service like `xip.io`. Where you can have different names pointing to your local ip like `https://myname.<my local ip>.xip.io:8000` for using this, remember to launch your gulp task like `HOST=<my local ip> gulp`. Doing this you are creating different origins, which will make you receive multiple notifications (as many as app origin registered).
+* To start over with a new test, clean the web push database in the foxbox:
+```rm -rf $HOME/.local/share/foxbox/webpush.sqlite``` and start a Firefox
+instance with a new profile ```<path to firefox bin> --profile /tmp/<random>```.
+* If you want to perform multiple tries with same profile try to use a service
+like `xip.io`. Where you can have different names pointing to your local ip like `https://myname.<my local ip>.xip.io:8000` for using this, remember to launch
+your gulp task like `HOST=<my local ip> gulp`. Doing this you are creating
+different origins, which will make you receive multiple notifications (as many
+  as app origin registered).
 
 ## Tests
 
