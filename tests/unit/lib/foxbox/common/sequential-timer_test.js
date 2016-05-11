@@ -19,7 +19,8 @@ describe('SequentialTimer >', function () {
 
   afterEach(function() {
     timer.stop();
-    this.sinon.clock.restore();
+    this.sinon.restore();
+    this.sinon = null;
   });
 
   describe('start >', function() {

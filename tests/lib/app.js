@@ -16,7 +16,20 @@ App.prototype = {
       .then(() => {
         // Always set the fake registration server
         this.driver.executeScript(() => {
-          localStorage.registrationServer = 'https://localhost:4455/ping';
+          // We want to update "registrationService" setting via localStorage,
+          // but we're in the same window so "storage" event will never be
+          // fired. To workaround this we just need to simulate "storage" event
+          // with the required value.
+          const storageEvent = new StorageEvent(
+            'storage',
+            {
+              key: 'foxbox-registrationService',
+              newValue: 'https://localhost:4455/ping',
+              storageArea: window.localStorage,
+            }
+          );
+
+          window.dispatchEvent(storageEvent);
         });
       })
       .then(() => this.defaultView);

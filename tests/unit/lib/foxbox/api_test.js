@@ -31,7 +31,8 @@ describe('API >', function () {
   });
 
   afterEach(function() {
-    this.sinon.clock.restore();
+    this.sinon.restore();
+    this.sinon = null;
   });
 
   describe('when online and authenticated >', function() {

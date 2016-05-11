@@ -67,7 +67,7 @@ export default class Services extends EventDispatcher {
 
     this[p.cache] = null;
     this[p.pollingTimer] = new SequentialTimer(
-      this[p.settings].pollingInterval
+      this[p.settings].servicePollingInterval
     );
 
     this[p.updateServiceList] = this[p.updateServiceList].bind(this);
