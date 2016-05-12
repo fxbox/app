@@ -79,6 +79,7 @@ const settings = Object.freeze({
   SESSION: Object.freeze({ key: 'session' }),
   PUSH_ENDPOINT: Object.freeze({ key: 'pushEndpoint' }),
   PUSH_PUB_KEY: Object.freeze({ key: 'pushPubKey' }),
+  PUSH_AUTH: Object.freeze({ key: 'pushAuth' }),
   REGISTRATION_SERVICE: Object.freeze({
     key: 'registrationService',
     defaultValue: 'https://knilxof.org:4443/ping',
@@ -193,6 +194,14 @@ export default class Settings extends EventDispatcher {
 
   set pushPubKey(value) {
     this[p.updateSetting](settings.PUSH_PUB_KEY, value);
+  }
+
+  get pushAuth() {
+    return this[p.values].get(settings.PUSH_AUTH);
+  }
+
+  set pushAuth(value) {
+    this[p.updateSetting](settings.PUSH_AUTH, value);
   }
 
   // Getters only.
