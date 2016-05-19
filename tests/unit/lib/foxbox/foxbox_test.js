@@ -1,5 +1,6 @@
 import Foxbox from 'js/lib/foxbox/foxbox';
 
+/** @test {Foxbox} */
 describe('Foxbox >', function() {
   const singleBox = [{
     public_ip: '1.1.1.1',
@@ -45,6 +46,7 @@ describe('Foxbox >', function() {
     });
   });
 
+  /** @test {Foxbox#constructor} */
   describe('constructor >', function() {
     it('exposes a non extensible object', function() {
       assert.isObject(foxbox);
@@ -68,6 +70,7 @@ describe('Foxbox >', function() {
     });
   });
 
+  /** @test {Foxbox#init} */
   describe('init >', function() {
     describe('exposes an array of boxes', function() {
       it('in single box mode', function(done) {

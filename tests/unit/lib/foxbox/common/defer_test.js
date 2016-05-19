@@ -1,9 +1,10 @@
 import Defer from 'js/lib/foxbox/common/defer';
 
-describe('Defer >', function () {
+/** @test {Defer} */
+describe('Defer >', function() {
   let defer, onResolve, onReject;
 
-  beforeEach(function () {
+  beforeEach(function() {
     defer = new Defer();
 
     onResolve = sinon.stub();
@@ -12,6 +13,7 @@ describe('Defer >', function () {
     defer.promise.then(onResolve, onReject);
   });
 
+  /** @test {Defer#resolve} */
   it('resolve', function(done) {
     Promise.resolve()
       .then(() => {
@@ -30,6 +32,7 @@ describe('Defer >', function () {
       .then(done, done);
   });
 
+  /** @test {Defer#reject} */
   it('reject', function(done) {
     Promise.resolve()
       .then(() => {

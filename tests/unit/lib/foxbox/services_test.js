@@ -5,7 +5,8 @@ import BaseService from 'js/lib/foxbox/services/base';
 import DoorLockService from 'js/lib/foxbox/services/door-lock';
 import MotionSensorService from 'js/lib/foxbox/services/motion-sensor';
 
-describe('Services >', function () {
+/** @test {Services} */
+describe('Services >', function() {
   let services, dbStub, apiStub, settingsStub;
 
   const dbServices = [
@@ -34,7 +35,7 @@ describe('Services >', function () {
     },
   ];
 
-  beforeEach(function () {
+  beforeEach(function() {
     dbStub = sinon.stub({
       getServices: () => {},
       setService: () => {},
@@ -49,6 +50,7 @@ describe('Services >', function () {
     services = new Services(dbStub, apiStub, settingsStub);
   });
 
+  /** @test {Services#getAll} */
   it('"getAll" returns all currently cached services', function(done) {
     services.getAll()
       .then((services) => {
@@ -72,6 +74,7 @@ describe('Services >', function () {
       .then(done, done);
   });
 
+  /** @test {Services#get} */
   it('"get" returns service by its id', function(done) {
     Promise.all([services.get('id-one'), services.get('id-two')])
       .then(([baseService, motionSensorService]) => {
@@ -91,6 +94,7 @@ describe('Services >', function () {
       .then(done, done);
   });
 
+  /** @test {Services#togglePolling} */
   describe('polling >', function() {
     const doorLockServiceRaw = {
       id: 'id-three',

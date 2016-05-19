@@ -3,7 +3,8 @@ import { waitForNextMacroTask } from '../../../test-utils';
 import Defer from 'js/lib/foxbox/common/defer';
 import SequentialTimer from 'js/lib/foxbox/common/sequential-timer';
 
-describe('SequentialTimer >', function () {
+/** @test {SequentialTimer} */
+describe('SequentialTimer >', function() {
   const DEFAULT_INTERVAL = 2000;
 
   let timer;
@@ -23,6 +24,7 @@ describe('SequentialTimer >', function () {
     this.sinon = null;
   });
 
+  /** @test {SequentialTimer#start} */
   describe('start >', function() {
     it('throws if "onTick" is not provided or not a function', function() {
       assert.throws(() => timer.start());
@@ -128,6 +130,7 @@ describe('SequentialTimer >', function () {
     });
   });
 
+  /** @test {SequentialTimer#stop} */
   describe('stop >', function() {
     beforeEach(function() {
       timer.start(onTick);
@@ -175,6 +178,7 @@ describe('SequentialTimer >', function () {
     });
   });
 
+  /** @test {SequentialTimer#interval} */
   describe('interval >', function() {
     it('is correctly set by default', function() {
       assert.equal(timer.interval, DEFAULT_INTERVAL);
