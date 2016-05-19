@@ -23,11 +23,15 @@ export default class Services extends BaseView {
   componentDidMount() {
     this.updateServiceList();
 
+    this.foxbox.services.togglePolling(true);
+
     this.foxbox.services.on('services-changed', this.updateServiceList);
     this.foxbox.services.on('service-changed', this.updateServiceState);
   }
 
   componentWillUnmount() {
+    this.foxbox.services.togglePolling(false);
+
     this.foxbox.services.off('services-changed', this.updateServiceList);
     this.foxbox.services.off('service-changed', this.updateServiceState);
   }

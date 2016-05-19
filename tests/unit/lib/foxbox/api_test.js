@@ -2,8 +2,8 @@ import { waitForNextMacroTask } from '../../test-utils';
 import API from 'js/lib/foxbox/api';
 
 /** @test {API} */
-describe('API >', function() {
-  let netStub, settingsStub, api;
+describe('API >', function () {
+  let netStub, settingsStub, api, isDocumentHidden;
 
   const testBlob = new Blob([], { type: 'image/jpeg' });
 
@@ -27,6 +27,15 @@ describe('API >', function() {
     });
     netStub.fetchJSON.returns(Promise.resolve({ property: 'property' }));
     netStub.fetchBlob.returns(Promise.resolve(testBlob));
+
+    isDocumentHidden = false;
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => isDocumentHidden,
+    });
+
+    this.sinon.stub(document, 'addEventListener');
+    this.sinon.stub(document, 'removeEventListener');
 
     api = new API(netStub, settingsStub);
   });
@@ -694,6 +703,204 @@ describe('API >', function() {
 
           sinon.assert.calledOnce(onWatchStub);
           sinon.assert.calledWithExactly(onWatchStub, { OpenClosed: 'Open' });
+        })
+        .then(done, done);
+    });
+  });
+
+  describe('when document is not visible', function() {
+    beforeEach(function() {
+      isDocumentHidden = true;
+    });
+
+    it('"get" correctly waits for the document to become visible',
+    function(done) {
+      const resourcePromise = api.get('resource');
+
+      waitForNextMacroTask()
+        .then(() => {
+          sinon.assert.notCalled(netStub.fetchJSON);
+
+          isDocumentHidden = false;
+          document.addEventListener.withArgs('visibilitychange').yield();
+
+          return resourcePromise;
+        })
+        .then((data) => {
+          sinon.assert.calledOnce(netStub.fetchJSON);
+          sinon.assert.calledWithExactly(
+            netStub.fetchJSON,
+            'https://secure-box.com/api/v5/resource'
+          );
+
+          assert.deepEqual(data, { property: 'property' });
+
+          // Make sure we correctly subscribed/unsubscribed to/from
+          // "visibilitychange" document event.
+          sinon.assert.calledOnce(document.addEventListener);
+          sinon.assert.calledWithExactly(
+            document.addEventListener,
+            'visibilitychange',
+            sinon.match.func
+          );
+
+          sinon.assert.calledOnce(document.removeEventListener);
+          sinon.assert.calledWithExactly(
+            document.removeEventListener,
+            'visibilitychange',
+            document.addEventListener.lastCall.args[1]
+          );
+        })
+        .then(done, done);
+    });
+
+    it('"put" correctly waits for the document to become visible',
+    function(done) {
+      const resourcePromise = api.put(
+        'resource-put', { parameters: 'parameters' }
+      );
+
+      waitForNextMacroTask()
+        .then(() => {
+          sinon.assert.notCalled(netStub.fetchJSON);
+
+          isDocumentHidden = false;
+          document.addEventListener.withArgs('visibilitychange').yield();
+
+          return resourcePromise;
+        })
+        .then((data) => {
+          sinon.assert.calledOnce(netStub.fetchJSON);
+          sinon.assert.calledWithExactly(
+            netStub.fetchJSON,
+            'https://secure-box.com/api/v5/resource-put',
+            'PUT',
+            { parameters: 'parameters' }
+          );
+
+          assert.deepEqual(data, { property: 'property' });
+
+          // Make sure we correctly subscribed/unsubscribed to/from
+          // "visibilitychange" document event.
+          sinon.assert.calledOnce(document.addEventListener);
+          sinon.assert.calledWithExactly(
+            document.addEventListener,
+            'visibilitychange',
+            sinon.match.func
+          );
+
+          sinon.assert.calledOnce(document.removeEventListener);
+          sinon.assert.calledWithExactly(
+            document.removeEventListener,
+            'visibilitychange',
+            document.addEventListener.lastCall.args[1]
+          );
+        })
+        .then(done, done);
+    });
+
+    it('"blob" correctly waits for the document to become visible',
+    function(done) {
+      const resourcePromise = api.blob(
+        'resource-blob-put',
+        { parameters: 'parameters' },
+        'blob/x-blob'
+      );
+
+      waitForNextMacroTask()
+        .then(() => {
+          sinon.assert.notCalled(netStub.fetchBlob);
+
+          isDocumentHidden = false;
+          document.addEventListener.withArgs('visibilitychange').yield();
+
+          return resourcePromise;
+        })
+        .then((blob) => {
+          sinon.assert.calledOnce(netStub.fetchBlob);
+          sinon.assert.calledWithExactly(
+            netStub.fetchBlob,
+            'https://secure-box.com/api/v5/resource-blob-put',
+            'blob/x-blob',
+            'PUT',
+            { parameters: 'parameters' }
+          );
+
+          assert.strictEqual(blob, testBlob);
+
+          // Make sure we correctly subscribed/unsubscribed to/from
+          // "visibilitychange" document event.
+          sinon.assert.calledOnce(document.addEventListener);
+          sinon.assert.calledWithExactly(
+            document.addEventListener,
+            'visibilitychange',
+            sinon.match.func
+          );
+
+          sinon.assert.calledOnce(document.removeEventListener);
+          sinon.assert.calledWithExactly(
+            document.removeEventListener,
+            'visibilitychange',
+            document.addEventListener.lastCall.args[1]
+          );
+        })
+        .then(done, done);
+    });
+
+    it('"watch" correctly waits for the document to become visible',
+    function(done) {
+      const getterToWatchId = 'getter-id-1';
+      const onWatchStub = sinon.stub();
+
+      netStub.fetchJSON.withArgs(
+        'https://secure-box.com/api/v5/channels/get',
+        'PUT',
+        [{ id: getterToWatchId }]
+      ).returns(
+        Promise.resolve({ [getterToWatchId]: { OpenClosed: 'Open' } })
+      );
+
+      api.watch(getterToWatchId, onWatchStub);
+
+      this.sinon.clock.tick(settingsStub.watchInterval);
+
+      waitForNextMacroTask()
+        .then(() => {
+          sinon.assert.notCalled(netStub.fetchJSON);
+          sinon.assert.notCalled(onWatchStub);
+
+          isDocumentHidden = false;
+          document.addEventListener.withArgs('visibilitychange').yield();
+
+          return waitForNextMacroTask();
+        })
+        .then(() => {
+          sinon.assert.calledOnce(netStub.fetchJSON);
+          sinon.assert.calledWithExactly(
+            netStub.fetchJSON,
+            'https://secure-box.com/api/v5/channels/get',
+            'PUT',
+            [{ id: getterToWatchId }]
+          );
+
+          sinon.assert.calledOnce(onWatchStub);
+          sinon.assert.calledWithExactly(onWatchStub, { OpenClosed: 'Open' });
+
+          // Make sure we correctly subscribed/unsubscribed to/from
+          // "visibilitychange" document event.
+          sinon.assert.calledOnce(document.addEventListener);
+          sinon.assert.calledWithExactly(
+            document.addEventListener,
+            'visibilitychange',
+            sinon.match.func
+          );
+
+          sinon.assert.calledOnce(document.removeEventListener);
+          sinon.assert.calledWithExactly(
+            document.removeEventListener,
+            'visibilitychange',
+            document.addEventListener.lastCall.args[1]
+          );
         })
         .then(done, done);
     });

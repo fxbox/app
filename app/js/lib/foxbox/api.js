@@ -15,6 +15,7 @@ const p = Object.freeze({
   getURL: Symbol('getURL'),
   onceOnline: Symbol('onceOnline'),
   onceAuthenticated: Symbol('onceAuthenticated'),
+  onceDocumentVisible: Symbol('onceDocumentVisible'),
   onceReady: Symbol('onceReady'),
   fetchGetterValues: Symbol('fetchGetterValues'),
   updateGetterValue: Symbol('updateGetterValue'),
@@ -183,13 +184,18 @@ export default class API {
 
   /**
    * Returns promise that is resolved once API is ready to use (API host is
-   * discovered and online and authenticated user session is established).
+   * discovered and online, authenticated user session is established and
+   * document is visible).
    *
    * @returns {Promise}
    * @private
    */
   [p.onceReady]() {
-    return Promise.all([this[p.onceOnline](), this[p.onceAuthenticated]()]);
+    return Promise.all([
+      this[p.onceOnline](),
+      this[p.onceAuthenticated](),
+      this[p.onceDocumentVisible](),
+    ]);
   }
 
   /**
@@ -221,6 +227,28 @@ export default class API {
     }
 
     return new Promise((resolve) => settings.once('session', () => resolve()));
+  }
+
+  /**
+   * Returns promise that is resolved once document becomes visible.
+   *
+   * @returns {Promise}
+   * @private
+   */
+  [p.onceDocumentVisible]() {
+    if (!document.hidden) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      document.addEventListener('visibilitychange',
+      function onVisibilityChange() {
+        if (!document.hidden) {
+          document.removeEventListener('visibilitychange', onVisibilityChange);
+          resolve();
+        }
+      });
+    });
   }
 
   /**

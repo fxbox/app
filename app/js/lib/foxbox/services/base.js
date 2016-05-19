@@ -13,6 +13,7 @@ const p = Object.freeze({
   manufacturer: Symbol('manufacturer'),
   model: Symbol('model'),
   name: Symbol('name'),
+  watchers: Symbol('watchers'),
   getters: Symbol('getters'),
   setters: Symbol('setters'),
   hasGetters: Symbol('hasGetters'),
@@ -24,7 +25,7 @@ const p = Object.freeze({
 });
 
 export default class BaseService extends EventDispatcher {
-  constructor(props, api, allowedEvents) {
+  constructor(props, api, allowedEvents, watchers) {
     super(allowedEvents);
 
     // Private properties.
@@ -40,6 +41,7 @@ export default class BaseService extends EventDispatcher {
       props.properties.product_name || '';
     this[p.getters] = props.getters;
     this[p.setters] = props.setters;
+    this[p.watchers] = watchers || new Map();
     this[p.hasGetters] = Object.keys(this[p.getters]).length > 0;
     this[p.hasSetters] = Object.keys(this[p.setters]).length > 0;
   }
@@ -112,26 +114,52 @@ export default class BaseService extends EventDispatcher {
   /**
    * Setups value watcher for the getter matching specified selector.
    *
-   * @param {Object} selector Selector to match getter which value we would like
-   * to watch.
+   * @param {string} alias Watcher alias to match getter which value we would
+   * like to watch.
    * @param {function} handler Function to be called once getter value changes.
    */
-  watch(selector, handler) {
+  watch(alias, handler) {
+    const watcher = this[p.watchers].get(alias);
+    if (!watcher) {
+      throw new Error('Unsupported watcher `${alias}`!');
+    }
+
+    const [selector, processor, wrappedHandlers = new Map()] = watcher;
+    if (wrappedHandlers.size === 0) {
+      watcher.push(wrappedHandlers);
+    }
+
+    let wrappedHandler = wrappedHandlers.get(handler);
+    if (!wrappedHandler) {
+      wrappedHandler = (value) => handler(this[processor](value));
+      wrappedHandlers.set(handler, wrappedHandler);
+    }
+
     const { id: getterId } = this[p.getChannel](this[p.getters], selector);
-    this[p.api].watch(getterId, handler);
+    this[p.api].watch(getterId, wrappedHandler);
   }
 
   /**
    * Removes value watcher for the getter matching specified selector.
    *
-   * @param {Object} selector Selector to match getter for which we would like
+   * @param {string} alias Watcher alias to match getter for which we would like
    * to remove value watcher.
    * @param {function} handler Function that was used in corresponding watch
    * call.
    */
-  unwatch(selector, handler) {
+  unwatch(alias, handler) {
+    const watcher = this[p.watchers].get(alias);
+    if (!watcher) {
+      throw new Error('Unsupported watcher `${alias}`!');
+    }
+
+    const [selector,, wrappedHandlers] = watcher;
+
+    const wrappedHandler = wrappedHandlers.get(handler);
+    wrappedHandlers.delete(handler);
+
     const { id: getterId } = this[p.getChannel](this[p.getters], selector);
-    this[p.api].unwatch(getterId, handler);
+    this[p.api].unwatch(getterId, wrappedHandler);
   }
 
   /**
@@ -139,7 +167,25 @@ export default class BaseService extends EventDispatcher {
    * Classes that extend BaseService and override this method should always call
    * super.teardown() method as well.
    */
-  teardown() {}
+  teardown() {
+    for (let watcher of this[p.watchers].values()) {
+      const [selector,, wrappedHandlers] = watcher;
+
+      // If nobody set up watchers or all watchers has been properly unwatched,
+      // we don't have anything to do here.
+      if (!wrappedHandlers || wrappedHandlers.size === 0) {
+        continue;
+      }
+
+      const { id: getterId } = this[p.getChannel](this[p.getters], selector);
+      for (let wrappedHandler of wrappedHandlers.values()) {
+        console.warn(`Forgotten watcher for ${getterId}!`);
+        this[p.api].unwatch(getterId, wrappedHandler);
+      }
+
+      wrappedHandlers.clear();
+    }
+  }
 
   /**
    * @param {Object} channels
