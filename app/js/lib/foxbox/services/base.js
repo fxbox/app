@@ -14,13 +14,12 @@ const p = Object.freeze({
   model: Symbol('model'),
   name: Symbol('name'),
   watchers: Symbol('watchers'),
-  getters: Symbol('getters'),
-  setters: Symbol('setters'),
-  hasGetters: Symbol('hasGetters'),
-  hasSetters: Symbol('hasSetters'),
+  channels: Symbol('channels'),
 
   // Private methods.
-  getChannel: Symbol('getChannel'),
+  getChannels: Symbol('getChannel'),
+  getFetchChannel: Symbol('getFetchChannel'),
+  getSendChannel: Symbol('getSendChannel'),
   getSetterValueType: Symbol('getSetterValueType'),
 });
 
@@ -39,11 +38,8 @@ export default class BaseService extends EventDispatcher {
     // Some service don't have name, but can have product_name instead.
     this[p.name] = props.properties && props.properties.name ||
       props.properties.product_name || '';
-    this[p.getters] = props.getters;
-    this[p.setters] = props.setters;
+    this[p.channels] = props.channels;
     this[p.watchers] = watchers || new Map();
-    this[p.hasGetters] = Object.keys(this[p.getters]).length > 0;
-    this[p.hasSetters] = Object.keys(this[p.setters]).length > 0;
   }
 
   get type() {
@@ -66,14 +62,6 @@ export default class BaseService extends EventDispatcher {
     return this[p.name];
   }
 
-  get hasGetters() {
-    return this[p.hasGetters];
-  }
-
-  get hasSetters() {
-    return this[p.hasSetters];
-  }
-
   /**
    * Call a service setter with a value.
    *
@@ -82,7 +70,7 @@ export default class BaseService extends EventDispatcher {
    * @return {Promise}
    */
   set(selector, value = '') {
-    const setter = this[p.getChannel](this[p.setters], selector);
+    const setter = this[p.getSendChannel](selector);
     const setterType = this[p.getSetterValueType](setter.kind);
 
     return this[p.api].put(
@@ -98,7 +86,7 @@ export default class BaseService extends EventDispatcher {
    * @return {Promise}
    */
   get(selector) {
-    const getter = this[p.getChannel](this[p.getters], selector);
+    const getter = this[p.getFetchChannel](selector);
     const body = { id: getter.id };
 
     if (getter.kind.type === 'Binary') {
@@ -135,7 +123,7 @@ export default class BaseService extends EventDispatcher {
       wrappedHandlers.set(handler, wrappedHandler);
     }
 
-    const { id: getterId } = this[p.getChannel](this[p.getters], selector);
+    const { id: getterId } = this[p.getFetchChannel](selector);
     this[p.api].watch(getterId, wrappedHandler);
   }
 
@@ -158,7 +146,7 @@ export default class BaseService extends EventDispatcher {
     const wrappedHandler = wrappedHandlers.get(handler);
     wrappedHandlers.delete(handler);
 
-    const { id: getterId } = this[p.getChannel](this[p.getters], selector);
+    const { id: getterId } = this[p.getFetchChannel](selector);
     this[p.api].unwatch(getterId, wrappedHandler);
   }
 
@@ -177,7 +165,7 @@ export default class BaseService extends EventDispatcher {
         continue;
       }
 
-      const { id: getterId } = this[p.getChannel](this[p.getters], selector);
+      const { id: getterId } = this[p.getFetchChannel](selector);
       for (let wrappedHandler of wrappedHandlers.values()) {
         console.warn(`Forgotten watcher for ${getterId}!`);
         this[p.api].unwatch(getterId, wrappedHandler);
@@ -188,30 +176,64 @@ export default class BaseService extends EventDispatcher {
   }
 
   /**
-   * @param {Object} channels
-   * @param {Object|string} selector A value matching the kind of a channel.
-   * @return {Object}
+   * Returns list of channels that match to specified selector.
+   * @param {Object|string} selector Selector that channel should match to.
+   * @return {Array<Object>}
+   * @private
    */
-  [p.getChannel](channels, selector) {
-    let channelKey;
-
+  [p.getChannels](selector) {
     if (selector.id) {
-      channelKey = selector.id;
-    } else if (selector.kind || typeof selector === 'string') {
-      const channelKind = selector.kind || selector;
-
-      channelKey = Object.keys(channels).find((key) => {
-        const channel = channels[key];
-
-        if (typeof channel.kind === 'object') {
-          return channel.kind.kind === channelKind;
-        }
-
-        return channel.kind === channelKind;
-      });
+      const channel = this[p.channels][selector.id];
+      return channel ? [channel] : [];
     }
 
-    return channelKey ? channels[channelKey] : null;
+    if (selector.kind || typeof selector === 'string') {
+      const channelKind = selector.kind || selector;
+
+      return Object.keys(this[p.channels]).reduce((channels, key) => {
+        const channel = this[p.channels][key];
+
+        const isMatchingChannel = typeof channel.kind === 'object' ?
+          channel.kind.kind === channelKind :
+          channel.kind === channelKind;
+
+        if (isMatchingChannel) {
+          channels.push(channel);
+        }
+
+        return channels;
+      }, []);
+    }
+
+    return [];
+  }
+
+  /**
+   * Returns channel that supports fetch operation and matches to specified
+   * selector.
+   *
+   * @param {Object|string} selector Selector that channel should match to.
+   * @return {Object}
+   * @private
+   */
+  [p.getFetchChannel](selector) {
+    return this[p.getChannels](selector).find(
+      (channel) => channel.supports_fetch
+    );
+  }
+
+  /**
+   * Returns channel that supports send operation and matches to specified
+   * selector.
+   *
+   * @param {Object|string} selector Selector that channel should match to.
+   * @return {Object}
+   * @private
+   */
+  [p.getSendChannel](selector) {
+    return this[p.getChannels](selector).find(
+      (channel) => channel.supports_send
+    );
   }
 
   /**

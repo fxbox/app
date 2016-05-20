@@ -17,7 +17,7 @@ const p = Object.freeze({
 
   // Private methods.
   getServiceInstance: Symbol('getServiceInstance'),
-  hasDoorLockChannel: Symbol('hasDoorLockChannel'),
+  hasChannelWithKind: Symbol('hasChannelWithKind'),
   getCache: Symbol('getCache'),
 });
 
@@ -221,12 +221,11 @@ export default class Services extends EventDispatcher {
         return new LightService(data, this[p.api]);
 
       case 'OpenZwave Adapter':
-        if (this[p.hasDoorLockChannel](data.getters) ||
-          this[p.hasDoorLockChannel](data.setters)) {
+        if (this[p.hasChannelWithKind](data.channels, 'DoorLocked')) {
           return new DoorLockService(data, this[p.api]);
         }
 
-        if (Object.keys(data.getters).length > 0) {
+        if (this[p.hasChannelWithKind](data.channels, 'OpenClosed')) {
           return new MotionSensorService(data, this[p.api]);
         }
 
@@ -238,16 +237,16 @@ export default class Services extends EventDispatcher {
   }
 
   /**
-   * Detects if channel list (getters/setters) contains channel with
-   * 'DoorLocked' kind.
+   * Detects if channel list contains channel with specified kind.
    *
    * @param {Array<Object>} channels List of the channels to look through.
-   * @return {Object}
+   * @param {string} kind Kind of the channel to look for.
+   * @return {boolean}
    * @private
    */
-  [p.hasDoorLockChannel](channels) {
-    return Object.keys(channels).find(
-      (key) => channels[key].kind === 'DoorLocked'
+  [p.hasChannelWithKind](channels, kind) {
+    return Object.keys(channels).some(
+      (key) => channels[key].kind === kind
     );
   }
 }

@@ -4,11 +4,11 @@ import ServicesListItem from 'js/views/services-list-item';
 
 export default class ServicesList extends React.Component {
   render() {
-    const userFacingServices = this.props.services.filter(
-      (service) => this.isUserFacingService(service)
+    const knownServices = this.props.services.filter(
+      (service) => service.type !== 'unknown'
     );
 
-    let serviceNodes = userFacingServices.map((service) => (
+    const serviceNodes = knownServices.map((service) => (
         <ServicesListItem
           key={service.id}
           service={service}
@@ -19,16 +19,6 @@ export default class ServicesList extends React.Component {
     return (
       <ul className="service-list">{serviceNodes}</ul>
     );
-  }
-
-  isUserFacingService(service) {
-    // If service doesn't have any getters and setters, there is no need to
-    // display it to the user.
-    if (!service.hasGetters && !service.hasSetters) {
-      return false;
-    }
-
-    return service.type !== 'unknown';
   }
 }
 

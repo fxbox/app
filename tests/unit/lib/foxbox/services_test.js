@@ -14,8 +14,7 @@ describe('Services >', function() {
       id: 'id-one',
       adapter: 'x-unknown-service',
       properties: {},
-      getters: {},
-      setters: {},
+      channels: {},
     },
     {
       id: 'id-two',
@@ -25,13 +24,13 @@ describe('Services >', function() {
         model: 'zwave-model',
         name: 'zwave-name',
       },
-      getters: {
+      channels: {
         motionGetterId: {
           id: 'motionGetterId',
           kind: 'OpenClosed',
+          supports_fetch: true,
         },
       },
-      setters: {},
     },
   ];
 
@@ -100,13 +99,13 @@ describe('Services >', function() {
       id: 'id-three',
       adapter: 'OpenZwave Adapter',
       properties: {},
-      getters: {
+      channels: {
         doorLockGetterId: {
           id: 'doorLockGetterId',
           kind: 'DoorLocked',
+          supports_fetch: true,
         },
       },
-      setters: {},
     };
 
     let onServicesChangedStub;
