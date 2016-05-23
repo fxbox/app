@@ -50,34 +50,42 @@ export default class Recipes {
       'services',
       { getters: [{ kind: 'ThinkerbellRuleSource' }] }
     )
-    // Mark getters and setters with more friendly names.
+    // Mark channels with more friendly names.
     .then((services) => {
       return services.map((service) => {
-        const enabledGetterId = Object.keys(service.getters).find(
-          (getterId) => service.getters[getterId].kind === 'ThinkerbellRuleOn'
-        );
-        const sourceGetterId = Object.keys(service.getters).find(
-          (getterId) => service.getters[getterId].kind ===
-          'ThinkerbellRuleSource'
-        );
+        return Object.keys(service.channels).reduce((rule, channelId) => {
+          const channel = service.channels[channelId];
 
-        const enabledSetterId = Object.keys(service.setters).find(
-          (setterId) => service.setters[setterId].kind === 'ThinkerbellRuleOn'
-        );
-        const removeSetterId = Object.keys(service.setters).find(
-          (setterId) => service.setters[setterId].kind ===
-          'RemoveThinkerbellRule'
-        );
+          switch (channel.kind) {
+            case 'ThinkerbellRuleOn':
+              if (channel.supports_fetch) {
+                rule.getEnabled = channelId;
+              } else if (channel.supports_send) {
+                rule.setEnabled = channelId;
+              }
+              break;
+            case 'ThinkerbellRuleSource':
+              if (channel.supports_fetch) {
+                rule.getSource = channelId;
+              }
+              break;
+            case 'RemoveThinkerbellRule':
+              if (channel.supports_send) {
+                rule.remove = channelId;
+              }
+              break;
+          }
 
-        return {
+          return rule;
+        }, {
           id: service.id,
-          getEnabled: enabledGetterId,
-          getSource: sourceGetterId,
-          setEnabled: enabledSetterId,
-          remove: removeSetterId,
+          getEnabled: null,
+          getSource: null,
+          setEnabled: null,
+          remove: null,
           status: null,
           source: null,
-        };
+        });
       });
     })
     .then((services) => {
@@ -138,7 +146,7 @@ export default class Recipes {
     ];
 
     return this[p.api].post(
-      'channels/getters', supportedKinds.map((kind) => ({ kind }))
+      'channels', supportedKinds.map((kind) => ({ kind, supports_fetch: true }))
     )
     .then((getters) => {
       return getters.map((getter) => {
@@ -206,7 +214,7 @@ export default class Recipes {
     ];
 
     return this[p.api].post(
-      'channels/setters', supportedKinds.map((kind) => ({ kind }))
+      'channels', supportedKinds.map((kind) => ({ kind, supports_send: true }))
     )
     .then((setters) => {
       return setters.map((setter) => {

@@ -9,7 +9,7 @@ const p = Object.freeze({
 
   watchTimer: Symbol('watchTimer'),
   watchEventBus: Symbol('watchEventBus'),
-  watchGetters: Symbol('getters'),
+  watchGetters: Symbol('watchGetters'),
 
   // Private methods.
   getURL: Symbol('getURL'),
