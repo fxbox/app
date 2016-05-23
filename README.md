@@ -11,6 +11,7 @@ The following browsers are actively supported:
 
 * Firefox Nightly for Android
 * Chrome Beta for Android
+* Safari for iOS 9
 
 ## Prerequisites
 
@@ -36,24 +37,27 @@ $ npm install
 $ gulp
 ```
 
-Then point your browser to [https://localhost:8000](https://localhost:8000/) and accept security exception for self-signed
+Then point your browser to [https://localhost:8000](https://localhost:8000/) and
+accept security exception for self-signed
 development certificate.
 
-By default app is served via `https` using self-signed certificate from `certs` folder. Certificate is valid for ~100
-years and generated with the following command:
+By default app is served via `https` using self-signed certificate from `certs`
+folder. Certificate is valid for ~100 years and generated with the following
+command:
 
 ```bash
 $ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 36500 -nodes
 ```
 
-In case custom certificate is required you can either override respective files in `certs` folder or change certificate
-and private key paths in `webserver` gulp task in `gulpfile.js`.
+In case custom certificate is required you can either override respective files
+in `certs` folder or change certificate and private key paths in `webserver`
+gulp task in `gulpfile.js`.
 
-Even though it's not recommended sometimes you may want to switch to `http`, for that purpose just comment out `https`
-config property in `webserver` gulp task in `gulpfile.js`. Check out official [gulp-webserver module page](https://www.npmjs.com/package/gulp-webserver)
-for possible options as well. And don't forget to flip it back while running integration tests as they will still assume
-that app is run via `https`.
-
+Even though it's not recommended sometimes you may want to switch to `http`, for
+that purpose just comment out `https` config property in `webserver` gulp task
+in `gulpfile.js`. Check out official [gulp-webserver module page](https://www.npmjs.com/package/gulp-webserver)
+for possible options as well. And don't forget to flip it back while running
+integration tests as they will still assume that app is run via `https`.
 
 Note: The app is built in the `dist/app` folder.
 
@@ -61,17 +65,18 @@ Note: The app is built in the `dist/app` folder.
 
 ### Supported browsers
 
-|         | Firefox 46   | Firefox Nightly 49    | Chrome 50       | Chrome Canary 51   | Opera           |
-| ------- | ------------ | --------------------- | --------------- | ------------------ | --------------- |
-|   OSX   |   Working    |       Working         | Coming soon     | Coming soon        | Coming soon     |
-|  Linux  |   Working    |       Working         | Coming soon     | Coming soon        | Coming soon     |
-| Windows |  Not tested  |      Not tested       | Not tested      | Not tested         | Not tested      |
-| Android | Not working  |      Coming soon      | Coming soon     | Coming soon        | Coming soon     |
+|         | Firefox 46  | Firefox Nightly 49 | Chrome 50       | Chrome Canary 51   | Opera           | Safari     |
+| ------- | ----------- | ------------------ | --------------- | ------------------ | --------------- | ---------- |
+|   OSX   |   Working   |      Working       | Coming soon     | Coming soon        | Coming soon     | Not tested |
+|  Linux  |   Working   |      Working       | Coming soon     | Coming soon        | Coming soon     |            |
+| Windows |  Not tested |     Not tested     | Not tested      | Not tested         | Not tested      |            |
+| Android | Not working |     Coming soon    | Coming soon     | Coming soon        | Coming soon     |            |
+|   iOS   |             |                    |                 |                    |                 | Not tested |
 
 ### Prerequisites
 
 There are a couple of steps that you must do in order to have push notifications
- working. As they rely on Service Workers, make sure you follow the next steps:
+working. As they rely on Service Workers, make sure you follow the next steps:
 
 * Push Notification will need **HTTPS everywhere**, so be sure your `foxbox` is
 running over SSL.
@@ -81,14 +86,16 @@ certificate.
 the self self-signed certificate.
 
 ### Tips and tricks
+
 * To start over with a new test, clean the web push database in the foxbox:
 ```rm -rf $HOME/.local/share/foxbox/webpush.sqlite``` and start a Firefox
 instance with a new profile ```<path to firefox bin> --profile /tmp/<random>```.
 * If you want to perform multiple tries with same profile try to use a service
-like `xip.io`. Where you can have different names pointing to your local ip like `https://myname.<my local ip>.xip.io:8000` for using this, remember to launch
+like `xip.io`. Where you can have different names pointing to your local ip like
+`https://myname.<my local ip>.xip.io:8000` for using this, remember to launch
 your gulp task like `HOST=<my local ip> gulp`. Doing this you are creating
 different origins, which will make you receive multiple notifications (as many
-  as app origin registered).
+as app origin registered).
 
 ## Tests
 
