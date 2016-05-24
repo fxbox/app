@@ -217,17 +217,19 @@ export default class Foxbox extends Service {
     }
 
     const url = new URL(location.href);
-    if (!url.searchParams.has('session_token')) {
+    const searchParams = new URLSearchParams(url.search.substring(1));
+    if (!searchParams.has('session_token')) {
       return Promise.resolve();
     }
 
     // There is a session token in the URL, let's remember it.
     // @todo Find a better way to handle URL escape.
-    this[p.settings].session = url.searchParams.get('session_token')
+    this[p.settings].session = searchParams.get('session_token')
       .replace(/ /g, '+');
 
     // Remove the session param from the current location.
-    url.searchParams.delete('session_token');
+    searchParams.delete('session_token');
+    url.search = searchParams;
     location.replace(url.href);
 
     // Returning rejected promise here the promise chain.

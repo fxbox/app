@@ -50,6 +50,8 @@ gulp.task('lint', function() {
 gulp.task('loader-polyfill', function() {
   return gulp.src([
       './node_modules/alameda/alameda.js',
+      './node_modules/whatwg-fetch/fetch.js',
+      './node_modules/url-search-params/build/url-search-params.max.js',
       `${APP_ROOT}js/bootstrap.js`,
     ])
     .pipe(concat('initapp.js'))
