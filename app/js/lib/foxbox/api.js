@@ -84,6 +84,20 @@ export default class API {
   }
 
   /**
+   * Performs HTTP 'DELETE' API request and accepts JSON as response.
+   *
+   * @param {string} path Specific API resource path to be used in conjunction
+   * with the base API path.
+   * @param {Object=} body Optional object that will be serialized to JSON
+   * string and sent as 'DELETE' body.
+   * @return {Promise}
+   */
+  delete(path, body) {
+    return this[p.onceReady]()
+      .then(() => this[p.net].fetchJSON(this[p.getURL](path), 'DELETE', body));
+  }
+
+  /**
    * Performs either HTTP 'GET' or 'PUT' (if body parameter is specified) API
    * request and accepts Blob as response.
    *

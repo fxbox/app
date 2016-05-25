@@ -173,7 +173,7 @@ export default class ThemesNew extends BaseView {
     }
 
     const optionNodes = this.state.getters.map((getter, index) => (
-      <option key={index} value={index}>{getter.name}</option>
+      <option key={index} value={index}>{this.getChannelName(getter)}</option>
     ));
 
     return (
@@ -229,7 +229,7 @@ export default class ThemesNew extends BaseView {
     }
 
     const optionNodes = this.state.setters.map((setter, index) => (
-      <option key={index} value={index}>{setter.name}</option>
+      <option key={index} value={index}>{this.getChannelName(setter)}</option>
     ));
 
     return (
@@ -268,6 +268,12 @@ export default class ThemesNew extends BaseView {
         {optionNodes}
       </select>
     );
+  }
+
+  getChannelName(channel) {
+    // If channel has tags, let's use them as channel identifier.
+    const tags = channel.tags.join(', ');
+    return tags ? `${channel.name} (${tags})` : channel.name;
   }
 }
 

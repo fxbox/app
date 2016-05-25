@@ -214,13 +214,18 @@ export default class ServicesListItem extends React.Component {
       }
     }
 
+    const serviceName = this.getServiceName();
+    const serviceNameNode = serviceName ?
+      (<small>{` (${serviceName})`}</small>) :
+      null;
+
     return (
       <li className="service-list__item" data-icon={icon}
           data-connected={isConnected}>
         <a className="service-list__item-link"
            href={`#services/${this.service.id}`}>
           {serviceType}
-          <small>{` (${this.service.name})`}</small>
+          {serviceNameNode}
         </a>
         <div className="service-list__item-color-picker"
              style={{ background: this.getBulbColour() }}>
@@ -235,8 +240,9 @@ export default class ServicesListItem extends React.Component {
   }
 
   renderDoorLock() {
-    const doorLockNameNode = this.service.name ?
-      (<small>{` (${this.service.name})`}</small>) :
+    const serviceName = this.getServiceName();
+    const serviceNameNode = serviceName ?
+      (<small>{` (${serviceName})`}</small>) :
       null;
 
     return (
@@ -244,7 +250,7 @@ export default class ServicesListItem extends React.Component {
         <a className="service-list__item-link"
            href={`#services/${this.service.id}`}>
           Door Lock
-          {doorLockNameNode}
+          {serviceNameNode}
         </a>
         <label>
           <input className="service-list__on-off-toggle" type="checkbox"
@@ -256,8 +262,9 @@ export default class ServicesListItem extends React.Component {
   }
 
   renderMotionSensor() {
-    const motionSensorNameNode = this.service.name ?
-      (<small>{` (${this.service.name})`}</small>) :
+    const serviceName = this.getServiceName();
+    const motionSensorNameNode = serviceName ?
+      (<small>{` (${serviceName})`}</small>) :
       null;
 
     let motionSensorClassName = 'service-list__item motion-sensor-item';
@@ -277,8 +284,9 @@ export default class ServicesListItem extends React.Component {
   }
 
   renderGenericService(type = 'Unknown service', icon = 'unknown') {
-    const serviceNameNode = this.service.name ?
-      (<small>{` (${this.service.name})`}</small>) :
+    const serviceName = this.getServiceName();
+    const serviceNameNode = serviceName ?
+      (<small>{` (${serviceName})`}</small>) :
       null;
 
     return (
@@ -305,6 +313,11 @@ export default class ServicesListItem extends React.Component {
       default:
         return this.renderGenericService();
     }
+  }
+
+  getServiceName() {
+    // If service has tags, let's use them as service identifier.
+    return this.service.getTags().join(', ') || this.service.name;
   }
 }
 

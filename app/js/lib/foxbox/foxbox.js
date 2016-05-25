@@ -259,14 +259,6 @@ export default class Foxbox extends Service {
     this[p.settings].session = null;
   }
 
-  getTags() {
-    return this[p.db].getTags.apply(this[p.db], arguments);
-  }
-
-  setTag() {
-    return this[p.db].setTag.apply(this[p.db], arguments);
-  }
-
   /**
    * Ask the user for accepting push notifications from the box.
    * This method will be call each time that we log in, but will

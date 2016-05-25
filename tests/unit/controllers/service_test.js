@@ -6,7 +6,9 @@ import Service from 'js/views/service';
 describe('Service controller tests', function () {
   let foxboxStub, mountNodeStub, controller;
 
-  before(function() {
+  beforeEach(function () {
+    this.sinon = sinon.sandbox.create();
+
     foxboxStub = sinon.stub();
     mountNodeStub = document.createElement('node');
 
@@ -14,6 +16,11 @@ describe('Service controller tests', function () {
       foxbox: foxboxStub,
       mountNode: mountNodeStub,
     });
+  });
+
+  afterEach(function() {
+    this.sinon.restore();
+    this.sinon = null;
   });
 
   it('Controller is successfully created', function() {
@@ -24,8 +31,8 @@ describe('Service controller tests', function () {
     const createElementStub = sinon.stub();
     const id = 1234;
 
-    sinon.stub(ReactDOM, 'render');
-    sinon.stub(React, 'createElement')
+    this.sinon.stub(ReactDOM, 'render');
+    this.sinon.stub(React, 'createElement')
       .withArgs(Service, { id, foxbox: foxboxStub })
       .returns(createElementStub);
 

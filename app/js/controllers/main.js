@@ -3,6 +3,7 @@ import { RoutingController } from 'components/mvc';
 import UsersController from 'js/controllers/users';
 import ServicesController from 'js/controllers/services';
 import ServiceController from 'js/controllers/service';
+import ServiceTagsController from 'js/controllers/service-tags';
 import ThemesController from 'js/controllers/themes';
 import DevController from 'js/controllers/dev';
 
@@ -21,6 +22,7 @@ export default class MainController extends RoutingController {
       '': usersController,
       'users/(.+)': usersController,
       'services': new ServicesController(options),
+      'services/(.+)/tags': new ServiceTagsController(options),
       'services/(.+)': new ServiceController(options),
       'themes': themesController,
       'themes/(.+)': themesController,

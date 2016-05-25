@@ -143,19 +143,19 @@ describe('API >', function () {
       it('throws if wrong path is used', function(done) {
         const noArgsPromise = api.put()
           .then(
-            () => { throw new Error('post should not be resolved!'); },
+            () => { throw new Error('put should not be resolved!'); },
             (error) => error
           );
 
         const emptyStringPromise = api.put('')
           .then(
-            () => { throw new Error('post should not be resolved!'); },
+            () => { throw new Error('put should not be resolved!'); },
             (error) => error
           );
 
         const nullArgsPromise = api.put(null)
           .then(
-            () => { throw new Error('post should not be resolved!'); },
+            () => { throw new Error('put should not be resolved!'); },
             (error) => error
           );
 
@@ -168,7 +168,7 @@ describe('API >', function () {
           .then(done, done);
       });
 
-      it('uses correct URL and parameters to fetch resource', function(done) {
+      it('uses correct URL and parameters to put resource', function(done) {
         api.put('resource-put', { parameters: 'parameters' })
           .then((data) => {
             sinon.assert.calledOnce(netStub.fetchJSON);
@@ -176,6 +176,53 @@ describe('API >', function () {
               netStub.fetchJSON,
               'https://secure-box.com/api/v5/resource-put',
               'PUT',
+              { parameters: 'parameters' }
+            );
+
+            assert.deepEqual(data, { property: 'property' });
+          })
+          .then(done, done);
+      });
+    });
+
+    /** @test {API#delete} */
+    describe('delete >', function() {
+      it('throws if wrong path is used', function(done) {
+        const noArgsPromise = api.delete()
+          .then(
+            () => { throw new Error('delete should not be resolved!'); },
+            (error) => error
+          );
+
+        const emptyStringPromise = api.delete('')
+          .then(
+            () => { throw new Error('delete should not be resolved!'); },
+            (error) => error
+          );
+
+        const nullArgsPromise = api.delete(null)
+          .then(
+            () => { throw new Error('delete should not be resolved!'); },
+            (error) => error
+          );
+
+        Promise.all([noArgsPromise, emptyStringPromise, nullArgsPromise])
+          .then(([noArgsError, emptyStringError, nullArgsError]) => {
+            assert.instanceOf(noArgsError, Error);
+            assert.instanceOf(emptyStringError, Error);
+            assert.instanceOf(nullArgsError, Error);
+          })
+          .then(done, done);
+      });
+
+      it('uses correct URL and parameters to delete resource', function(done) {
+        api.delete('resource-delete', { parameters: 'parameters' })
+          .then((data) => {
+            sinon.assert.calledOnce(netStub.fetchJSON);
+            sinon.assert.calledWithExactly(
+              netStub.fetchJSON,
+              'https://secure-box.com/api/v5/resource-delete',
+              'DELETE',
               { parameters: 'parameters' }
             );
 
@@ -618,6 +665,42 @@ describe('API >', function () {
         .then(done, done);
     });
 
+    /** @test {API#delete} */
+    it('"delete" correctly waits for the api readiness', function(done) {
+      const deleteResourcePromise = api.delete(
+        'resource-delete', { parameters: 'parameters' }
+      );
+
+      waitForNextMacroTask()
+        .then(() => {
+          sinon.assert.notCalled(netStub.fetchJSON);
+
+          netStub.online = true;
+          netStub.once.withArgs('online').yield();
+        })
+        .then(() => {
+          // We're online, but still don't have authenticated session.
+          sinon.assert.notCalled(netStub.fetchJSON);
+
+          settingsStub.session = 'session';
+          settingsStub.once.withArgs('session').yield();
+
+          return deleteResourcePromise;
+        })
+        .then((data) => {
+          sinon.assert.calledOnce(netStub.fetchJSON);
+          sinon.assert.calledWithExactly(
+            netStub.fetchJSON,
+            'https://secure-box.com/api/v5/resource-delete',
+            'DELETE',
+            { parameters: 'parameters' }
+          );
+
+          assert.deepEqual(data, { property: 'property' });
+        })
+        .then(done, done);
+    });
+
     /** @test {API#blob} */
     it('"blob" correctly waits for the api readiness', function(done) {
       const resourcePromise = api.blob(
@@ -798,6 +881,51 @@ describe('API >', function () {
         })
         .then(done, done);
     });
+
+    it('"delete" correctly waits for the document to become visible',
+    function(done) {
+        const deleteResourcePromise = api.delete(
+          'resource-delete', { parameters: 'parameters' }
+        );
+
+        waitForNextMacroTask()
+          .then(() => {
+            sinon.assert.notCalled(netStub.fetchJSON);
+
+            isDocumentHidden = false;
+            document.addEventListener.withArgs('visibilitychange').yield();
+
+            return deleteResourcePromise;
+          })
+          .then((data) => {
+            sinon.assert.calledOnce(netStub.fetchJSON);
+            sinon.assert.calledWithExactly(
+              netStub.fetchJSON,
+              'https://secure-box.com/api/v5/resource-delete',
+              'DELETE',
+              { parameters: 'parameters' }
+            );
+
+            assert.deepEqual(data, { property: 'property' });
+
+            // Make sure we correctly subscribed/unsubscribed to/from
+            // "visibilitychange" document event.
+            sinon.assert.calledOnce(document.addEventListener);
+            sinon.assert.calledWithExactly(
+              document.addEventListener,
+              'visibilitychange',
+              sinon.match.func
+            );
+
+            sinon.assert.calledOnce(document.removeEventListener);
+            sinon.assert.calledWithExactly(
+              document.removeEventListener,
+              'visibilitychange',
+              document.addEventListener.lastCall.args[1]
+            );
+          })
+          .then(done, done);
+      });
 
     it('"blob" correctly waits for the document to become visible',
     function(done) {

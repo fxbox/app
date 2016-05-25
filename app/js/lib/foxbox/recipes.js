@@ -193,6 +193,7 @@ export default class Recipes {
           id: getter.id,
           kind: getter.kind,
           name: name || getter.adapter,
+          tags: getter.tags,
           options,
         };
       });
@@ -304,6 +305,7 @@ export default class Recipes {
           id: setter.id,
           kind: setter.kind,
           name: name || setter.adapter,
+          tags: setter.tags,
           options,
         };
       });
