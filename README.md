@@ -1,7 +1,7 @@
 # ![Project Link app](https://raw.githubusercontent.com/fxbox/app/master/app/img/icons/32.png "Project Link app") Project Link app
 
 [![Build Status](https://travis-ci.org/fxbox/app.svg?branch=master)](https://travis-ci.org/fxbox/app)
-![Documentation Coverage](https://rawgit.com/fxbox/app/assets/badge.svg)
+![Documentation Coverage](https://rawgit.com/fxbox/app/master/assets/badge.svg)
 [![License](https://img.shields.io/badge/license-MPL2-blue.svg)](https://raw.githubusercontent.com/fxbox/app/master/LICENSE)
 
 > An app for [Project Link](https://wiki.mozilla.org/Project_Link)
