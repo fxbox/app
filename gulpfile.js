@@ -15,9 +15,11 @@ const mocha = require('gulp-mocha');
 const gls = require('gulp-live-server');
 const gsww = require('gulp-sww');
 const pkg = require('./package.json');
+const esdoc = require('gulp-esdoc');
 
 const APP_ROOT = './app/';
 const TESTS_ROOT = './tests/';
+const DOC_ROOT = './doc/';
 
 const DIST_ROOT = './dist/';
 const DIST_APP_ROOT = './dist/app/';
@@ -198,14 +200,39 @@ gulp.task('clobber-tests', function() {
   return del(DIST_TESTS_ROOT);
 });
 
+gulp.task('clobber-doc', function() {
+  return del(DOC_ROOT);
+});
+
 /**
  * Cleans all created files by this gulpfile, and node_modules.
  */
 gulp.task('clean', function() {
   return del([
     DIST_ROOT,
+    DOC_ROOT,
     'node_modules/',
   ]);
+});
+
+/**
+ * Generate documentation from the code.
+ */
+gulp.task('generate-doc', function() {
+  return gulp.src(`${APP_ROOT}js/lib/foxbox/`)
+    .pipe(esdoc({
+      destination: DOC_ROOT,
+      title: 'Project Link web app',
+      test: {
+        type: 'mocha',
+        source: TESTS_ROOT,
+      },
+    }));
+});
+
+gulp.task('copy-doc-badge', function() {
+  return gulp.src(`${DOC_ROOT}badge.svg`)
+    .pipe(gulp.dest('./assets/'));
 });
 
 gulp.task('start-simulators', function() {
@@ -241,6 +268,10 @@ gulp.task('run-test-integration', function() {
     `${TESTS_ROOT}{common,integration}/**/*_test.js`, { read: false }
     )
     .pipe(mocha());
+});
+
+gulp.task('doc', function() {
+  runSequence(['clobber-doc'], ['generate-doc'], ['copy-doc-badge']);
 });
 
 gulp.task('test-integration', function(cb) {
