@@ -10,7 +10,7 @@ const zip = require('gulp-zip');
 const del = require('del');
 const runSequence = require('run-sequence');
 const webserver = require('gulp-webserver');
-const mocha = require('gulp-mocha');
+const mocha = require('gulp-spawn-mocha');
 const gls = require('gulp-live-server');
 const gsww = require('gulp-sww');
 const pkg = require('./package.json');
@@ -31,6 +31,10 @@ const cssnano = require('cssnano');
 const stylelint = require('gulp-stylelint');
 const git = require('gulp-git');
 const ghPages = require('gulp-gh-pages');
+const download = require('gulp-downloader');
+const gunzip = require('gulp-gunzip');
+const chmod = require('gulp-chmod');
+const process = require('process');
 
 const APP_ROOT = './app/';
 const TESTS_ROOT = './tests/';
@@ -375,6 +379,39 @@ gulp.task('run-unit-tests', ['compile-unit-tests'], function(cb) {
   server.start();
 });
 
+gulp.task('install-gecko-driver', function() {
+  // wires is the previous project name of geckodriver
+  const GECKO_DRIVER_BINARY_NAME = 'wires';
+  const GECKO_DRIVER_VERSION = '0.8.0-dev';
+  const GECKO_DRIVER_FOLDER = `${__dirname}/dist`;
+
+  // GeckoDriver must be in the path, so Selenium client can locate it
+  const oldPath = process.env.PATH;
+  process.env.PATH = `${oldPath}:${GECKO_DRIVER_FOLDER}`;
+
+  const os = getOsName();
+
+  // @todo Replace by mozilla/geckodriver once 0.8.0 is out
+  return download(`https://github.com/JohanLorenzo/geckodriver/releases/\
+download/v${GECKO_DRIVER_VERSION}/${GECKO_DRIVER_BINARY_NAME}-\
+${GECKO_DRIVER_VERSION}-${os}.gz`)
+    .pipe(gunzip())
+    .pipe(chmod(755))
+    .pipe(rename(GECKO_DRIVER_BINARY_NAME))
+    .pipe(gulp.dest(GECKO_DRIVER_FOLDER));
+});
+
+function getOsName() {
+  switch (process.platform) {
+    case 'darwin':
+      return 'OSX';
+    case 'linux':
+      return 'linux64'; // Warning: No 32 bits binary is available
+    default:
+      throw new Error('Unsupported OS');
+  }
+}
+
 gulp.task('run-test-integration', function() {
   return gulp.src(
     `${TESTS_ROOT}{common,integration}/**/*_test.js`, { read: false }
@@ -387,10 +424,13 @@ gulp.task('doc', function() {
 });
 
 gulp.task('test-integration', function(cb) {
-  runSequence('start-simulators', 'run-test-integration', () => {
+  runSequence(
+    'install-gecko-driver',
+    'start-simulators',
+    'run-test-integration',
     // Tear down whatever the result is
-    runSequence('stop-simulators', cb);
-  });
+    () => { runSequence('stop-simulators', cb); }
+  );
 });
 
 gulp.task('run-test-e2e', function() {

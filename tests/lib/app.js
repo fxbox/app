@@ -1,12 +1,22 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+const base64 = require('base64-js');
 const webdriver = require('selenium-webdriver');
+const firefoxCapabilities = require('selenium-webdriver/lib/capabilities')
+  .Capabilities.firefox();
 
-const ASYNC_SCRIPT_TIMEOUT_IN_MS = 10000;
+firefoxCapabilities.set('marionette', true);
 
-function App(driver, url) {
-  this.driver = driver || new webdriver.Builder().forBrowser('firefox').build();
-  this.driver.manage().timeouts().setScriptTimeout(ASYNC_SCRIPT_TIMEOUT_IN_MS);
+const zippedProfile = fs.readFileSync(path.join(__dirname, 'profile.zip'));
+const encodedProfile = base64.fromByteArray(zippedProfile);
+firefoxCapabilities.set('firefox_profile', encodedProfile);
+const driverBuilder = new webdriver.Builder()
+  .withCapabilities(firefoxCapabilities);
+
+function App(url) {
+  this.driver = driverBuilder.build();
   this.url = url || 'https://localhost:8000';
 }
 

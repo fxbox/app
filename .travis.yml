@@ -6,14 +6,24 @@ cache:
   directories:
     - node_modules
 
+env:
+  - CXX=g++-4.8 # g++ 4.8 is needed to compile some of the node modules
+
 addons:
-  firefox: "46.0.1" # Firefox 47+ breaks Selenium. See https://github.com/fxbox/app/pull/161
+  # Firefox 48+ is needed because it allows to call window.foo within Selenium
+  # https://bugzilla.mozilla.org/show_bug.cgi?id=1123506
+  firefox: latest-beta
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
 
 install:
   - "sh -e /etc/init.d/xvfb start"
   - "export DISPLAY=:99.0"
   - "wget http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar"
-  - "java -jar selenium-server-standalone-2.53.1.jar > /dev/null &"
+  - "java -jar selenium-server-standalone-2.53.0.jar > /dev/null &"
   - npm install
 
 script:
