@@ -1,6 +1,7 @@
 # ![Project Link app](https://raw.githubusercontent.com/fxbox/app/master/app/img/icons/32.png "Project Link app") Project Link app
 
 [![Build Status](https://travis-ci.org/fxbox/app.svg?branch=master)](https://travis-ci.org/fxbox/app)
+![Documentation Coverage](https://rawgit.com/fxbox/app/assets/badge.svg)
 [![License](https://img.shields.io/badge/license-MPL2-blue.svg)](https://raw.githubusercontent.com/fxbox/app/master/LICENSE)
 
 > An app for [Project Link](https://wiki.mozilla.org/Project_Link)
@@ -111,3 +112,11 @@ Steps (to be scripted soon):
 2. Run it with `cargo run`
 3. With a browser, perform the first time setup by going to [http://localhost:3000](http://localhost:3000/)
 4. Run `gulp test-e2e`
+
+## Documentation
+
+Generate documentation from the source code with:
+
+```bash
+$ gulp doc
+```

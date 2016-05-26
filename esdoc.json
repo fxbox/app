@@ -1,9 +1,0 @@
-{
-  "source": "./app/js/lib/foxbox",
-  "destination": "./doc",
-  "title": "Project Link web app",
-  "test": {
-    "type": "mocha",
-    "source": "./tests"
-  }
-}
