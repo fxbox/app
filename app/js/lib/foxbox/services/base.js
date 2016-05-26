@@ -21,7 +21,6 @@ const p = Object.freeze({
   getChannels: Symbol('getChannel'),
   getFetchChannel: Symbol('getFetchChannel'),
   getSendChannel: Symbol('getSendChannel'),
-  getSetterValueType: Symbol('getSetterValueType'),
 });
 
 export default class BaseService extends EventDispatcher {
@@ -65,40 +64,46 @@ export default class BaseService extends EventDispatcher {
   }
 
   /**
-   * Call a service setter with a value.
+   * Sets a value via sending it to a service channel.
    *
-   * @param {Object|string} selector A value matching the kind of a channel.
-   * @param {string|number|boolean} value
+   * @param {Object|string} selector Selector for the channel to use.
+   * @param {*} value Value to set.
    * @return {Promise}
    */
-  set(selector, value = '') {
-    const setter = this[p.getSendChannel](selector);
-    const setterType = this[p.getSetterValueType](setter.kind);
+  set(selector, value = null) {
+    const channel = this[p.getSendChannel](selector);
+    const accepts = channel.supports_send.accepts;
 
-    return this[p.api].put(
-      'channels/set',
-      [[{ id: setter.id }, { [setterType]: value }]]
-    );
+    // If channel declares input value type, then we should use it, otherwise
+    // we send a "null" value.
+    const payload = [
+      { id: channel.id },
+      accepts ? { [accepts.requires || accepts.optional]: value } : null,
+    ];
+
+    return this[p.api].put('channels/set', [payload]);
   }
 
   /**
-   * Call a service getter.
+   * Gets a value from a service channel.
    *
-   * @param {Object} selector
+   * @param {Object} selector Selector for the channel to use.
    * @return {Promise}
    */
   get(selector) {
-    const getter = this[p.getFetchChannel](selector);
-    const body = { id: getter.id };
+    const channel = this[p.getFetchChannel](selector);
+    const returns = channel.supports_fetch.returns;
+    const payload = { id: channel.id };
 
-    if (getter.kind.type === 'Binary') {
-      return this[p.api].blob('channels/get', body);
+    // If we expect binary data let's request it properly.
+    if (returns && (returns.requires || returns.optional) === 'Binary') {
+      return this[p.api].blob('channels/get', payload);
     }
 
     // We request getter value by unique getter id, so we can have only
     // results for this getter.
-    return this[p.api].put('channels/get', body)
-      .then((response) => response[getter.id]);
+    return this[p.api].put('channels/get', payload)
+      .then((response) => response[channel.id]);
   }
 
   /**
@@ -232,7 +237,7 @@ export default class BaseService extends EventDispatcher {
    * super.teardown() method as well.
    */
   teardown() {
-    for (let watcher of this[p.watchers].values()) {
+    for (const watcher of this[p.watchers].values()) {
       const [selector,, wrappedHandlers] = watcher;
 
       // If nobody set up watchers or all watchers has been properly unwatched,
@@ -242,7 +247,7 @@ export default class BaseService extends EventDispatcher {
       }
 
       const { id: getterId } = this[p.getFetchChannel](selector);
-      for (let wrappedHandler of wrappedHandlers.values()) {
+      for (const wrappedHandler of wrappedHandlers.values()) {
         console.warn(`Forgotten watcher for ${getterId}!`);
         this[p.api].unwatch(getterId, wrappedHandler);
       }
@@ -263,17 +268,13 @@ export default class BaseService extends EventDispatcher {
       return channel ? [channel] : [];
     }
 
-    if (selector.kind || typeof selector === 'string') {
-      const channelKind = selector.kind || selector;
+    if (selector.feature || typeof selector === 'string') {
+      const channelFeature = selector.feature || selector;
 
       return Object.keys(this[p.channels]).reduce((channels, key) => {
         const channel = this[p.channels][key];
 
-        const isMatchingChannel = typeof channel.kind === 'object' ?
-          channel.kind.kind === channelKind :
-          channel.kind === channelKind;
-
-        if (isMatchingChannel) {
+        if (channel.feature === channelFeature) {
           channels.push(channel);
         }
 
@@ -290,12 +291,22 @@ export default class BaseService extends EventDispatcher {
    *
    * @param {Object|string} selector Selector that channel should match to.
    * @return {Object}
+   * @throws Will throw if there is no channel that corresponds to selector and
+   * supports fetch operation.
    * @private
    */
   [p.getFetchChannel](selector) {
-    return this[p.getChannels](selector).find(
+    const channel = this[p.getChannels](selector).find(
       (channel) => channel.supports_fetch
     );
+
+    if (!channel) {
+      throw new Error(
+        `Couldn't find channel that supports "fetch" with selector: ${selector}`
+      );
+    }
+
+    return channel;
   }
 
   /**
@@ -304,39 +315,21 @@ export default class BaseService extends EventDispatcher {
    *
    * @param {Object|string} selector Selector that channel should match to.
    * @return {Object}
+   * @throws Will throw if there is no channel that corresponds to selector and
+   * supports send operation.
    * @private
    */
   [p.getSendChannel](selector) {
-    return this[p.getChannels](selector).find(
+    const channel = this[p.getChannels](selector).find(
       (channel) => channel.supports_send
     );
-  }
 
-  /**
-   * Returns value type string for the specified operation kind.
-   *
-   * @param {string|Object} operationKind Kind of the operation, string for the
-   * well known type and object for the Extension channel kind.
-   * @return {string}
-   * @private
-   */
-  [p.getSetterValueType](operationKind) {
-    if (!operationKind) {
-      throw new Error('Operation kind is not defined.');
+    if (!channel) {
+      throw new Error(
+        `Couldn't find channel that supports "send" with selector: ${selector}`
+      );
     }
 
-    // Operation kind can be either object or string.
-    if (typeof operationKind === 'object') {
-      return operationKind.type;
-    }
-
-    switch (operationKind) {
-      case 'TakeSnapshot':
-        return 'Unit';
-      case 'LightOn':
-        return 'OnOff';
-      default:
-        return operationKind;
-    }
+    return channel;
   }
 }

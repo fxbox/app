@@ -15,11 +15,13 @@ export default class LightService extends BaseService {
   }
 
   isAvailable() {
-    return this.get('available').then((response) => response.OnOff === 'On');
+    return this.get('device/available')
+      .then((response) => response.OnOff === 'On');
   }
 
   isOn() {
-    return this.get('LightOn').then((response) => response.OnOff === 'On');
+    return this.get('light/is-on')
+      .then((response) => response.OnOff === 'On');
   }
 
   /**
@@ -29,7 +31,6 @@ export default class LightService extends BaseService {
    * @return {Promise}
    */
   turn(on) {
-    const value = on ? 'On' : 'Off';
-    return this.set('LightOn', value);
+    return this.set('light/is-on', on ? 'On' : 'Off');
   }
 }

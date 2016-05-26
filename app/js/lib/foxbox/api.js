@@ -125,8 +125,8 @@ export default class API {
   /**
    * Registers watcher for the getter with specified id.
    *
-   * @todo We may need to accept getter kind in the future too, to validate
-   * getter value type.
+   * @todo We may need to accept getter's "supports_fetch" property in the
+   * future too, to validate getter value type.
    *
    * @param {string} getterId Id of the getter we'd like to watch.
    * @param {function} handler Handler to be executed once watched value is
@@ -310,19 +310,19 @@ export default class API {
     if (!getterValue || !getter.value) {
       valueChanged = getterValue !== getter.value;
     } else {
-      const [valueKind] = Object.keys(getterValue);
-      if (valueKind === 'Error') {
+      const [valueType] = Object.keys(getterValue);
+      if (valueType === 'Error') {
         console.error(
           'Failed to retrieve value for getter (%s): %o',
           getter.id,
-          getterValue[valueKind]
+          getterValue[valueType]
         );
 
         return;
       }
 
-      const newValue = getterValue[valueKind];
-      const oldValue = getter.value[valueKind];
+      const newValue = getterValue[valueType];
+      const oldValue = getter.value[valueType];
 
       if (newValue && oldValue && typeof newValue === 'object') {
         // @todo If value is a non-null object, we use their JSON representation

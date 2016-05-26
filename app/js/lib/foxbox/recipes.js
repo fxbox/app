@@ -48,7 +48,7 @@ export default class Recipes {
   getAll() {
     return this[p.api].post(
       'services',
-      { getters: [{ kind: 'ThinkerbellRuleSource' }] }
+      { channels: [{ feature: 'thinkerbell/rule-source' }] }
     )
     // Mark channels with more friendly names.
     .then((services) => {
@@ -56,32 +56,23 @@ export default class Recipes {
         return Object.keys(service.channels).reduce((rule, channelId) => {
           const channel = service.channels[channelId];
 
-          switch (channel.kind) {
-            case 'ThinkerbellRuleOn':
-              if (channel.supports_fetch) {
-                rule.getEnabled = channelId;
-              } else if (channel.supports_send) {
-                rule.setEnabled = channelId;
-              }
+          switch (channel.feature) {
+            case 'thinkerbell/is-rule-enabled':
+              rule.enabled = channelId;
               break;
-            case 'ThinkerbellRuleSource':
-              if (channel.supports_fetch) {
-                rule.getSource = channelId;
-              }
+            case 'thinkerbell/rule-source':
+              rule.getSource = channelId;
               break;
-            case 'RemoveThinkerbellRule':
-              if (channel.supports_send) {
-                rule.remove = channelId;
-              }
+            case 'thinkerbell/remove-rule-id':
+              rule.remove = channelId;
               break;
           }
 
           return rule;
         }, {
           id: service.id,
-          getEnabled: null,
           getSource: null,
-          setEnabled: null,
+          enabled: null,
           remove: null,
           status: null,
           source: null,
@@ -92,7 +83,7 @@ export default class Recipes {
       // Fetch recipe enabled statuses and sources.
       const { enabledSelectors, sourceSelectors } = services.reduce(
         (selectors, service) => {
-          selectors.enabledSelectors.push({ id: service.getEnabled });
+          selectors.enabledSelectors.push({ id: service.enabled });
           selectors.sourceSelectors.push({ id: service.getSource });
 
           return selectors;
@@ -106,7 +97,7 @@ export default class Recipes {
       ])
       .then(([statuses, sources]) => {
         return services.map((service) => {
-          const statusResponse = statuses[service.getEnabled];
+          const statusResponse = statuses[service.enabled];
           const sourceResponse = sources[service.getSource];
 
           if (statusResponse && statusResponse.OnOff) {
@@ -138,15 +129,16 @@ export default class Recipes {
   }
 
   getGetters() {
-    // Currently we support only Clock and Motion Sensor as triggers.
-    const supportedKinds = [
-      'CurrentTimeOfDay',
-      'OpenClosed',
-      'DoorLocked',
+    // Currently we support only Clock, Motion Sensor and Door Lock as triggers.
+    const supportedFeatures = [
+      'clock/time-of-day-seconds',
+      'door/is-open',
+      'door/is-locked',
     ];
 
     return this[p.api].post(
-      'channels', supportedKinds.map((kind) => ({ kind, supports_fetch: true }))
+      'channels',
+      supportedFeatures.map((feature) => ({ feature, supports_fetch: true }))
     )
     .then((getters) => {
       return getters.map((getter) => {
@@ -154,8 +146,8 @@ export default class Recipes {
         const options = [];
 
         // Assign user friendly name to every getter and it's value options.
-        switch (getter.kind) {
-          case 'CurrentTimeOfDay':
+        switch (getter.feature) {
+          case 'clock/time-of-day-seconds':
             name = 'Everyday';
             options.push(...[{
               label: 'in the morning',
@@ -171,14 +163,14 @@ export default class Recipes {
               value: { Geq: { Duration: 64800 } },
             }]);
             break;
-          case 'OpenClosed':
+          case 'door/is-open':
             name = 'Motion Sensor';
             options.push({
               label: 'detects motion',
               value: { Eq: { OpenClosed: 'Open' } },
             });
             break;
-          case 'DoorLocked':
+          case 'door/is-locked':
             name = 'Door';
             options.push({
               label: 'is locked',
@@ -191,7 +183,7 @@ export default class Recipes {
 
         return {
           id: getter.id,
-          kind: getter.kind,
+          feature: getter.feature,
           name: name || getter.adapter,
           tags: getter.tags,
           options,
@@ -201,30 +193,26 @@ export default class Recipes {
   }
 
   getSetters() {
-    // Currently we support only TTS, camera and connected lights as actuators.
-    const supportedKinds = [
-      {
-        vendor: 'team@link.mozilla.org',
-        adapter: 'eSpeak adapter',
-        kind: 'Sentence',
-        type: 'String',
-      },
-      'TakeSnapshot',
-      'LightOn',
-      'DoorLocked',
+    // Currently we support only TTS, camera, connected lights, motion sensor
+    // and door lock as actuators.
+    const supportedFeatures = [
+      'speak/sentence',
+      'camera/store-snapshot',
+      'light/is-on',
+      'door/is-locked',
     ];
 
     return this[p.api].post(
-      'channels', supportedKinds.map((kind) => ({ kind, supports_send: true }))
+      'channels',
+      supportedFeatures.map((feature) => ({ feature, supports_send: true }))
     )
     .then((setters) => {
       return setters.map((setter) => {
         const options = [];
         let name;
 
-        // Check for the complex extension kind
-        if (typeof setter.kind === 'object') {
-          if (setter.kind.kind === 'Sentence') {
+        switch (setter.feature) {
+          case 'speak/sentence':
             name = 'say';
             options.push(...[
               {
@@ -240,70 +228,73 @@ export default class Recipes {
                 value: { String: '"Good evening!"' },
               },
             ]);
-          }
-        } else if (setter.kind === 'TakeSnapshot') {
-          name = 'camera';
-          options.push(...[
-            {
-              label: 'takes a picture',
-              value: { 'Unit': null },
-            },
-            {
-              label: 'sends me a picture',
-              value: [
-                {
-                  // Take a picture.
-                  destination: [{ id: setter.id }],
-                  kind: 'TakeSnapshot',
-                  value: { Unit: null },
-                },
-                {
-                  // Notify the user.
-                  destination: [{ kind: 'WebPushNotify' }],
-                  kind: 'WebPushNotify',
-                  value: {
-                    WebPushNotify: {
-                      message: JSON.stringify({
-                        message: 'Your bedroom patio door has just been ' +
+            break;
+          case 'camera/store-snapshot':
+            name = 'camera';
+            options.push(...[
+              {
+                label: 'takes a picture',
+                value: { 'Unit': null },
+              },
+              {
+                label: 'sends me a picture',
+                value: [
+                  {
+                    // Take a picture.
+                    destination: [{id: setter.id}],
+                    feature: 'camera/store-snapshot',
+                    value: { Unit: null },
+                  },
+                  {
+                    // Notify the user.
+                    destination: [{ feature: 'webpush/notify-msg' }],
+                    feature: 'webpush/notify-msg',
+                    value: {
+                      WebPushNotify: {
+                        message: JSON.stringify({
+                          message: 'Your bedroom patio door has just been ' +
                           'opened. Here is a picture of what I see.',
-                        action: `dev/camera-latest-image/${setter.service}`,
-                      }),
-                      resource: 'res1',
+                          action: `dev/camera-latest-image/${setter.service}`,
+                        }),
+                        resource: 'res1',
+                      },
                     },
                   },
-                },
-              ],
-            },
-          ]);
-        } else if (setter.kind === 'LightOn') {
-          name = 'light';
-          options.push(...[
-            {
-              label: 'gets turned on',
-              value: { OnOff: 'On' },
-            },
-            {
-              label: 'gets turned off',
-              value: { OnOff: 'Off' },
-            },
-          ]);
-        } else if (setter.kind === 'DoorLocked') {
-          name = 'door lock';
-          options.push(...[
-            {
-              label: 'locks the door',
-              value: { DoorLocked: 'Locked' },
-            },
-            {
-              label: 'unlocks the door',
-              value: { DoorLocked: 'Unlocked' },
-            },
-          ]);
+                ],
+              },
+            ]);
+            break;
+          case 'light/is-on':
+            name = 'light';
+            options.push(...[
+              {
+                label: 'gets turned on',
+                value: { OnOff: 'On' },
+              },
+              {
+                label: 'gets turned off',
+                value: { OnOff: 'Off' },
+              },
+            ]);
+            break;
+          case 'door/is-locked':
+            name = 'door lock';
+            options.push(...[
+              {
+                label: 'locks the door',
+                value: { DoorLocked: 'Locked' },
+              },
+              {
+                label: 'unlocks the door',
+                value: { DoorLocked: 'Unlocked' },
+              },
+            ]);
+            break;
         }
 
         return {
           id: setter.id,
-          kind: setter.kind,
+          feature: setter.feature,
           name: name || setter.adapter,
           tags: setter.tags,
           options,
@@ -326,7 +317,7 @@ export default class Recipes {
       execute = [
         {
           destination: [{ id: setter.id }],
-          kind: setter.kind,
+          feature: setter.feature,
           value: setterValue.value,
         },
       ];
@@ -342,7 +333,7 @@ export default class Recipes {
           conditions: [
             {
               source: [{ id: getter.id }],
-              kind: getter.kind,
+              feature: getter.feature,
               range: getterValue.value,
             },
           ],
@@ -355,7 +346,7 @@ export default class Recipes {
       'channels/set',
       {
         select: {
-          kind: 'AddThinkerbellRule',
+          feature: 'thinkerbell/add-rule',
         },
         value: {
           ThinkerbellRule: {
@@ -395,7 +386,7 @@ export default class Recipes {
     return this[p.api].put(
       'channels/set',
       {
-        select: { id: recipe[p.service].setEnabled },
+        select: { id: recipe[p.service].enabled },
         value: { OnOff: textValue },
       }
     )
@@ -419,29 +410,29 @@ export default class Recipes {
         this.getGetters(),
         this.getSetters(),
       ])
-      .then((services) => {
-        const clockGetter = services[0].find(
-          (service) => service.kind === 'CurrentTimeOfDay'
+      .then(([getters, setters]) => {
+        const clockGetter = getters.find(
+          (getter) => getter.feature === 'clock/time-of-day-seconds'
         );
         // Commented until the Philips Hue adapter watcher lands in the box.
-        /*const firstLightGetter = services[0].find(
-          (service) => service.kind === 'LightOn'
+        /*const firstLightGetter = getters.find(
+          (getter) => getter.feature === 'light/is-on'
         );*/
-        const lightsSetter = services[1].filter(
-          (service) => service.kind === 'LightOn'
+        const lightsSetter = setters.filter(
+          (setter) => setter.feature === 'light/is-on'
         );
 
         const conditions = [
           // When it's 8:00am.
           {
             source: [{ id: clockGetter.id }],
-            kind: 'CurrentTimeOfDay',
+            feature: 'clock/time-of-day-seconds',
             range: { Geq: { Duration: 28800 } },
           },
           // When the first light is on.
           /*{
             source: [{ id: firstLightGetter.id }],
-            kind: firstLightGetter.kind,
+            feature: firstLightGetter.feature,
             range: { Eq: { OnOff: 'On' } },
           },*/
         ];
@@ -450,15 +441,15 @@ export default class Recipes {
           // Turn off all lights.
           lightsSetter.map((setter) => ({
             destination: [{ id: setter.id }],
-            kind: setter.kind,
+            feature: setter.feature,
             value: { OnOff: 'Off' },
           })),
           // Notify the user.
           [
             {
               // Notify the user.
-              destination: [{ kind: 'WebPushNotify' }],
-              kind: 'WebPushNotify',
+              destination: [{ feature: 'webpush/notify-msg' }],
+              feature: 'webpush/notify-msg',
               value: {
                 WebPushNotify: {
                   message: JSON.stringify({
@@ -487,7 +478,7 @@ export default class Recipes {
           'channels/set',
           {
             select: {
-              kind: 'AddThinkerbellRule',
+              feature: 'thinkerbell/add-rule',
             },
             value: {
               ThinkerbellRule: {
@@ -518,27 +509,27 @@ export default class Recipes {
     ])
     .then(([getters, setters]) => {
       const clockGetter = getters.find(
-        (getter) => getter.kind === 'CurrentTimeOfDay'
+        (getter) => getter.feature === 'clock/time-of-day-seconds'
       );
 
       const doorLockGetter = getters.find(
-        (getter) => getter.kind === 'DoorLocked'
+        (getter) => getter.feature === 'door/is-locked'
       );
 
       const doorLockSetter = setters.find(
-        (setter) => setter.kind === 'DoorLocked'
+        (setter) => setter.feature === 'door/is-locked'
       );
 
       const conditions = [
         // When it's 8:00am.
         {
           source: [{ id: clockGetter.id }],
-          kind: 'CurrentTimeOfDay',
+          feature: 'clock/time-of-day-seconds',
           range: { Geq: { Duration: 28800 } },
         },
         {
           source: [{ id: doorLockGetter.id }],
-          kind: doorLockGetter.kind,
+          feature: doorLockGetter.feature,
           range: { Eq: { DoorLocked: 'Unlocked' } },
         },
       ];
@@ -546,13 +537,13 @@ export default class Recipes {
       const execute = [
         {
           destination: [{ id: doorLockSetter.id }],
-          kind: doorLockSetter.kind,
+          feature: doorLockSetter.feature,
           value: { DoorLocked: 'Locked' },
         },
         {
           // Notify the user.
-          destination: [{ kind: 'WebPushNotify' }],
-          kind: 'WebPushNotify',
+          destination: [{ feature: 'webpush/notify-msg' }],
+          feature: 'webpush/notify-msg',
           value: {
             WebPushNotify: {
               message: JSON.stringify({
@@ -579,7 +570,7 @@ export default class Recipes {
         'channels/set',
         {
           select: {
-            kind: 'AddThinkerbellRule',
+            feature: 'thinkerbell/add-rule',
           },
           value: {
             ThinkerbellRule: {

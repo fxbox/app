@@ -15,11 +15,11 @@ export default class IpCameraService extends BaseService {
   }
 
   getLatestImage() {
-    return this.get('latest image');
+    return this.get('camera/x-latest-image');
   }
 
   takeSnapshot() {
-    return this.set('TakeSnapshot')
-      .then(() => this.get('latest image'));
+    return this.set('camera/store-snapshot')
+      .then(() => this.get('camera/x-latest-image'));
   }
 }

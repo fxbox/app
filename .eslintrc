@@ -57,7 +57,7 @@
     "arrow-spacing": ["error"],
     "no-var": ["error"],
     "object-shorthand": ["error"],
-    "prefer-const": ["warn"],
+    "prefer-const": ["error"],
     "prefer-template": ["error"]
   },
 
