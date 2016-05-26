@@ -27,7 +27,7 @@ const motionStateToBoolean = function(motionState) {
 export default class MotionSensorService extends BaseService {
   constructor(props, api) {
     super(props, api, undefined, new Map([
-      ['motion', ['OpenClosed', p.onMotionStateChanged]],
+      ['motion', ['door/is-open', p.onMotionStateChanged]],
     ]));
 
     Object.freeze(this);
@@ -43,7 +43,7 @@ export default class MotionSensorService extends BaseService {
    * @return {Promise.<boolean>}
    */
   isMotionDetected() {
-    return this.get('OpenClosed').then(motionStateToBoolean);
+    return this.get('door/is-open').then(motionStateToBoolean);
   }
 
   /**

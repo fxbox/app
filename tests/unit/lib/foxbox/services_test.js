@@ -27,8 +27,8 @@ describe('Services >', function() {
       channels: {
         motionGetterId: {
           id: 'motionGetterId',
-          kind: 'OpenClosed',
-          supports_fetch: true,
+          feature: 'door/is-open',
+          supports_fetch: { returns: { required: 'OpenClosed' }},
         },
       },
     },
@@ -102,8 +102,8 @@ describe('Services >', function() {
       channels: {
         doorLockGetterId: {
           id: 'doorLockGetterId',
-          kind: 'DoorLocked',
-          supports_fetch: true,
+          feature: 'door/is-locked',
+          supports_fetch: { returns: { required: 'DoorLocked' }},
         },
       },
     };

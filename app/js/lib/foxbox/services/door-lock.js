@@ -20,7 +20,7 @@ export default class DoorLockService extends BaseService {
    * @return {Promise.<boolean>}
    */
   isLocked() {
-    return this.get('DoorLocked')
+    return this.get('door/is-locked')
       .then((response) => {
         if (!response) {
           throw new Error('Door lock status is not available yet!');
@@ -38,6 +38,6 @@ export default class DoorLockService extends BaseService {
    * @return {Promise}
    */
   lockUnlock(locked) {
-    return this.set('DoorLocked', locked ? 'Locked': 'Unlocked');
+    return this.set('door/is-locked', locked ? 'Locked': 'Unlocked');
   }
 }
