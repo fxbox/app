@@ -7,7 +7,7 @@ cache:
     - node_modules
 
 addons:
-  firefox: latest # Needed to support react
+  firefox: "46.0.1" # Firefox 47+ breaks Selenium. See https://github.com/fxbox/app/pull/161
 
 install:
   - "sh -e /etc/init.d/xvfb start"
