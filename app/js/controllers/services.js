@@ -2,7 +2,7 @@ import React from 'components/react';
 import ReactDOM from 'components/react-dom';
 import { Controller } from 'components/mvc';
 
-import Services from 'js/views/services';
+import Services from '../views/services';
 
 export default class ServicesController extends Controller {
   main() {

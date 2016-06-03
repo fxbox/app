@@ -25,10 +25,11 @@ require.config({
   },
 
   paths: {
-    'components': 'dist/app/components',
-    'js': 'dist/app/js',
+    'js': 'dist/tests/unit',
     // Addons include React TestUtils.
     'components/react': 'node_modules/react/dist/react-with-addons',
+    'components/react-dom': 'node_modules/react-dom/dist/react-dom',
+    'components/mvc': 'node_modules/fxos-mvc/dist/mvc',
     'rxjs': 'node_modules/rxjs/bundles/Rx.umd',
   },
 });

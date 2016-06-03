@@ -1,6 +1,6 @@
 import React from 'components/react';
 
-import NavigationMenu from 'js/views/navigation-menu';
+import NavigationMenu from './navigation-menu';
 
 export default class BaseView extends React.Component {
   renderHeader(title, cssClass) {

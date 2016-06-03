@@ -2,7 +2,7 @@ import React from 'components/react';
 import ReactDOM from 'components/react-dom';
 import { Controller } from 'components/mvc';
 
-import CameraLatestImageView from 'js/views/dev/camera-latest-image';
+import CameraLatestImageView from '../views/dev/camera-latest-image';
 
 export default class DevController extends Controller {
   main(path, args) {

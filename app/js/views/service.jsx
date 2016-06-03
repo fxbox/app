@@ -1,9 +1,9 @@
 import React from 'components/react';
 
-import BaseView from 'js/views/base-view';
-import CameraServiceView from 'js/views/services/camera';
-import LightServiceView from 'js/views/services/light';
-import DefaultServiceView from 'js/views/services/default';
+import BaseView from './base-view';
+import CameraServiceView from './services/camera';
+import LightServiceView from './services/light';
+import DefaultServiceView from './services/default';
 
 export default class Service extends BaseView {
   constructor(props) {

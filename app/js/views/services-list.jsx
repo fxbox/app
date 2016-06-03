@@ -1,6 +1,6 @@
 import React from 'components/react';
 
-import ServicesListItem from 'js/views/services-list-item';
+import ServicesListItem from './services-list-item';
 
 export default class ServicesList extends React.Component {
   render() {
