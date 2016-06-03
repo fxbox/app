@@ -30,8 +30,9 @@ registrationServerSimulator.get('/ping', (req, res) => {
 
 https.createServer(
   {
-    key: fs.readFileSync(path.join(__dirname, '../../certs/key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '../../certs/cert.pem')),
+    key: fs.readFileSync(path.join(__dirname, '../../certs/private/localhost.key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '../../certs/certs/localhost.cert.pem')),
+    passphrase: 'Foxlink',
   },
   registrationServerSimulator
 ).listen(4455);
