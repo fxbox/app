@@ -291,11 +291,7 @@ gulp.task('webserver', function() {
       livereload: false,
       directoryListing: false,
       open: false,
-      https: {
-        cert: './certs/certs/localhost.cert.pem',
-        key: './certs/private/localhost.key.pem',
-        passphrase: 'Foxlink',
-      },
+      https: { key: './certs/key.pem', cert: './certs/cert.pem' },
     }));
 });
 

@@ -71,7 +71,7 @@
     "gulp-stylelint": "^2.0.2",
     "gulp-sww": "0.0.12",
     "gulp-uglify": "^1.5.3",
-    "gulp-webserver": "git://github.com/JohanLorenzo/gulp-webserver.git#add-passphrase",
+    "gulp-webserver": "^0.9.1",
     "gulp-zip": "^3.2.0",
     "karma": "^0.13.22",
     "karma-chai": "^0.1.0",

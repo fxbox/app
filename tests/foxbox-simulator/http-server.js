@@ -19,9 +19,8 @@ foxboxSimulator.get('/ping', (req, res) => {
 
 https.createServer(
   {
-    key: fs.readFileSync(path.join(__dirname, '../../certs/private/localhost.key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '../../certs/certs/localhost.cert.pem')),
-    passphrase: 'Foxlink',
+    key: fs.readFileSync(path.join(__dirname, '../../certs/key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '../../certs/cert.pem')),
   },
   foxboxSimulator
 ).listen(3000);
