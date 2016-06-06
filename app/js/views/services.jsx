@@ -1,7 +1,7 @@
 import React from 'components/react';
 
-import ServicesListView from 'js/views/services-list';
-import BaseView from 'js/views/base-view';
+import ServicesListView from './services-list';
+import BaseView from './base-view';
 
 export default class Services extends BaseView {
   constructor(props) {

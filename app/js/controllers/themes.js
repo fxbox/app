@@ -2,8 +2,8 @@ import React from 'components/react';
 import ReactDOM from 'components/react-dom';
 import { Controller } from 'components/mvc';
 
-import Themes from 'js/views/themes';
-import ThemesNew from 'js/views/themes-new';
+import Themes from '../views/themes';
+import ThemesNew from '../views/themes-new';
 
 export default class ThemesController extends Controller {
   main(action = 'list') {

@@ -2,7 +2,7 @@ import React from 'components/react';
 import ReactDOM from 'components/react-dom';
 import { Controller } from 'components/mvc';
 
-import UserLogin from 'js/views/user-login';
+import UserLogin from '../views/user-login';
 
 const ALLOWED_ACTIONS = ['login', 'logout'];
 const DEFAULT_ACTION = ALLOWED_ACTIONS[0];

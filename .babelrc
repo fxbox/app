@@ -3,11 +3,13 @@
     "react"
   ],
   "plugins": [
-    "transform-es2015-modules-amd",
     "check-es2015-constants",
+    "external-helpers",
     "transform-es2015-block-scoping",
     "transform-es2015-arrow-functions",
     "transform-es2015-parameters",
+    "transform-es2015-destructuring",
+    "transform-es2015-spread",
     [
       "transform-es2015-classes",
       {

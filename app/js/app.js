@@ -1,4 +1,4 @@
-import MainController from 'js/controllers/main';
+import MainController from './controllers/main';
 
 const mainController = new MainController();
 mainController.main();

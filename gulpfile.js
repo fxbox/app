@@ -4,8 +4,8 @@
 
 const gulp = require('gulp');
 
-const concat = require('gulp-concat');
 const babel = require('gulp-babel');
+const babelHelpers = require('gulp-babel-external-helpers');
 const eslint = require('gulp-eslint');
 const zip = require('gulp-zip');
 const del = require('del');
@@ -16,6 +16,15 @@ const gls = require('gulp-live-server');
 const gsww = require('gulp-sww');
 const pkg = require('./package.json');
 const esdoc = require('gulp-esdoc');
+const sourcemaps = require('gulp-sourcemaps');
+const rename = require('gulp-rename');
+const merge = require('merge2');
+const rollup = require('gulp-rollup');
+const rollupBabelPlugin = require('rollup-plugin-babel');
+const rollupIncludePathsPlugin = require('rollup-plugin-includepaths');
+const rollupUglifyPlugin = require('rollup-plugin-uglify');
+const minifier = require('gulp-uglify/minifier');
+const uglifyjs = require('uglify-js');
 
 const APP_ROOT = './app/';
 const TESTS_ROOT = './tests/';
@@ -39,80 +48,154 @@ gulp.task('lint', function() {
       `${APP_ROOT}**/*.{js,jsx}`,
       `${TESTS_ROOT}**/*.js`,
       './*.js',
-      `!${APP_ROOT}components/**`,
     ])
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
 });
 
+gulp.task('copy-app-common', function() {
+  return merge(
+    gulp.src([
+      `${APP_ROOT}**`,
+      // Don't copy documentation files.
+      `!${APP_ROOT}**/*.md`,
+      // Don't copy JS, it will be compiled and copied on the compile step.
+      `!${APP_ROOT}js/**`,
+    ]),
+
+    // Module loader.
+    gulp.src('./node_modules/alameda/alameda.js')
+      .pipe(rename('js/alameda.js')),
+
+    // Components.
+    gulp.src('./node_modules/fxos-mvc/dist/mvc.js')
+      .pipe(rename('js/components/mvc.js')),
+
+    // Polyfills.
+    gulp.src('./node_modules/whatwg-fetch/fetch.js')
+      .pipe(rename('js/polyfills/fetch.js'))
+  )
+  .pipe(gulp.dest(DIST_APP_ROOT));
+});
+
 /**
- * Copies necessary files for the Babel amd loader to the app.
+ * Copy all required app resources/assets/external components to be used in
+ * development build.
  */
-gulp.task('loader-polyfill', function() {
-  return gulp.src([
-      './node_modules/alameda/alameda.js',
-      './node_modules/whatwg-fetch/fetch.js',
-      './node_modules/url-search-params/build/url-search-params.max.js',
-      `${APP_ROOT}js/bootstrap.js`,
-    ])
-    .pipe(concat('initapp.js'))
+gulp.task('copy-app-dev', ['copy-app-common'], function() {
+  return merge(
+    // Components.
+    gulp.src('./node_modules/react/dist/react.js')
+      .pipe(rename('js/components/react.js')),
+    gulp.src('./node_modules/react-dom/dist/react-dom.js')
+      .pipe(rename('js/components/react-dom.js')),
+
+    // Polyfills.
+    gulp.src('./node_modules/url-search-params/build/url-search-params.max.js')
+      .pipe(rename('js/polyfills/url-search-params.js'))
+  )
+  .pipe(gulp.dest(DIST_APP_ROOT));
+});
+
+/**
+ * Copy all required app resources/assets/external components to be used in
+ * production build.
+ */
+gulp.task('copy-app-production', ['copy-app-common'], function() {
+  return merge(
+    // Components.
+    gulp.src('./node_modules/react/dist/react.min.js')
+      .pipe(rename('js/components/react.js')),
+    gulp.src('./node_modules/react-dom/dist/react-dom.min.js')
+      .pipe(rename('js/components/react-dom.js')),
+
+    // Polyfills.
+    gulp.src('./node_modules/url-search-params/build/url-search-params.js')
+      .pipe(rename('js/polyfills/url-search-params.js'))
+  )
+  .pipe(gulp.dest(DIST_APP_ROOT));
+});
+
+/**
+ * Compiles app source i.e. processes source with Babel and Rollup.
+ */
+gulp.task('compile-app-dev', function() {
+  return gulp
+    .src(`${APP_ROOT}js/*.js`)
+    .pipe(
+      rollup({
+        sourceMap: true,
+        format: 'amd',
+        external: [
+          'components/mvc',
+          'components/react',
+          'components/react-dom',
+        ],
+        plugins: [
+          rollupBabelPlugin(),
+          rollupIncludePathsPlugin({ extensions: ['.js', '.jsx'] }),
+        ],
+      })
+    )
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(`${DIST_APP_ROOT}js`));
 });
 
 /**
- * Copy all non-js directory app source/assets/components.
+ * Compiles app source for production i.e. processes source with Babel, Rollup
+ * and UglifyJS.
  */
-gulp.task('copy-app', function() {
-  return gulp.src([
-      `${APP_ROOT}**`,
-      `!${APP_ROOT}js/**/*.js`, // do not copy js
-    ])
+gulp.task('compile-app-production', ['compress-external-modules'], function() {
+  return gulp
+    .src(`${APP_ROOT}js/*.js`)
+    .pipe(
+      rollup({
+        sourceMap: true,
+        format: 'amd',
+        external: [
+          'components/mvc',
+          'components/react',
+          'components/react-dom',
+        ],
+        plugins: [
+          rollupBabelPlugin(),
+          rollupUglifyPlugin({ sourceMap: true }, uglifyjs.minifier),
+          rollupIncludePathsPlugin({ extensions: ['.js', '.jsx'] }),
+        ],
+      })
+    )
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(`${DIST_APP_ROOT}js`));
+});
+
+/**
+ * Compresses external modules that don't provide compressed version.
+ */
+gulp.task('compress-external-modules', function() {
+  return gulp
+    .src([
+      `${DIST_APP_ROOT}js/alameda.js`,
+      `${DIST_APP_ROOT}js/components/mvc.js`,
+      `${DIST_APP_ROOT}js/polyfills/fetch.js`,
+    ], { base: DIST_APP_ROOT })
+    .pipe(sourcemaps.init())
+    .pipe(minifier({}, uglifyjs))
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(DIST_APP_ROOT));
 });
 
 /**
- * Apply Babel transform to the JS and JSX files.
+ * Applies Babel transform to the app/tests JS and JSX files. The only
+ * difference between normal app build and build for unit tests is that Rollup
+ * is not used here.
  */
-gulp.task('babel-app', function() {
-  const files = [
-    `${APP_ROOT}js/**/*.{js,jsx}`,
-  ];
-
-  try {
-    return gulp.src(files)
-      .pipe(babel().on('error', function(e) {
-          console.log('error running Babel', e);
-        })
-      )
-      .pipe(gulp.dest(`${DIST_APP_ROOT}js/`));
-  } catch (e) {
-    console.log('Got error in Babel', e);
-  }
-});
-
-/**
- * Process unit test files with Babel.
- */
-gulp.task('babel-unit-tests', function() {
-  try {
-    return gulp.src([`${TESTS_ROOT}unit/**/*.js`])
-      .pipe(
-        babel().on('error', function(e) {
-          console.error('Error occurred while running Babel', e);
-        })
-      )
-      .pipe(gulp.dest(`${DIST_TESTS_ROOT}unit/`));
-  } catch (e) {
-    console.error('Error occurred while process unit test files with Babel', e);
-  }
-});
-
-gulp.task('remove-useless', function() {
-  return del([
-    `${DIST_APP_ROOT}js/**/*.jsx`,
-    `${DIST_APP_ROOT}**/*.md`,
-  ]);
+gulp.task('compile-unit-tests', function() {
+  return gulp
+    .src([`${APP_ROOT}js/**/*.{js,jsx}`, `${TESTS_ROOT}unit/**/*.js`])
+    .pipe(babel({ plugins: ['transform-es2015-modules-amd'] }))
+    .pipe(babelHelpers('babel-helpers.js'))
+    .pipe(gulp.dest(`${DIST_TESTS_ROOT}unit/`));
 });
 
 /**
@@ -125,17 +208,22 @@ gulp.task('zip', function() {
 });
 
 /**
- * Runs travis tests.
+ * Builds the app for development.
  */
-gulp.task('travis', ['lint', 'loader-polyfill', 'babel-app']);
+gulp.task('build-dev', function(cb) {
+  runSequence(
+    'lint', 'clobber-app', 'copy-app-dev', 'compile-app-dev',
+    'offline', cb
+  );
+});
 
 /**
- * Build the app.
+ * Builds the app for the production.
  */
-gulp.task('build', function(cb) {
+gulp.task('build-production', function(cb) {
   runSequence(
-    ['lint'], ['clobber-app'], ['loader-polyfill', 'copy-app'], ['babel-app'],
-    ['remove-useless'], ['offline'], cb
+    'lint', 'clobber-app', 'copy-app-production', 'compile-app-production',
+    'offline', cb
   );
 });
 
@@ -152,17 +240,10 @@ gulp.task('offline', () => {
 });
 
 /**
- * Build unit tests.
- */
-gulp.task('build-unit-tests', function(cb) {
-  runSequence('clobber-tests', 'babel-unit-tests', cb);
-});
-
-/**
  * Watch for changes on the file system, and rebuild if so.
  */
 gulp.task('watch', function() {
-  gulp.watch([`${APP_ROOT}**`], ['build']);
+  gulp.watch([`${APP_ROOT}**`], ['build-dev']);
 });
 
 gulp.task('webserver', function() {
@@ -185,8 +266,8 @@ gulp.task('stop-webserver', function() {
  * The default task when `gulp` is run.
  * Adds a listener which will re-build on a file save.
  */
-gulp.task('default', function() {
-  runSequence('build', 'webserver', 'watch');
+gulp.task('default', function(cb) {
+  runSequence('build-dev', 'webserver', 'watch', cb);
 });
 
 /**
@@ -253,14 +334,12 @@ gulp.task('stop-simulators', function() {
   registrationServerSimulator.stop();
 });
 
-gulp.task('run-unit-tests', function(cb) {
-  runSequence('build-unit-tests', function() {
-    const Server = require('karma').Server;
+gulp.task('run-unit-tests', ['compile-unit-tests'], function(cb) {
+  const server = new (require('karma').Server)(
+    { configFile: `${__dirname}/karma.conf.js`}, cb
+  );
 
-    (new Server(
-      { configFile: `${__dirname}/karma.conf.js`, singleRun: true }, cb
-    )).start();
-  });
+  server.start();
 });
 
 gulp.task('run-test-integration', function() {
@@ -286,9 +365,8 @@ gulp.task('run-test-e2e', function() {
     .pipe(mocha());
 });
 
-gulp.task('test', function(cb) {
+gulp.task('test', ['clobber-tests', 'build-production'], function(cb) {
   runSequence(
-    'build',
     'run-unit-tests',
     'webserver',
     'test-integration',
@@ -300,5 +378,10 @@ gulp.task('test', function(cb) {
 
 // @todo Should be included in 'test' once less manual steps are required.
 gulp.task('test-e2e', function() {
-  runSequence('build', 'webserver', 'run-test-e2e', 'stop-webserver');
+  runSequence(
+    'build-production',
+    'webserver',
+    'run-test-e2e',
+    'stop-webserver'
+  );
 });

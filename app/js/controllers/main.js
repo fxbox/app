@@ -1,13 +1,13 @@
 import { RoutingController } from 'components/mvc';
 
-import UsersController from 'js/controllers/users';
-import ServicesController from 'js/controllers/services';
-import ServiceController from 'js/controllers/service';
-import ServiceTagsController from 'js/controllers/service-tags';
-import ThemesController from 'js/controllers/themes';
-import DevController from 'js/controllers/dev';
+import UsersController from './users';
+import ServicesController from './services';
+import ServiceController from './service';
+import ServiceTagsController from './service-tags';
+import ThemesController from './themes';
+import DevController from './dev';
 
-import Foxbox from 'js/lib/foxbox/foxbox';
+import Foxbox from '../lib/foxbox/foxbox';
 
 export default class MainController extends RoutingController {
   constructor() {

@@ -12,9 +12,15 @@ module.exports = function(config) {
 
     // List of files / patterns to load in the browser.
     files: [
-      { pattern: 'dist/**/*.js', included: false },
-      { pattern: 'node_modules/react/dist/*.js', included: false },
+      { pattern: 'dist/tests/unit/**/*.js', included: false },
+      {
+        pattern: 'node_modules/react/dist/react-with-addons.js',
+        included: false,
+      },
+      { pattern: 'node_modules/react-dom/dist/react-dom.js', included: false },
+      { pattern: 'node_modules/fxos-mvc/dist/mvc.js', included: false },
       { pattern: 'node_modules/rxjs/bundles/Rx.umd.js', included: false },
+      'dist/tests/unit/babel-helpers.js',
       'tests/unit/test-main.js',
     ],
 
@@ -43,7 +49,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode, if true, Karma captures browsers, runs the
     // tests and exits.
-    singleRun: false,
+    singleRun: true,
 
     // Concurrency level, how many browsers can be started simultaneously.
     concurrency: Infinity,

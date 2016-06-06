@@ -1,7 +1,7 @@
 import React from 'components/react';
 
-import BaseView from 'js/views/base-view';
-import TagList from 'js/views/tag-list';
+import BaseView from './base-view';
+import TagList from './tag-list';
 
 export default class ServiceTags extends BaseView {
   constructor(props) {

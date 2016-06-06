@@ -1,7 +1,7 @@
 import React from 'components/react';
 
-import BaseView from 'js/views/base-view';
-import ThemesListItemView from 'js/views/themes-list-item';
+import BaseView from './base-view';
+import ThemesListItemView from './themes-list-item';
 
 // @todo Allow editing existing recipes when clicking on the label.
 

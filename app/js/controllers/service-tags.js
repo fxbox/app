@@ -2,7 +2,7 @@ import React from 'components/react';
 import ReactDOM from 'components/react-dom';
 import { Controller } from 'components/mvc';
 
-import ServiceTagsView from 'js/views/service-tags';
+import ServiceTagsView from '../views/service-tags';
 
 export default class ServiceTagsController extends Controller {
   main(id) {
