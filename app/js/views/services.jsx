@@ -69,7 +69,3 @@ export default class Services extends BaseView {
     );
   }
 }
-
-Services.propTypes = {
-  foxbox: React.PropTypes.object.isRequired,
-};

@@ -2,9 +2,9 @@
   "presets": [
     "react"
   ],
+
   "plugins": [
     "check-es2015-constants",
-    "external-helpers",
     "transform-es2015-block-scoping",
     "transform-es2015-arrow-functions",
     "transform-es2015-parameters",
@@ -16,5 +16,24 @@
         "loose": true
       }
     ]
-  ]
+  ],
+
+  "env": {
+    "development": {
+      "plugins": ["external-helpers"]
+    },
+
+    "production": {
+      "plugins": [
+        "external-helpers",
+        "transform-react-inline-elements",
+        "transform-react-constant-elements",
+        "transform-react-remove-prop-types"
+      ]
+    },
+
+    "test": {
+      "plugins": ["transform-es2015-modules-amd"]
+    }
+  }
 }

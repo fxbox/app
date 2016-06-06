@@ -5,7 +5,6 @@
 const gulp = require('gulp');
 
 const babel = require('gulp-babel');
-const babelHelpers = require('gulp-babel-external-helpers');
 const eslint = require('gulp-eslint');
 const zip = require('gulp-zip');
 const del = require('del');
@@ -191,10 +190,11 @@ gulp.task('compress-external-modules', function() {
  * is not used here.
  */
 gulp.task('compile-unit-tests', function() {
+  process.env.BABEL_ENV = 'test';
+
   return gulp
     .src([`${APP_ROOT}js/**/*.{js,jsx}`, `${TESTS_ROOT}unit/**/*.js`])
-    .pipe(babel({ plugins: ['transform-es2015-modules-amd'] }))
-    .pipe(babelHelpers('babel-helpers.js'))
+    .pipe(babel())
     .pipe(gulp.dest(`${DIST_TESTS_ROOT}unit/`));
 });
 
@@ -211,6 +211,8 @@ gulp.task('zip', function() {
  * Builds the app for development.
  */
 gulp.task('build-dev', function(cb) {
+  process.env.BABEL_ENV = 'development';
+
   runSequence(
     'lint', 'clobber-app', 'copy-app-dev', 'compile-app-dev',
     'offline', cb
@@ -221,6 +223,8 @@ gulp.task('build-dev', function(cb) {
  * Builds the app for the production.
  */
 gulp.task('build-production', function(cb) {
+  process.env.BABEL_ENV = 'production';
+
   runSequence(
     'lint', 'clobber-app', 'copy-app-production', 'compile-app-production',
     'offline', cb

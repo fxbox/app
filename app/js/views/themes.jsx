@@ -57,7 +57,3 @@ export default class Themes extends BaseView {
     );
   }
 }
-
-Themes.propTypes = {
-  foxbox: React.PropTypes.object.isRequired,
-};
