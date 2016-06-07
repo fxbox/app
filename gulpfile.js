@@ -29,6 +29,8 @@ const postcssImport = require('postcss-import');
 const postcssUrl = require('postcss-url');
 const cssnano = require('cssnano');
 const stylelint = require('gulp-stylelint');
+const git = require('gulp-git');
+const ghPages = require('gulp-gh-pages');
 
 const APP_ROOT = './app/';
 const TESTS_ROOT = './tests/';
@@ -415,4 +417,46 @@ gulp.task('test-e2e', function() {
     'run-test-e2e',
     'stop-webserver'
   );
+});
+
+/**
+ * Deploys production-optimized app build to the "origin/gh-branch". Every new
+ * deployment comes with a separate commit attributed with the date and source
+ * branch revision. If tree has some changes that are not committed yet, there
+ * will be a warning, but all local changes will be deployed anyway.
+ */
+gulp.task('deploy', ['build-production'], function() {
+  const wrapIntoPromise = (method, args) => new Promise((resolve, reject) => {
+    git[method].call(
+      git, args, (err, result) => err ? reject(err) : resolve(result)
+    );
+  });
+
+  return Promise
+    .all([
+      wrapIntoPromise('revParse', { args: '--short HEAD', quiet: true }),
+      wrapIntoPromise('status', { args: '--porcelain', quiet: true }),
+    ])
+    .then((results) => {
+      const revision = results[0];
+      const status = results[1];
+
+      let message = `Deployment is based on ${revision}`;
+
+      if (status) {
+        console.log(
+          '\x1b[31m',
+          `You have uncommitted changes that will be deployed!\n${status}`,
+          '\x1b[0m'
+        );
+
+        message += ' (includes uncommitted changes)';
+      }
+
+      return new Promise((resolve, reject) => {
+        merge(gulp.src(`${DIST_APP_ROOT}**/*`).pipe(ghPages({ message })))
+          .on('end', resolve)
+          .on('error', reject);
+      });
+    });
 });
