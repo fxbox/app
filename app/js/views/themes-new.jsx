@@ -276,7 +276,3 @@ export default class ThemesNew extends BaseView {
     return tags ? `${channel.name} (${tags})` : channel.name;
   }
 }
-
-ThemesNew.propTypes = {
-  foxbox: React.PropTypes.object.isRequired,
-};

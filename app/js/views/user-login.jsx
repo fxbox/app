@@ -92,7 +92,3 @@ export default class UserLogin extends BaseView {
     );
   }
 }
-
-UserLogin.propTypes = {
-  foxbox: React.PropTypes.object.isRequired,
-};
