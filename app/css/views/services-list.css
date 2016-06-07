@@ -1,25 +1,29 @@
-[data-icon="unknown"] {
+[data-icon='unknown'] {
   background-image: url('services-list/unknown.svg');
 }
 
-[data-icon="ip-camera"] {
+[data-icon='ip-camera'] {
   background-image: url('services-list/ip-camera.svg');
 }
 
-[data-icon="door-lock"] {
+[data-icon='door-lock'] {
   background-image: url('services-list/door-lock.svg');
 }
 
 @keyframes motion-sensor-animation {
-  0%, 90% {
+  0%,
+  90% {
     background-size: 2.7rem;
   }
 
-  5%, 95% {
+  5%,
+  95% {
     background-size: 2.3rem;
   }
 
-  10%, 85%, 100% {
+  10%,
+  85%,
+  100% {
     background-size: 2.5rem;
   }
 }

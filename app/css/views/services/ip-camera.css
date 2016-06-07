@@ -14,39 +14,37 @@
   flex-grow: 1;
   padding-top: 2rem;
 
-  color: #393536;
   text-align: center;
+  color: #393536;
 }
 
 .camera-controls__snapshot-tools {
+  position: relative;
   display: flex;
   justify-content: center;
-  position: relative;
   padding: 2rem;
 }
 
 .camera-controls__snapshot-btn {
   padding: 2rem;
 
-  background-color: #40acb3;
-
-  box-shadow: 0 0 0 0.4rem #40acb3;
   border: 0.4rem solid #fff;
   border-radius: 50%;
+  background-color: #40acb3;
+  box-shadow: 0 0 0 0.4rem #40acb3;
 }
 
 .camera-controls__snapshot-btn::-moz-focus-inner {
   padding: 0;
-  border: 0
+  border: 0;
 }
 
 .camera-controls__previous-snapshot {
-  display: none;
-
   position: absolute;
-  right: 2rem;
   top: 20%;
+  right: 2rem;
 
+  display: none;
   width: 5rem;
   height: 60%;
 

@@ -3,16 +3,17 @@
 }
 
 .tag-list__item {
-  display: flex;
   position: relative;
 
-  padding-left: 4rem;
+  display: flex;
   justify-content: space-between;
+
+  padding-left: 4rem;
 }
 
 .tag-list__item-remove {
   width: 1rem;
 
   border: none;
-  background: url(../icons/remove.svg) center center no-repeat;
+  background: url('../icons/remove.svg') center center no-repeat;
 }

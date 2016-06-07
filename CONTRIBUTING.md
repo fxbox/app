@@ -8,10 +8,10 @@ If you're new to the Project Link web app and want to contribute, there is a
 ## Coding standard
 
 The code base is written in es2015, make sure to use semantic and syntactic
-idioms in this flavour of JavaScript.
+idioms in this flavour of JavaScript. We're trying to follow [BEM methodology](https://en.bem.info/methodology/) when writing CSS.
 
 The coding standard is not documented but most of the important features are
-enforced using eslint.
+enforced using [eslint](http://eslint.org/) and [stylelint](http://stylelint.io/). So it's really easy to get acquainted with the most of coding styles just by reading through `.eslintrc` and `.stylelintrc` located at the project's root.
 To ensure your code is compatible a pre-commit hook is run. Alternatively, you
 can run the linting task this way:
 ```bash

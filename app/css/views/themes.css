@@ -13,36 +13,36 @@
   flex-direction: row;
   align-items: center;
   padding: 1rem 0;
-  border-bottom: 0.1rem solid grey;
+  border-bottom: 0.1rem solid #808080;
 }
 
 .themes-list__item--deactivated .themes-list__name {
-  opacity: .25;
+  opacity: 0.25;
 }
 
 .themes-list__toggle {
-  border: 1px solid black;
   width: 3rem;
   height: 3rem;
   margin: 0 1rem 0 0;
-  border-radius: .2rem;
+  border: 1px solid #000;
+  border-radius: 0.2rem;
 }
 
 .themes-list__name {
+  overflow: hidden;
+  width: 100%;
+  text-overflow: ellipsis;
   font-size: 1.4rem;
   line-height: 2.8rem;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .themes-list__remove {
-  background: url(../icons/clear.svg) no-repeat center center;
-  border: none;
+  right: 0;
   width: 4rem;
   height: 3rem;
   margin: 0 0 0 1rem;
   padding: 0;
-  right: 0;
+  border: none;
+  background: url('../icons/clear.svg') no-repeat center center;
   font-size: 0;
 }

@@ -1,16 +1,19 @@
 /* Modal */
 .modal {
-  display: none;
-  opacity: 0;
-  width: 90vw;
-  padding: 0;
-  box-shadow: 1rem 1rem 2rem grey;
-  left: 5vw;
-  top: 40%;
   position: absolute;
+  top: 40%;
+  left: 5vw;
+
+  display: none;
+  width: 90vw;
   margin: auto;
-  background: white;
+  padding: 0;
+
   text-align: center;
+
+  opacity: 0;
+  background: #fff;
+  box-shadow: 1rem 1rem 2rem #808080;
 }
 
 .modal.visible {

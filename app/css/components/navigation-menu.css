@@ -11,40 +11,42 @@
   flex-grow: 1;
 
   text-align: center;
-  filter: brightness(5);
+
+  border-bottom: 0.3rem solid transparent;
   -webkit-filter: brightness(5);
-  border-bottom: .3rem solid transparent;
+  filter: brightness(5);
 }
 
 .navigation-menu__item-link {
   display: block;
 
   height: 4.75rem;
-  color: #fff;
   text-decoration: none;
-  font-size: 0;
-  background: url(../menu-icons/settings.svg) center 1.6rem no-repeat;
+  color: #fff;
+  background: url('../menu-icons/settings.svg') center 1.6rem no-repeat;
   background-size: 2.4rem;
+  font-size: 0;
 }
 
 .navigation-menu__item--active {
-  filter: initial;
-  -webkit-filter: initial;
   border-bottom-color: #3fd4f2;
+
+  -webkit-filter: initial;
+  filter: initial;
 }
 
-.navigation-menu__item-link[href~="#services"] {
-  background-image: url(../menu-icons/home.svg);
+.navigation-menu__item-link[href~='#services'] {
+  background-image: url('../menu-icons/home.svg');
 }
 
-.navigation-menu__item-link[href~="#themes"] {
-  background-image: url(../menu-icons/themes.svg);
+.navigation-menu__item-link[href~='#themes'] {
+  background-image: url('../menu-icons/themes.svg');
 }
 
-.navigation-menu__item-link[href~="#mr-fox"] {
-  background-image: url(../menu-icons/notifications.svg);
+.navigation-menu__item-link[href~='#mr-fox'] {
+  background-image: url('../menu-icons/notifications.svg');
 }
 
-.navigation-menu__item-link[href~="#settings"] {
-  background-image: url(../menu-icons/settings.svg);
+.navigation-menu__item-link[href~='#settings'] {
+  background-image: url('../menu-icons/settings.svg');
 }

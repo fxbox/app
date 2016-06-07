@@ -3,26 +3,26 @@
 }
 
 .service-list__item {
-  display: flex;
   position: relative;
+
+  display: flex;
   padding-left: 4rem;
 
-  background-size: 2.5rem;
-  background-position: left 1rem;
   background-repeat: no-repeat;
+  background-position: left 1rem;
+  background-size: 2.5rem;
 }
 
-.service-list__item[data-connected="false"] {
+.service-list__item[data-connected='false'] {
   opacity: 0.25;
 }
 
 .service-list__item-link {
   width: 100%;
 
-  color: #000;
   text-decoration: none;
+  color: #000;
 }
-
 
 /** Light service item styles **/
 
@@ -32,9 +32,9 @@
   height: 2rem;
   margin: 1.5rem 0 0 1rem;
 
-  border-radius: .2rem;
+  border-radius: 0.2rem;
 }
 
 .service-list__on-off-toggle {
-  border: 1px solid black;
+  border: 1px solid #000;
 }
