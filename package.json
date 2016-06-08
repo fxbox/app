@@ -11,6 +11,7 @@
     "build": "gulp build-dev",
     "build-production": "gulp build-production",
     "test": "gulp test",
+    "deploy": "gulp deploy",
     "generate-icons": "inkscape -e app/img/icons/128.png -w 128 app/img/icon.svg;inkscape -e app/img/icons/512.png -w 512 app/img/icon.svg;inkscape -e app/img/icons/60.png -w 60 app/img/icon.svg;inkscape -e app/img/icons/16.png -w 16 app/img/icon.svg;inkscape -e app/img/icons/32.png -w 32 app/img/icon.svg;inkscape -e app/img/icons/48.png -w 48 app/img/icon.svg;inkscape -e app/img/icons/64.png -w 64 app/img/icon.svg;inkscape -e app/img/icons/90.png -w 90 app/img/icon.svg;inkscape -e app/img/icons/144.png -w 144 app/img/icon.svg;inkscape -e app/img/icons/256.png -w 256 app/img/icon.svg;inkscape -e app/img/icons/336.png -w 336 app/img/icon.svg;inkscape -e app/favicon.ico -w 32 app/img/icon.svg"
   },
   "keywords": [
@@ -54,6 +55,8 @@
     "gulp-babel": "^6.1.2",
     "gulp-esdoc": "^0.2.0",
     "gulp-eslint": "^2.0.0",
+    "gulp-gh-pages": "^0.5.4",
+    "gulp-git": "^1.7.2",
     "gulp-live-server": "0.0.29",
     "gulp-mocha": "^2.2.0",
     "gulp-postcss": "^6.1.1",
