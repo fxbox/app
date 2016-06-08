@@ -1,0 +1,29 @@
+{
+  "name": "Project Link app",
+  "short_name": "Project Link",
+  "lang": "en",
+  "scope": "/app/",
+  "start_url": "/app/?homescreen=1",
+  "orientation": "portrait",
+  "display": "standalone",
+  "theme_color": "#0ca8a4",
+  "background_color": "#fff",
+  "icons": [
+    {
+      "src": "img/icon.svg",
+      "sizes": "16x16",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "img/icons/144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ],
+  "gcm_sender_id": "591585649932"
+}
