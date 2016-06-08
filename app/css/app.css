@@ -1,8 +1,23 @@
+@import 'FiraSans/font.css';
+@import 'components/modal.css';
+@import 'components/navigation-menu.css';
+@import 'components/service-list.css';
+@import 'components/tag-list.css';
+@import 'views/services-list.css';
+@import 'views/service-tags.css';
+@import 'views/service.css';
+@import 'views/services/default.css';
+@import 'views/services/ip-camera.css';
+@import 'views/user-login.css';
+@import 'views/themes.css';
+@import 'views/themes-new.css';
+@import 'vendors/philips-hue.css';
+
 /** General styles **/
 html {
   height: 100%;
 
-  font: normal 10px/10px Arial;
+  font: 400 10px/10px Arial;
 }
 
 body {
@@ -11,56 +26,53 @@ body {
   padding: 0;
 
   background: #fff;
-  font: normal 2.2rem/4.4rem "Fira Sans", Arial;
-  font-weight: 300;
+  font: 300 2.2rem/4.4rem 'Fira Sans', Arial;
 }
 
-h1, h2 {
+h1,
+h2 {
   margin: 0;
   font-weight: 300;
 }
 
 h1 {
-  font-size: 3.2rem;
   width: 100%;
+  font-size: 3.2rem;
 }
 
 h2 {
-  font-size: 2.6rem;
   padding: 1rem 3rem 0;
+  font-size: 2.6rem;
 }
 
 ul {
-  padding: 0;
   margin: 0;
+  padding: 0;
   list-style: none;
 }
 
 input {
-  font: normal 2.2rem/4.4rem "Fira Sans", Arial;
-  font-weight: 300;
-  background: #fff;
   margin: 0;
-  border: 1px solid grey;
-  border-radius: .3rem;
+
+  border: 1px solid #808080;
+  border-radius: 0.3rem;
+  background: #fff;
+
+  font: 300 2.2rem/4.4rem 'Fira Sans', Arial;
 }
 
 button {
-  font: normal 2.2rem/4.4rem "Fira Sans", Arial;
-  font-weight: 300;
-  background: #fff;
   margin: 0;
-  border: 1px solid grey;
-  border-radius: .3rem;
+
+  border: 1px solid #808080;
+  border-radius: 0.3rem;
+
+  background: #fff;
+  font: 300 2.2rem/4.4rem 'Fira Sans', Arial;
 }
 
 select {
-  font: normal 2.2rem/4.4rem "Fira Sans", Arial;
-  font-weight: 300;
-}
-
-[hidden] {
-  display: none !important;
+  font: 300 2.2rem/4.4rem 'Fira Sans', Arial;
 }
 
 /** App specific styles */
@@ -81,22 +93,22 @@ select {
   align-items: center;
   padding: 1rem 3rem;
 
-  background-color: #0ca8a4;
   color: #fff;
+  background-color: #0ca8a4;
 }
 
 .app-view__header--white {
-  background-color: #fff;
-  color: #0ca8a4;
   text-align: center;
+  color: #0ca8a4;
   border-bottom: 1px solid #0ca8a4;
+  background-color: #fff;
 }
 
 .app-view__body {
-  flex: 1;
   position: relative;
-
   overflow-y: auto;
+
+  flex: 1;
 }
 
 .app-view__fill-body {

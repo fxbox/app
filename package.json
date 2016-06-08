@@ -45,6 +45,7 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
     "cors": "^2.7.1",
+    "cssnano": "^3.7.0",
     "del": "^2.2.0",
     "eslint": "^2.11.1",
     "eslint-plugin-react": "^5.1.1",
@@ -55,9 +56,11 @@
     "gulp-eslint": "^2.0.0",
     "gulp-live-server": "0.0.29",
     "gulp-mocha": "^2.2.0",
+    "gulp-postcss": "^6.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-rollup ": "^1.9.0",
     "gulp-sourcemaps": "^1.6.0",
+    "gulp-stylelint": "^2.0.2",
     "gulp-sww": "0.0.12",
     "gulp-uglify": "^1.5.3",
     "gulp-webserver": "^0.9.1",
@@ -73,6 +76,8 @@
     "karma-requirejs": "^1.0.0",
     "merge2": "^1.0.2",
     "mocha": "^2.5.3",
+    "postcss-import": "^8.1.2",
+    "postcss-url": "^5.1.2",
     "requirejs": "^2.2.0",
     "rollup": "^0.26.3",
     "rollup-plugin-babel": "^2.4.0",
@@ -83,6 +88,8 @@
     "selenium-webdriver": "^2.53.2",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
+    "stylelint": "^6.5.1",
+    "stylelint-config-standard": "^8.0.0",
     "uglify-js": "mishoo/UglifyJS2#harmony"
   }
 }

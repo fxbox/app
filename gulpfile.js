@@ -24,6 +24,11 @@ const rollupIncludePathsPlugin = require('rollup-plugin-includepaths');
 const rollupUglifyPlugin = require('rollup-plugin-uglify');
 const minifier = require('gulp-uglify/minifier');
 const uglifyjs = require('uglify-js');
+const postcss = require('gulp-postcss');
+const postcssImport = require('postcss-import');
+const postcssUrl = require('postcss-url');
+const cssnano = require('cssnano');
+const stylelint = require('gulp-stylelint');
 
 const APP_ROOT = './app/';
 const TESTS_ROOT = './tests/';
@@ -41,16 +46,21 @@ let registrationServerSimulator;
  * Runs eslint on all javascript files found in the app and tests dirs.
  */
 gulp.task('lint', function() {
-  // Note: To have the process exit with an error code (1) on lint error, return
-  // the stream and pipe to failOnError last.
-  return gulp.src([
-      `${APP_ROOT}**/*.{js,jsx}`,
-      `${TESTS_ROOT}**/*.js`,
-      './*.js',
-    ])
-    .pipe(eslint())
-    .pipe(eslint.format())
-    .pipe(eslint.failAfterError());
+  return merge(
+    // Note: To have the process exit with an error code (1) on lint error,
+    // return the stream and pipe to failOnError last.
+    gulp
+      .src([`${APP_ROOT}**/*.{js,jsx}`, `${TESTS_ROOT}**/*.js`, './*.js'])
+      .pipe(eslint())
+      .pipe(eslint.format())
+      .pipe(eslint.failAfterError()),
+
+    gulp
+      .src('app/**/*.css')
+      .pipe(
+        stylelint({ reporters: [{ formatter: 'verbose', console: true }] })
+      )
+  );
 });
 
 gulp.task('copy-app-common', function() {
@@ -61,7 +71,9 @@ gulp.task('copy-app-common', function() {
       `!${APP_ROOT}**/*.md`,
       // Don't copy JS, it will be compiled and copied on the compile step.
       `!${APP_ROOT}js/**`,
-    ]),
+      // Don't copy CSS, it will be compiled and copied on the compile step.
+      `!${APP_ROOT}**/*.css`,
+    ], { nodir: true }),
 
     // Module loader.
     gulp.src('./node_modules/alameda/alameda.js')
@@ -199,6 +211,21 @@ gulp.task('compile-unit-tests', function() {
 });
 
 /**
+ * Pipes CSS through several postCSS plugins and outputs single CSS file.
+ */
+gulp.task('compile-css', function () {
+  return gulp.src(`${APP_ROOT}css/app.css`)
+    .pipe(sourcemaps.init())
+    .pipe(postcss([
+      postcssImport(),
+      postcssUrl({ url: 'rebase' }),
+      cssnano(),
+    ]))
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(`${DIST_APP_ROOT}css/`));
+});
+
+/**
  * Packages the application into a zip.
  */
 gulp.task('zip', function() {
@@ -214,7 +241,7 @@ gulp.task('build-dev', function(cb) {
   process.env.BABEL_ENV = 'development';
 
   runSequence(
-    'lint', 'clobber-app', 'copy-app-dev', 'compile-app-dev',
+    'lint', 'clobber-app', 'copy-app-dev', 'compile-app-dev', 'compile-css',
     'offline', cb
   );
 });
@@ -227,7 +254,7 @@ gulp.task('build-production', function(cb) {
 
   runSequence(
     'lint', 'clobber-app', 'copy-app-production', 'compile-app-production',
-    'offline', cb
+    'compile-css', 'offline', cb
   );
 });
 

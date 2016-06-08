@@ -1,0 +1,135 @@
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "color-named": "never",
+    "declaration-no-important": true,
+    "font-family-name-quotes": "always-where-recommended",
+    "font-weight-notation": "numeric",
+    "function-url-quotes": "always",
+    "selector-max-specificity": "0,2,0",
+    "selector-no-id": true,
+    "selector-root-no-composition": true,
+    "string-quotes": "single",
+    "declaration-block-properties-order": [
+      {
+        "properties": [
+          "position",
+          "z-index",
+          "top",
+          "right",
+          "bottom",
+          "left"
+        ]
+      },
+      {
+        "properties": [
+          "display",
+          "visibility",
+          "float",
+          "clear",
+          "overflow",
+          "clip",
+          "zoom",
+          "flex",
+          "flex-basis",
+          "flex-direction",
+          "flex-flow",
+          "flex-grow",
+          "flex-shrink",
+          "flex-wrap",
+          "align-content",
+          "align-items",
+          "align-self",
+          "justify-content",
+          "order"
+        ]
+      },
+      {
+        "properties": [
+          "box-sizing",
+          "width",
+          "min-width",
+          "max-width",
+          "height",
+          "min-height",
+          "max-height",
+          "margin",
+          "padding"
+        ]
+      },
+      {
+        "properties": [
+          "table-layout",
+          "empty-cells",
+          "caption-side",
+          "border-spacing",
+          "border-collapse",
+          "list-style"
+        ]
+      },
+      {
+        "properties": [
+          "content",
+          "quotes",
+          "counter",
+          "resize",
+          "cursor",
+          "user-select",
+          "nav",
+          "transition",
+          "transform",
+          "animation",
+          "text-align",
+          "vertical-align",
+          "white-space",
+          "text-decoration",
+          "text-emphasis",
+          "text-indent",
+          "text-justify",
+          "text-transform",
+          "letter-spacing",
+          "word-spacing",
+          "text-outline",
+          "text-transform",
+          "text-wrap",
+          "text-overflow",
+          "word-wrap",
+          "word-break",
+          "tab-size",
+          "hyphens",
+          "pointer-events"
+        ]
+      },
+      {
+        "properties": [
+          "opacity",
+          "color",
+          "border",
+          "border-radius",
+          "outline",
+          "background",
+          "background-color",
+          "background-image",
+          "background-repeat",
+          "background-attachment",
+          "background-position",
+          "background-position-x",
+          "background-position-y",
+          "background-clip",
+          "background-origin",
+          "background-size",
+          "box-decoration-break",
+          "box-shadow",
+          "filter",
+          "text-shadow"
+        ]
+      },
+      {
+        "properties": [
+          "font",
+          "line-height"
+        ]
+      }
+    ]
+  }
+}
