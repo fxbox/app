@@ -1,10 +1,10 @@
 import React from 'components/react';
 import ReactDOM from 'components/react-dom';
-import { Controller } from 'components/mvc';
 
+import BaseController from './base';
 import Services from '../views/services';
 
-export default class ServicesController extends Controller {
+export default class ServicesController extends BaseController {
   main() {
     ReactDOM.render(React.createElement(Services, {
       foxbox: this.foxbox,

@@ -1,10 +1,10 @@
 import React from 'components/react';
 import ReactDOM from 'components/react-dom';
-import { Controller } from 'components/mvc';
 
+import BaseController from './base';
 import CameraLatestImageView from '../views/dev/camera-latest-image';
 
-export default class DevController extends Controller {
+export default class DevController extends BaseController {
   main(path, args) {
     switch (path) {
       case 'camera-latest-image':

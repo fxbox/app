@@ -21,13 +21,13 @@ export default class UserLogin extends BaseView {
   }
 
   componentDidMount() {
-    this.foxbox.addEventListener('online', this.onBoxOnline);
-    this.foxbox.addEventListener('discovery', this.onBoxDiscovery);
+    this.foxbox.on('online', this.onBoxOnline);
+    this.foxbox.on('discovery', this.onBoxDiscovery);
   }
 
   componentWillUnmount() {
-    this.foxbox.removeEventListener('online', this.onBoxOnline);
-    this.foxbox.removeEventListener('discovery', this.onBoxDiscovery);
+    this.foxbox.off('online', this.onBoxOnline);
+    this.foxbox.off('discovery', this.onBoxDiscovery);
   }
 
   onSelectChange(evt) {

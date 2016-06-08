@@ -35,8 +35,8 @@ describe('User login view tests', function() {
     foxboxStub = sinon.stub({
       boxes: single ? singleBox : multiBox,
       client: null,
-      addEventListener: () => {},
-      removeEventListener: () => {},
+      on: () => {},
+      off: () => {},
       selectBox: () => {},
       login: () => {},
     });

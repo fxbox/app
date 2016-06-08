@@ -2,7 +2,7 @@
 
 'use strict';
 
-import { Service } from 'components/mvc';
+import EventDispatcher from './common/event-dispatcher';
 
 import Settings from './settings';
 import Db from './db';
@@ -23,9 +23,9 @@ const p = Object.freeze({
   api: Symbol('api'),
 });
 
-export default class Foxbox extends Service {
+export default class Foxbox extends EventDispatcher {
   constructor({ settings, db, net } = {}) {
-    super();
+    super(['push-message', 'online', 'discovery']);
 
     // Private properties.
     this[p.settings] = settings || new Settings();
@@ -44,13 +44,9 @@ export default class Foxbox extends Service {
   init() {
     window.foxbox = this;
 
-    this[p.net].on('online', (online) => {
-      this._dispatchEvent('online', online);
-    });
+    this[p.net].on('online', (online) => this.emit('online', online));
 
-    this[p.webPush].on('message', (msg) => {
-      this._dispatchEvent('push-message', msg);
-    });
+    this[p.webPush].on('message', (msg) => this.emit('push-message', msg));
 
     // No need to block the UI on the discovery process.
     // Once we discover a box we can connect to, we will start
@@ -140,7 +136,7 @@ export default class Foxbox extends Service {
         // @todo We should improve this logic and check if boxes list has
         // actually changed and if so only then override internal box list and
         // fire event.
-        this._dispatchEvent('discovery');
+        this.emit('discovery');
 
         // If the registration server didn't give us any info and
         // we have no record of previous registrations, we schedule
