@@ -1,27 +1,20 @@
 'use strict';
 
-const App = require('../lib/app');
+const suiteManager = require('../lib/suite_manager.js');
 
-describe('Recipes tests', function() {
-  let app;
-  let loginView;
-  let servicesGeneralView;
-  this.timeout(120000);
 
-  before(() => {
-    app = new App();
-    return app.init()
-      .then((defaultView) => { loginView = defaultView; })
-      .then(() => loginView.loginSuccess(12345678))
-      .then((servicesView) => servicesGeneralView = servicesView);
-  });
+suiteManager.registerSubSuite(function(loginView) {
+  describe('Recipes tests', function() {
+    let servicesGeneralView;
 
-  afterEach(() => app.cleanUp());
+    before(() => {
+      return loginView.loginSuccess(12345678)
+        .then((servicesView) => servicesGeneralView = servicesView);
+    });
 
-  after(() => app.stop());
-
-  it('should be able to start creating a new recipe', () => {
-    return servicesGeneralView.goToRecipesView()
-      .then((recipesView) => recipesView.goToNewRecipe().tap);
+    it('should be able to start creating a new recipe', () => {
+      return servicesGeneralView.goToRecipesView()
+        .then((recipesView) => recipesView.goToNewRecipe().tap);
+    });
   });
 });

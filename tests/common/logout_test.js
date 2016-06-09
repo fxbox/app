@@ -1,22 +1,15 @@
 'use strict';
 
-const App = require('../lib/app');
+const suiteManager = require('../lib/suite_manager.js');
 
-describe('Logout', function() {
-  let app;
-  let loginView;
-  this.timeout(120000);
 
-  before(() => {
-    app = new App();
-    return app.init()
-      .then((defaultView) => { loginView = defaultView; });
-  });
+suiteManager.registerSubSuite(function(loginView) {
+  describe('Logout', function() {
 
-  after(() => app.stop());
+    it('should logout', () => {
+      return loginView.loginSuccess(12345678)
+        .then((servicesView) => servicesView.logoutSuccess());
+    });
 
-  it('should logout', () => {
-    return loginView.loginSuccess(12345678)
-      .then((servicesView) => servicesView.logoutSuccess());
   });
 });

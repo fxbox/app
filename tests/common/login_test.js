@@ -1,28 +1,21 @@
 'use strict';
 
-const App = require('../lib/app');
+const suiteManager = require('../lib/suite_manager.js');
 
-describe('Login', function() {
-  let app;
-  let loginView;
-  this.timeout(120000);
 
-  before(() => {
-    app = new App();
+suiteManager.registerSubSuite(function(loginView) {
+  describe('Login', function() {
+
+    console.log('In login suite');
+
+    it('should login', () => {
+      console.log('in test');
+      return loginView.loginSuccess(12345678);
+    });
+
+    // @todo Delete this test once a new one comes in. It was initially meant to
+    // make sure the clean up was correctly made.
+    it('should login a second time', () => loginView.loginSuccess(12345678));
+
   });
-
-  beforeEach(() => {
-    return app.init()
-      .then((defaultView) => { loginView = defaultView; });
-  });
-
-  afterEach(() => app.cleanUp());
-
-  after(() => app.stop());
-
-  it('should login', () => loginView.loginSuccess(12345678));
-
-  // @todo Delete this test once a new one comes in. It was initially meant to
-  // make sure the clean up was correctly made.
-  it('should login a second time', () => loginView.loginSuccess(12345678));
 });
