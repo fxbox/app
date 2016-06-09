@@ -1,17 +1,20 @@
 'use strict';
 
-module.exports = function(loginView) {
-  describe('Recipes tests', function() {
-    let servicesGeneralView;
+const app = require('../lib/app');
 
-    before(() => {
-      return loginView.loginSuccess(12345678)
-        .then((servicesView) => servicesGeneralView = servicesView);
-    });
+describe('Recipes tests', function() {
+  this.timeout(60000);
 
-    it('should be able to start creating a new recipe', () => {
-      return servicesGeneralView.goToRecipesView()
-        .then((recipesView) => recipesView.goToNewRecipe().tap);
-    });
+  let servicesGeneralView;
+
+  beforeEach(() => {
+    return app.init()
+      .then((loginView) => loginView.loginSuccess(12345678))
+      .then((servicesView) => servicesGeneralView = servicesView);
   });
-};
+
+  it('should be able to start creating a new recipe', () => {
+    return servicesGeneralView.goToRecipesView()
+      .then((recipesView) => recipesView.goToNewRecipe().tap);
+  });
+});

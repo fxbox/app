@@ -414,7 +414,7 @@ function getOsName() {
 
 gulp.task('run-test-integration', function() {
   return gulp.src(
-    `${TESTS_ROOT}/lib/suite_manager.js`, { read: false }
+    `${TESTS_ROOT}{common,integration}/**/*_test.js`, { read: false }
     )
     .pipe(mocha());
 });

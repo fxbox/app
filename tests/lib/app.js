@@ -65,4 +65,6 @@ App.prototype = {
   },
 };
 
-module.exports = App;
+const app = new App();
+
+module.exports = app;

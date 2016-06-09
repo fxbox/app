@@ -1,18 +1,20 @@
 'use strict';
 
-module.exports = function(loginView) {
-  describe('Login', function() {
+const app = require('../lib/app');
 
-    console.log('In login suite', loginView);
+describe('Login', function() {
+  this.timeout(60000);
 
-    it('should login', () => {
-      console.log('in test');
-      return loginView.loginSuccess(12345678);
-    });
+  let loginView;
 
-    // @todo Delete this test once a new one comes in. It was initially meant to
-    // make sure the clean up was correctly made.
-    it('should login a second time', () => loginView.loginSuccess(12345678));
-
+  beforeEach(() => {
+    return app.init()
+      .then((defaultView) => { loginView = defaultView; });
   });
-};
+
+  it('should login', () => loginView.loginSuccess(12345678));
+
+  // @todo Delete this test once a new one comes in. It was initially meant to
+  // make sure the clean up was correctly made.
+  it('should login a second time', () => loginView.loginSuccess(12345678));
+});
