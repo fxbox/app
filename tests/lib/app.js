@@ -8,6 +8,7 @@ const firefoxCapabilities = require('selenium-webdriver/lib/capabilities')
   .Capabilities.firefox();
 
 firefoxCapabilities.set('marionette', true);
+firefoxCapabilities.set('firefox_binary', '/home/jlorenzo/firefox/firefox-bin');
 
 const zippedProfile = fs.readFileSync(path.join(__dirname, 'profile.zip'));
 const encodedProfile = base64.fromByteArray(zippedProfile);

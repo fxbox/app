@@ -5,74 +5,52 @@ const fs = require('fs');
 const App = require('./app.js');
 
 
-function SuiteManager() {
-  this.subSuites = [];
-  this.app = new App();
-  this.numberOfTestFiles = countNumberOfTestFiles();
-}
-
-function countNumberOfTestFiles() {
+function getTestFiles() {
   const foldersPaths = ['common', 'integration']
     .map((folderName) => path.join(__dirname, `../${folderName}`));
 
-  const numberOfTestFilesPerFolder = foldersPaths.map((folder) => {
+  const testFiles = foldersPaths.map((folder) => {
     const files = fs.readdirSync(folder);
     const jsTestFiles = files.filter((file) => file.endsWith('_test.js'));
-    return jsTestFiles.length;
+    const jsTestPaths = jsTestFiles
+      .map((fileName) => path.join(folder, fileName));
+
+    return jsTestPaths;
   });
 
-  const numberOfTestFiles = numberOfTestFilesPerFolder
-    .reduce((prev, curr) => prev + curr);
-
-  return numberOfTestFiles;
+  return [].concat.apply([], testFiles); // flatten
 }
 
-SuiteManager.prototype = {
-  registerSubSuite(subSuite) {
-    this.subSuites.push(subSuite);
-    if (this._areAllFilesLoaded()) {
-      this._run();
-    }
-  },
+function loadAndExecuteSubSuite(filePath, initialView) {
+  const subSuite = require(filePath);
+  console.log('before calling it', initialView);
+  subSuite.apply(null, [initialView]);
+}
 
-  _areAllFilesLoaded() {
-    return this.subSuites.length === this.numberOfTestFiles;
-  },
+describe('', function() {
+  this.timeout(120000);
 
-  _run() {
-    const self = this;
+  const app = new App();
+  let loginView;
+  const testFiles = getTestFiles();
 
-    describe('', function() {
-      this.timeout(120000);
-
-      let loginView;
-
-      beforeEach(function() {
-        return self.app.init()
-          .then((defaultView) => {
-            console.log('in then', defaultView);
-            loginView = defaultView;
-          });
+  beforeEach(function() {
+    return app.init()
+      .then((defaultView) => {
+        console.log('in then', defaultView);
+        loginView = defaultView;
       });
+  });
 
-      describe('toto', function() {
-        console.log('before subSuites', loginView);
-        self.subSuites.forEach(function(subSuite) {
-          subSuite(loginView);
-        });
-      });
+  testFiles.forEach(function(testFile) {
+    loadAndExecuteSubSuite(testFile, loginView);
+  });
 
-      afterEach(function() {
-        return self.app.cleanUp();
-      });
+  afterEach(function() {
+    return app.cleanUp();
+  });
 
-      after(function() {
-        return self.app.stop();
-      });
-    });
-  },
-};
-
-const suiteManager = new SuiteManager();
-
-module.exports = suiteManager;
+  after(function() {
+    return app.stop();
+  });
+});

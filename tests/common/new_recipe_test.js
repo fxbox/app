@@ -1,9 +1,6 @@
 'use strict';
 
-const suiteManager = require('../lib/suite_manager.js');
-
-
-suiteManager.registerSubSuite(function(loginView) {
+module.exports = function(loginView) {
   describe('Recipes tests', function() {
     let servicesGeneralView;
 
@@ -17,4 +14,4 @@ suiteManager.registerSubSuite(function(loginView) {
         .then((recipesView) => recipesView.goToNewRecipe().tap);
     });
   });
-});
+};

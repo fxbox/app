@@ -1,12 +1,9 @@
 'use strict';
 
-const suiteManager = require('../lib/suite_manager.js');
-
-
-suiteManager.registerSubSuite(function(loginView) {
+module.exports = function(loginView) {
   describe('Login', function() {
 
-    console.log('In login suite');
+    console.log('In login suite', loginView);
 
     it('should login', () => {
       console.log('in test');
@@ -18,4 +15,4 @@ suiteManager.registerSubSuite(function(loginView) {
     it('should login a second time', () => loginView.loginSuccess(12345678));
 
   });
-});
+};

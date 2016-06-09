@@ -1,9 +1,6 @@
 'use strict';
 
-const suiteManager = require('../lib/suite_manager.js');
-
-
-suiteManager.registerSubSuite(function(loginView) {
+module.exports = function(loginView) {
   describe('Logout', function() {
 
     it('should logout', () => {
@@ -12,4 +9,4 @@ suiteManager.registerSubSuite(function(loginView) {
     });
 
   });
-});
+};
