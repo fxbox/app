@@ -2,8 +2,6 @@
 
 const app = require('../lib/app');
 
-console.log(this);
-
 afterEach(function() {
   return app.cleanUp();
 });
