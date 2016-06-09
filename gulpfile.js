@@ -380,9 +380,7 @@ gulp.task('run-unit-tests', ['compile-unit-tests'], function(cb) {
 });
 
 gulp.task('install-gecko-driver', function() {
-  // wires is the previous project name of geckodriver
-  const GECKO_DRIVER_BINARY_NAME = 'wires';
-  const GECKO_DRIVER_VERSION = '0.8.0-dev';
+  const GECKO_DRIVER_VERSION = '0.8.0';
   const GECKO_DRIVER_FOLDER = `${__dirname}/dist`;
 
   // GeckoDriver must be in the path, so Selenium client can locate it
@@ -391,13 +389,14 @@ gulp.task('install-gecko-driver', function() {
 
   const os = getOsName();
 
-  // @todo Replace by mozilla/geckodriver once 0.8.0 is out
-  return download(`https://github.com/JohanLorenzo/geckodriver/releases/\
-download/v${GECKO_DRIVER_VERSION}/${GECKO_DRIVER_BINARY_NAME}-\
+  return download(`https://github.com/mozilla/geckodriver/releases/\
+download/v${GECKO_DRIVER_VERSION}/geckodriver-\
 ${GECKO_DRIVER_VERSION}-${os}.gz`)
     .pipe(gunzip())
     .pipe(chmod(755))
-    .pipe(rename(GECKO_DRIVER_BINARY_NAME))
+    // wires is the previous project name of geckodriver, selenium will look
+    // for that name in the path
+    .pipe(rename('wires'))
     .pipe(gulp.dest(GECKO_DRIVER_FOLDER));
 });
 
