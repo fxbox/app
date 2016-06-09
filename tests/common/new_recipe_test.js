@@ -6,7 +6,7 @@ describe('Recipes tests', function() {
   let app;
   let loginView;
   let servicesGeneralView;
-  this.timeout(30000);
+  this.timeout(120000);
 
   before(() => {
     app = new App();
