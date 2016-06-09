@@ -17,4 +17,4 @@ install:
   - npm install
 
 script:
-  - "npm test | grep -v 'firefox_profile'"
+  - npm test
