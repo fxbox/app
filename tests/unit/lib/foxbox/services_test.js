@@ -25,10 +25,10 @@ describe('Services >', function() {
         name: 'zwave-name',
       },
       channels: {
-        motionGetterId: {
-          id: 'motionGetterId',
+        motionChannelId: {
+          id: 'motionChannelId',
           feature: 'door/is-open',
-          supports_fetch: { returns: { required: 'OpenClosed' }},
+          supports_fetch: { returns: { requires: 'OpenClosed' }},
         },
       },
     },
@@ -100,10 +100,10 @@ describe('Services >', function() {
       adapter: 'OpenZwave Adapter',
       properties: {},
       channels: {
-        doorLockGetterId: {
-          id: 'doorLockGetterId',
+        doorLockChannelId: {
+          id: 'doorLockChannelId',
           feature: 'door/is-locked',
-          supports_fetch: { returns: { required: 'DoorLocked' }},
+          supports_fetch: { returns: { requires: 'IsLocked' }},
         },
       },
     };

@@ -9,7 +9,7 @@ const p = Object.freeze({
 
   watchTimer: Symbol('watchTimer'),
   watchEventBus: Symbol('watchEventBus'),
-  watchGetters: Symbol('watchGetters'),
+  watchChannels: Symbol('watchChannels'),
 
   // Private methods.
   getURL: Symbol('getURL'),
@@ -17,8 +17,8 @@ const p = Object.freeze({
   onceAuthenticated: Symbol('onceAuthenticated'),
   onceDocumentVisible: Symbol('onceDocumentVisible'),
   onceReady: Symbol('onceReady'),
-  fetchGetterValues: Symbol('fetchGetterValues'),
-  updateGetterValue: Symbol('updateGetterValue'),
+  getChannelValues: Symbol('getChannelValues'),
+  updateChannelValue: Symbol('updateChannelValue'),
 });
 
 /**
@@ -36,9 +36,9 @@ export default class API {
 
     this[p.watchTimer] = new SequentialTimer(this[p.settings].watchInterval);
     this[p.watchEventBus] = new EventDispatcher();
-    this[p.watchGetters] = new Map();
+    this[p.watchChannels] = new Map();
 
-    this[p.fetchGetterValues] = this[p.fetchGetterValues].bind(this);
+    this[p.getChannelValues] = this[p.getChannelValues].bind(this);
 
     Object.freeze(this);
   }
@@ -123,58 +123,58 @@ export default class API {
   }
 
   /**
-   * Registers watcher for the getter with specified id.
+   * Registers watcher for the channel with specified id.
    *
-   * @todo We may need to accept getter's "supports_fetch" property in the
-   * future too, to validate getter value type.
+   * @todo We may need to accept channels's "supports_fetch" property in the
+   * future too, to validate channel value type.
    *
-   * @param {string} getterId Id of the getter we'd like to watch.
+   * @param {string} channelId Id of the channel we'd like to watch.
    * @param {function} handler Handler to be executed once watched value is
    * changed.
    */
-  watch(getterId, handler) {
-    this[p.watchEventBus].on(getterId, handler);
+  watch(channelId, handler) {
+    this[p.watchEventBus].on(channelId, handler);
 
-    if (this[p.watchGetters].has(getterId)) {
+    if (this[p.watchChannels].has(channelId)) {
       return;
     }
 
-    this[p.watchGetters].set(getterId, {
-      id: getterId,
-      // Using null as initial value, some getters can return null when value
+    this[p.watchChannels].set(channelId, {
+      id: channelId,
+      // Using null as initial value, some channels can return null when value
       // is not yet available, so it perfectly fits our case.
       value: null,
     });
 
-    // We automatically start watching if at least one getter is requested to
+    // We automatically start watching if at least one channel is requested to
     // be watched.
     if (!this[p.watchTimer].started) {
-      this[p.watchTimer].start(this[p.fetchGetterValues]);
+      this[p.watchTimer].start(this[p.getChannelValues]);
     }
   }
 
   /**
-   * Unregisters watcher for the getter with specified id.
+   * Unregisters watcher for the channel with specified id.
    *
-   * @param {string} getterId Id of the getter we'd like to not watch anymore.
+   * @param {string} channelId Id of the channel we'd like to not watch anymore.
    * @param {function} handler Handler function that has been used with "watch"
    * previously.
    */
-  unwatch(getterId, handler) {
-    if (!this[p.watchGetters].has(getterId)) {
-      console.warn('Getter with id "%s" is not watched.', getterId);
+  unwatch(channelId, handler) {
+    if (!this[p.watchChannels].has(channelId)) {
+      console.warn('Channel with id "%s" is not watched.', channelId);
       return;
     }
 
-    this[p.watchEventBus].off(getterId, handler);
+    this[p.watchEventBus].off(channelId, handler);
 
-    // If there is no more listeners, we should not watch this getter anymore.
-    if (!this[p.watchEventBus].hasListeners(getterId)) {
-      this[p.watchGetters].delete(getterId);
+    // If there is no more listeners, we should not watch this channel anymore.
+    if (!this[p.watchEventBus].hasListeners(channelId)) {
+      this[p.watchChannels].delete(channelId);
     }
 
-    // If no more getters are watched let's stop watching.
-    if (this[p.watchGetters].size === 0) {
+    // If no more channels are watched let's stop watching.
+    if (this[p.watchChannels].size === 0) {
       this[p.watchTimer].stop();
     }
   }
@@ -266,78 +266,78 @@ export default class API {
   }
 
   /**
-   * Fetches values for the set of getters.
+   * Fetches values for the set of channels.
    *
    * @return {Promise}
    * @private
    */
-  [p.fetchGetterValues]() {
+  [p.getChannelValues]() {
     // It may happen that all watchers have been unregistered in the meantime,
     // so let's return early in this case.
-    if (this[p.watchGetters].size === 0) {
+    if (this[p.watchChannels].size === 0) {
       return Promise.resolve();
     }
 
-    const selectors = Array.from(this[p.watchGetters].values()).map(
+    const selectors = Array.from(this[p.watchChannels].values()).map(
       ({ id }) => ({ id })
     );
 
     return this.put('channels/get', selectors)
       .then((response) => {
         Object.keys(response).forEach((key) => {
-          const getter = this[p.watchGetters].get(key);
-          if (!getter) {
+          const channel = this[p.watchChannels].get(key);
+          if (!channel) {
             return;
           }
 
-          this[p.updateGetterValue](getter, response[key]);
+          this[p.updateChannelValue](channel, response[key]);
         });
       });
   }
 
   /**
-   * Updates getter value if needed. If value has changed, appropriate event is
+   * Updates channel value if needed. If value has changed, appropriate event is
    * fired.
    *
-   * @param {{ id: string, value: Object }} getter Getter to update value for.
-   * @param {Object} getterValue Getter value returned from the server.
+   * @param {{ id: string, value: * }} channel Channel to update value for.
+   * @param {*} newValue New channel value returned from the server.
    *
    * @private
    */
-  [p.updateGetterValue](getter, getterValue) {
+  [p.updateChannelValue](channel, newValue) {
     let valueChanged = false;
 
-    if (!getterValue || !getter.value) {
-      valueChanged = getterValue !== getter.value;
+    if (!newValue || !channel.value) {
+      valueChanged = newValue !== channel.value;
     } else {
-      const [valueType] = Object.keys(getterValue);
+      const [valueType] = Object.keys(newValue);
       if (valueType === 'Error') {
         console.error(
-          'Failed to retrieve value for getter (%s): %o',
-          getter.id,
-          getterValue[valueType]
+          'Failed to retrieve value for channel (%s): %o',
+          channel.id,
+          newValue[valueType]
         );
 
         return;
       }
 
-      const newValue = getterValue[valueType];
-      const oldValue = getter.value[valueType];
-
-      if (newValue && oldValue && typeof newValue === 'object') {
+      if (newValue && channel.value && typeof channel.value === 'object') {
         // @todo If value is a non-null object, we use their JSON representation
         // to compare values. It's not performant and not reliable at all, but
         // this OK until we have such values, once we support them we should
         // have dedicated utility function for deep comparing objects.
-        valueChanged = JSON.stringify(newValue) !== JSON.stringify(oldValue);
+        valueChanged = JSON.stringify(newValue) !==
+          JSON.stringify(channel.value);
       } else {
-        valueChanged = newValue !== oldValue;
+        valueChanged = newValue !== channel.value;
       }
     }
 
     if (valueChanged) {
-      getter.value = Object.freeze(getterValue);
-      this[p.watchEventBus].emit(getter.id, getter.value);
+      // In ES6, a non-object argument will be treated as if it was a frozen
+      // ordinary object, so it's simply returned.
+      channel.value = Object.freeze(newValue);
+      this[p.watchEventBus].emit(channel.id, channel.value);
     }
   }
 }

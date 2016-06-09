@@ -71,17 +71,10 @@ export default class BaseService extends EventDispatcher {
    * @return {Promise}
    */
   set(selector, value = null) {
-    const channel = this[p.getSendChannel](selector);
-    const accepts = channel.supports_send.accepts;
-
-    // If channel declares input value type, then we should use it, otherwise
-    // we send a "null" value.
-    const payload = [
-      { id: channel.id },
-      accepts ? { [accepts.requires || accepts.optional]: value } : null,
-    ];
-
-    return this[p.api].put('channels/set', [payload]);
+    return this[p.api].put(
+      'channels/set',
+      { select: { id: this[p.getSendChannel](selector).id }, value }
+    );
   }
 
   /**
@@ -100,18 +93,18 @@ export default class BaseService extends EventDispatcher {
       return this[p.api].blob('channels/get', payload);
     }
 
-    // We request getter value by unique getter id, so we can have only
-    // results for this getter.
+    // We request channel value by unique channel id, so we can have only
+    // results for this channel.
     return this[p.api].put('channels/get', payload)
       .then((response) => response[channel.id]);
   }
 
   /**
-   * Setups value watcher for the getter matching specified selector.
+   * Setups value watcher for the channel matching specified selector.
    *
-   * @param {string} alias Watcher alias to match getter which value we would
+   * @param {string} alias Watcher alias to match channel which value we would
    * like to watch.
-   * @param {function} handler Function to be called once getter value changes.
+   * @param {function} handler Function to be called once channel value changes.
    */
   watch(alias, handler) {
     const watcher = this[p.watchers].get(alias);
@@ -130,15 +123,15 @@ export default class BaseService extends EventDispatcher {
       wrappedHandlers.set(handler, wrappedHandler);
     }
 
-    const { id: getterId } = this[p.getFetchChannel](selector);
-    this[p.api].watch(getterId, wrappedHandler);
+    const { id: channelId } = this[p.getFetchChannel](selector);
+    this[p.api].watch(channelId, wrappedHandler);
   }
 
   /**
-   * Removes value watcher for the getter matching specified selector.
+   * Removes value watcher for the channel matching specified selector.
    *
-   * @param {string} alias Watcher alias to match getter for which we would like
-   * to remove value watcher.
+   * @param {string} alias Watcher alias to match channel for which we would
+   * like to remove value watcher.
    * @param {function} handler Function that was used in corresponding watch
    * call.
    */
@@ -153,8 +146,8 @@ export default class BaseService extends EventDispatcher {
     const wrappedHandler = wrappedHandlers.get(handler);
     wrappedHandlers.delete(handler);
 
-    const { id: getterId } = this[p.getFetchChannel](selector);
-    this[p.api].unwatch(getterId, wrappedHandler);
+    const { id: channelId } = this[p.getFetchChannel](selector);
+    this[p.api].unwatch(channelId, wrappedHandler);
   }
 
   /**
@@ -246,10 +239,10 @@ export default class BaseService extends EventDispatcher {
         continue;
       }
 
-      const { id: getterId } = this[p.getFetchChannel](selector);
+      const { id: channelId } = this[p.getFetchChannel](selector);
       for (const wrappedHandler of wrappedHandlers.values()) {
-        console.warn(`Forgotten watcher for ${getterId}!`);
-        this[p.api].unwatch(getterId, wrappedHandler);
+        console.warn(`Forgotten watcher for ${channelId}!`);
+        this[p.api].unwatch(channelId, wrappedHandler);
       }
 
       wrappedHandlers.clear();

@@ -97,15 +97,13 @@ describe('WebPush >', function () {
             apiStub.put,
             'channels/set',
             [[
-              [{ id: 'setter:subscribe.webpush@link.mozilla.org' }],
+              [{ id: 'channel:subscribe.webpush@link.mozilla.org' }],
               {
-                Json: {
-                  subscriptions: [{
-                    public_key: 'AQID',
-                    push_uri: 'https://x-new-fake-endpoint.org',
-                    auth: 'BAUG',
-                  }],
-                },
+                subscriptions: [{
+                  public_key: 'AQID',
+                  push_uri: 'https://x-new-fake-endpoint.org',
+                  auth: 'BAUG',
+                }],
               },
             ]]
           );
@@ -113,8 +111,8 @@ describe('WebPush >', function () {
             apiStub.put,
             'channels/set',
             [[
-              [{ id: 'setter:resource.webpush@link.mozilla.org' }],
-              { Json: { resources: ['res1'] } },
+              [{ id: 'channel:resource.webpush@link.mozilla.org' }],
+              { resources: ['res1'] },
             ]]
           );
         })

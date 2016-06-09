@@ -51,15 +51,13 @@ export default class WebPush extends EventDispatcher {
         // Send push information to the server.
         // @todo We will need some library to write taxonomy messages.
         const pushConfigurationMsg = [[
-            [{ id: 'setter:subscribe.webpush@link.mozilla.org' }],
+            [{ id: 'channel:subscribe.webpush@link.mozilla.org' }],
             {
-              Json: {
-                subscriptions: [{
-                  public_key: settings.pushPubKey,
-                  push_uri: settings.pushEndpoint,
-                  auth: settings.pushAuth,
-                }],
-              },
+              subscriptions: [{
+                public_key: settings.pushPubKey,
+                push_uri: settings.pushEndpoint,
+                auth: settings.pushAuth,
+              }],
             },
           ]];
 
@@ -68,8 +66,8 @@ export default class WebPush extends EventDispatcher {
       .then(() => {
         // Setup some common push resources.
         const pushResourcesMsg = [[
-          [{ id: 'setter:resource.webpush@link.mozilla.org' }],
-          { Json: { resources: ['res1'] } },
+          [{ id: 'channel:resource.webpush@link.mozilla.org' }],
+          { resources: ['res1'] },
         ]];
 
         return this[p.api].put('channels/set', pushResourcesMsg);
