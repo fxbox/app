@@ -440,7 +440,7 @@ gulp.task('run-test-e2e', function() {
 
 gulp.task('test', ['clobber-tests', 'build-production'], function(cb) {
   runSequence(
-    // 'run-unit-tests',
+    'run-unit-tests',
     'webserver',
     'test-integration',
     () => { // Tear down whatever the result is
