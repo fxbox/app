@@ -202,7 +202,7 @@ gulp.task('compile-unit-tests', function() {
 /**
  * Pipes CSS through several postCSS plugins and outputs single CSS file.
  */
-gulp.task('compile-css', function () {
+gulp.task('compile-css', function() {
   return gulp.src(`${APP_ROOT}css/app.css`)
     .pipe(sourcemaps.init())
     .pipe(postcss([
@@ -248,10 +248,14 @@ gulp.task('build-production', function(cb) {
 });
 
 /**
- * Add Service Worker and offline support
+ * Add offline support.
  */
 gulp.task('offline', () => {
-  gulp.src(['**/*'], { cwd: DIST_APP_ROOT })
+  return gulp.src([
+    '**/*',
+    '!*.map',
+    '!**/*.map',
+  ], { cwd: DIST_APP_ROOT })
     .pipe(gsww({
       version: pkg.version,
       hookSW: 'hookSW.js',
