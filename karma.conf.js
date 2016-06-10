@@ -18,7 +18,6 @@ module.exports = function(config) {
         included: false,
       },
       { pattern: 'node_modules/react-dom/dist/react-dom.js', included: false },
-      { pattern: 'node_modules/fxos-mvc/dist/mvc.js', included: false },
       { pattern: 'node_modules/rxjs/bundles/Rx.umd.js', included: false },
       'tests/unit/test-main.js',
     ],

@@ -1,11 +1,11 @@
 import React from 'components/react';
 import ReactDOM from 'components/react-dom';
-import { Controller } from 'components/mvc';
 
+import BaseController from './base';
 import Themes from '../views/themes';
 import ThemesNew from '../views/themes-new';
 
-export default class ThemesController extends Controller {
+export default class ThemesController extends BaseController {
   main(action = 'list') {
     const props = {
       foxbox: this.foxbox,

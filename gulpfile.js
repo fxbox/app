@@ -81,10 +81,6 @@ gulp.task('copy-app-common', function() {
     gulp.src('./node_modules/alameda/alameda.js')
       .pipe(rename('js/alameda.js')),
 
-    // Components.
-    gulp.src('./node_modules/fxos-mvc/dist/mvc.js')
-      .pipe(rename('js/components/mvc.js')),
-
     // Polyfills.
     gulp.src('./node_modules/whatwg-fetch/fetch.js')
       .pipe(rename('js/polyfills/fetch.js'))
@@ -140,11 +136,7 @@ gulp.task('compile-app-dev', function() {
       rollup({
         sourceMap: true,
         format: 'amd',
-        external: [
-          'components/mvc',
-          'components/react',
-          'components/react-dom',
-        ],
+        external: ['components/react', 'components/react-dom'],
         plugins: [
           rollupBabelPlugin(),
           rollupIncludePathsPlugin({ extensions: ['.js', '.jsx'] }),
@@ -166,11 +158,7 @@ gulp.task('compile-app-production', ['compress-external-modules'], function() {
       rollup({
         sourceMap: true,
         format: 'amd',
-        external: [
-          'components/mvc',
-          'components/react',
-          'components/react-dom',
-        ],
+        external: ['components/react', 'components/react-dom'],
         plugins: [
           rollupBabelPlugin(),
           rollupUglifyPlugin({ sourceMap: true }, uglifyjs.minifier),
@@ -189,7 +177,6 @@ gulp.task('compress-external-modules', function() {
   return gulp
     .src([
       `${DIST_APP_ROOT}js/alameda.js`,
-      `${DIST_APP_ROOT}js/components/mvc.js`,
       `${DIST_APP_ROOT}js/polyfills/fetch.js`,
     ], { base: DIST_APP_ROOT })
     .pipe(sourcemaps.init())

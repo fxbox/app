@@ -1,5 +1,4 @@
-import { RoutingController } from 'components/mvc';
-
+import BaseController from './base';
 import UsersController from './users';
 import ServicesController from './services';
 import ServiceController from './service';
@@ -9,16 +8,23 @@ import DevController from './dev';
 
 import Foxbox from '../lib/foxbox/foxbox';
 
-export default class MainController extends RoutingController {
+const p = Object.freeze({
+  controllers: Symbol('controllers'),
+  onHashChanged: Symbol('onHashChanged'),
+});
+
+export default class MainController extends BaseController {
   constructor() {
-    const foxbox = new Foxbox();
+    super();
+
+    const foxbox = this.foxbox = new Foxbox();
     const mountNode = document.querySelector('.app-view-container');
     const options = { foxbox, mountNode };
 
     const usersController = new UsersController(options);
     const themesController = new ThemesController(options);
 
-    super({
+    this[p.controllers] = {
       '': usersController,
       'users/(.+)': usersController,
       'services': new ServicesController(options),
@@ -27,9 +33,9 @@ export default class MainController extends RoutingController {
       'themes': themesController,
       'themes/(.+)': themesController,
       'dev/(.+)/(.+)': new DevController(options),
-    });
+    };
 
-    this.foxbox = foxbox;
+    window.addEventListener('hashchange', this[p.onHashChanged].bind(this));
   }
 
   main() {
@@ -45,7 +51,7 @@ export default class MainController extends RoutingController {
             location.hash = '#services';
           }
 
-          this.foxbox.addEventListener('push-message', (msg) => {
+          this.foxbox.on('push-message', (msg) => {
             if (msg.action) {
               location.hash = msg.action;
             }
@@ -54,7 +60,24 @@ export default class MainController extends RoutingController {
           location.hash = '#users/login';
         }
 
-        this.route();
+        this[p.onHashChanged]();
       });
+  }
+
+  /**
+   * Handles hash change event and routes to the right controller.
+   *
+   * @private
+   */
+  [p.onHashChanged]() {
+    const route = window.location.hash.slice(1);
+
+    for (const routeName of Object.keys(this[p.controllers])) {
+      const match = route.match(new RegExp(`^${routeName}$`));
+      if (match) {
+        this[p.controllers][routeName].main(...match.slice(1));
+        break;
+      }
+    }
   }
 }

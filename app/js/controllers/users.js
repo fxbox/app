@@ -1,13 +1,13 @@
 import React from 'components/react';
 import ReactDOM from 'components/react-dom';
-import { Controller } from 'components/mvc';
 
+import BaseController from './base';
 import UserLogin from '../views/user-login';
 
 const ALLOWED_ACTIONS = ['login', 'logout'];
 const DEFAULT_ACTION = ALLOWED_ACTIONS[0];
 
-export default class UsersController extends Controller {
+export default class UsersController extends BaseController {
   main(action = DEFAULT_ACTION) {
     if (!ALLOWED_ACTIONS.includes(action)) {
       console.error(

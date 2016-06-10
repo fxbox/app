@@ -21,7 +21,6 @@
   "license": "MPL2",
   "dependencies": {
     "alameda": "^1.0.0",
-    "fxos-mvc": "fxos-eng/mvc#master",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "url-search-params": "^0.5.0",
