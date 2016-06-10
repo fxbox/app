@@ -21,7 +21,7 @@ const motionStateToBoolean = function(motionState) {
     return false;
   }
 
-  return motionState.OpenClosed === 'Open';
+  return motionState === 'Open';
 };
 
 export default class MotionSensorService extends BaseService {
@@ -48,7 +48,7 @@ export default class MotionSensorService extends BaseService {
 
   /**
    * Function that is called whenever motion state changes. It is intended to
-   * convert raw getter value into simple boolean.
+   * convert raw channel value into simple boolean.
    *
    * @param {Object} motionState State that indicates whether motion detected
    * or not.

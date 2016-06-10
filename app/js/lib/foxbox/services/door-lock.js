@@ -21,13 +21,7 @@ export default class DoorLockService extends BaseService {
    */
   isLocked() {
     return this.get('door/is-locked')
-      .then((response) => {
-        if (!response) {
-          throw new Error('Door lock status is not available yet!');
-        }
-
-        return response.DoorLocked === 'Locked';
-      });
+      .then((lockedUnlocked) => lockedUnlocked === 'Locked');
   }
 
   /**
