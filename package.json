@@ -18,7 +18,7 @@
     "iot"
   ],
   "author": "",
-  "license": "MPL2",
+  "license": "MPL-2.0",
   "dependencies": {
     "alameda": "^1.0.0",
     "react": "^15.1.0",
@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^6.0.4",
+    "babel-plugin-array-includes": "^2.0.3",
     "babel-plugin-check-es2015-constants": "^6.8.0",
     "babel-plugin-external-helpers": "^6.8.0",
     "babel-plugin-transform-es2015-arrow-functions": "^6.8.0",

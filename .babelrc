@@ -4,6 +4,7 @@
   ],
 
   "plugins": [
+    "array-includes",
     "check-es2015-constants",
     "transform-es2015-block-scoping",
     "transform-es2015-arrow-functions",
