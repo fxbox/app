@@ -58,13 +58,13 @@ export default class Recipes {
 
           switch (channel.feature) {
             case 'thinkerbell/is-rule-enabled':
-              rule.enabled = channelId;
+              rule.enabled = { id: channelId, feature: channel.feature };
               break;
             case 'thinkerbell/rule-source':
-              rule.getSource = channelId;
+              rule.getSource = { id: channelId, feature: channel.feature };
               break;
             case 'thinkerbell/remove-rule-id':
-              rule.remove = channelId;
+              rule.remove = { id: channelId, feature: channel.feature };
               break;
           }
 
@@ -83,8 +83,8 @@ export default class Recipes {
       // Fetch recipe enabled statuses and sources.
       const { enabledSelectors, sourceSelectors } = services.reduce(
         (selectors, service) => {
-          selectors.enabledSelectors.push({ id: service.enabled });
-          selectors.sourceSelectors.push({ id: service.getSource });
+          selectors.enabledSelectors.push(service.enabled);
+          selectors.sourceSelectors.push(service.getSource);
 
           return selectors;
         },
@@ -97,8 +97,8 @@ export default class Recipes {
       ])
       .then(([statuses, sources]) => {
         return services.map((service) => {
-          const statusResponse = statuses[service.enabled];
-          const sourceResponse = sources[service.getSource];
+          const statusResponse = statuses[service.enabled.id];
+          const sourceResponse = sources[service.getSource.id];
 
           if (!statusResponse || statusResponse.Error) {
             console.error(
@@ -119,7 +119,7 @@ export default class Recipes {
             );
             service.source = null;
           } else {
-            service.source = JSON.parse(sourceResponse);
+            service.source = sourceResponse;
           }
 
           return new Recipe(service);
@@ -339,10 +339,7 @@ export default class Recipes {
 
     return this[p.api].put(
       'channels/set',
-      {
-        select: { feature: 'thinkerbell/add-rule' },
-        value: { name, source: JSON.stringify(recipe) },
-      }
+      { select: { feature: 'thinkerbell/add-rule' }, value: recipe }
     );
   }
 
@@ -355,7 +352,7 @@ export default class Recipes {
   remove(recipe) {
     return this[p.api].put(
       'channels/set',
-      { select: { id: recipe[p.service].remove }, value: null }
+      { select: recipe[p.service].remove, value: null }
     );
   }
 
@@ -369,7 +366,7 @@ export default class Recipes {
   toggle(recipe, value = true) {
     return this[p.api].put(
       'channels/set',
-      { select: { id: recipe[p.service].enabled }, value: value ? 'On' : 'Off' }
+      { select: recipe[p.service].enabled, value: value ? 'On' : 'Off' }
     )
     .then(() => {
       recipe[p.service].status = value;
@@ -450,10 +447,7 @@ export default class Recipes {
 
       return this[p.api].put(
         'channels/set',
-        {
-          select: { feature: 'thinkerbell/add-rule' },
-          value: { name: recipe.name, source: JSON.stringify(recipe) },
-        }
+        { select: { feature: 'thinkerbell/add-rule' }, value: recipe }
       );
     });
 
@@ -528,10 +522,7 @@ export default class Recipes {
 
       return this[p.api].put(
         'channels/set',
-        {
-          select: { feature: 'thinkerbell/add-rule' },
-          value: { name: recipe.name, source: JSON.stringify(recipe) },
-        }
+        { select: { feature: 'thinkerbell/add-rule' }, value: recipe }
       );
     });
   }

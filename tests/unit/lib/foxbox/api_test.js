@@ -303,6 +303,7 @@ describe('API >', function () {
     describe('watch >', function() {
       const testChannelId1 = 'channel-id-1';
       const testChannelId2 = 'channel-id-2';
+      const channelFeature = 'feature';
 
       const testChannel1Values = {
         oldValue: 'Open',
@@ -324,7 +325,7 @@ describe('API >', function () {
         netStub.fetchJSON.withArgs(
           'https://secure-box.com/api/v5/channels/get',
           'PUT',
-          [{ id: testChannelId1 }]
+          [{ id: testChannelId1, feature: channelFeature }]
         ).returns(
           Promise.resolve({ [testChannelId1]: testChannel1Values.oldValue })
         );
@@ -332,7 +333,10 @@ describe('API >', function () {
         netStub.fetchJSON.withArgs(
           'https://secure-box.com/api/v5/channels/get',
           'PUT',
-          [{ id: testChannelId1 }, { id: testChannelId2 }]
+          [
+            { id: testChannelId1, feature: channelFeature },
+            { id: testChannelId2, feature: channelFeature },
+          ]
         ).returns(
           Promise.resolve({
             [testChannelId1]: testChannel1Values.oldValue,
@@ -348,7 +352,7 @@ describe('API >', function () {
           .then(() => {
             sinon.assert.notCalled(netStub.fetchJSON);
 
-            api.watch(testChannelId1, onWatch1Stub);
+            api.watch(testChannelId1, channelFeature, onWatch1Stub);
 
             this.sinon.clock.tick(settingsStub.watchInterval);
 
@@ -362,7 +366,7 @@ describe('API >', function () {
       });
 
       it('fires handler only if value changed', function(done) {
-        api.watch(testChannelId1, onWatch1Stub);
+        api.watch(testChannelId1, channelFeature, onWatch1Stub);
 
         this.sinon.clock.tick(settingsStub.watchInterval);
 
@@ -386,7 +390,7 @@ describe('API >', function () {
             netStub.fetchJSON.withArgs(
               'https://secure-box.com/api/v5/channels/get',
               'PUT',
-              [{ id: testChannelId1 }]
+              [{ id: testChannelId1, feature: channelFeature }]
             ).returns(
               Promise.resolve({ [testChannelId1]: testChannel1Values.newValue })
             );
@@ -403,8 +407,8 @@ describe('API >', function () {
       });
 
       it('groups all watcher request into one network request', function(done) {
-        api.watch(testChannelId1, onWatch1Stub);
-        api.watch(testChannelId2, onWatch2Stub);
+        api.watch(testChannelId1, channelFeature, onWatch1Stub);
+        api.watch(testChannelId2, channelFeature, onWatch2Stub);
 
         this.sinon.clock.tick(settingsStub.watchInterval);
 
@@ -434,7 +438,10 @@ describe('API >', function () {
             netStub.fetchJSON.withArgs(
               'https://secure-box.com/api/v5/channels/get',
               'PUT',
-              [{ id: testChannelId1 }, { id: testChannelId2 }]
+              [
+                { id: testChannelId1, feature: channelFeature },
+                { id: testChannelId2, feature: channelFeature },
+              ]
             ).returns(
               Promise.resolve({
                 [testChannelId1]: testChannel1Values.oldValue,
@@ -462,6 +469,7 @@ describe('API >', function () {
     describe('unwatch >', function() {
       const testChannelId1 = 'channel-id-1';
       const testChannelId2 = 'channel-id-2';
+      const channelFeature = 'feature';
 
       const channel1Value = 'Open';
       const channel2Value = 'Locked';
@@ -476,7 +484,7 @@ describe('API >', function () {
         netStub.fetchJSON.withArgs(
           'https://secure-box.com/api/v5/channels/get',
           'PUT',
-          [{ id: testChannelId1 }]
+          [{ id: testChannelId1, feature: channelFeature }]
         ).returns(
           Promise.resolve({ [testChannelId1]: channel1Value })
         );
@@ -484,7 +492,10 @@ describe('API >', function () {
         netStub.fetchJSON.withArgs(
           'https://secure-box.com/api/v5/channels/get',
           'PUT',
-          [{ id: testChannelId1 }, { id: testChannelId2 }]
+          [
+            { id: testChannelId1, feature: channelFeature },
+            { id: testChannelId2, feature: channelFeature },
+          ]
         ).returns(
           Promise.resolve({
             [testChannelId1]: channel1Value,
@@ -494,8 +505,8 @@ describe('API >', function () {
       });
 
       it('correctly removes unregistered watchers', function(done) {
-        api.watch(testChannelId1, onWatch1Stub);
-        api.watch(testChannelId2, onWatch2Stub);
+        api.watch(testChannelId1, channelFeature, onWatch1Stub);
+        api.watch(testChannelId2, channelFeature, onWatch2Stub);
 
         this.sinon.clock.tick(settingsStub.watchInterval);
 
@@ -508,7 +519,10 @@ describe('API >', function () {
               netStub.fetchJSON,
               'https://secure-box.com/api/v5/channels/get',
               'PUT',
-              [{ id: testChannelId1 }, { id: testChannelId2 }]
+              [
+                { id: testChannelId1, feature: channelFeature },
+                { id: testChannelId2, feature: channelFeature},
+              ]
             );
 
             sinon.assert.calledOnce(onWatch1Stub);
@@ -530,7 +544,7 @@ describe('API >', function () {
               netStub.fetchJSON,
               'https://secure-box.com/api/v5/channels/get',
               'PUT',
-              [{ id: testChannelId1 }]
+              [{ id: testChannelId1, feature: channelFeature }]
             );
 
             sinon.assert.calledOnce(onWatch1Stub);
@@ -743,17 +757,18 @@ describe('API >', function () {
     /** @test {API#watch} */
     it('"watch" correctly waits for the api readiness', function(done) {
       const channelToWatchId = 'channel-id-1';
+      const channelFeature = 'feature';
       const onWatchStub = sinon.stub();
 
       netStub.fetchJSON.withArgs(
         'https://secure-box.com/api/v5/channels/get',
         'PUT',
-        [{ id: channelToWatchId }]
+        [{ id: channelToWatchId, feature: channelFeature }]
       ).returns(
         Promise.resolve({ [channelToWatchId]: 'Open' })
       );
 
-      api.watch(channelToWatchId, onWatchStub);
+      api.watch(channelToWatchId, channelFeature, onWatchStub);
 
       this.sinon.clock.tick(settingsStub.watchInterval);
 
@@ -781,7 +796,7 @@ describe('API >', function () {
             netStub.fetchJSON,
             'https://secure-box.com/api/v5/channels/get',
             'PUT',
-            [{ id: channelToWatchId }]
+            [{ id: channelToWatchId, feature: channelFeature }]
           );
 
           sinon.assert.calledOnce(onWatchStub);
@@ -978,17 +993,18 @@ describe('API >', function () {
     it('"watch" correctly waits for the document to become visible',
     function(done) {
       const channelToWatchId = 'channel-id-1';
+      const channelFeature = 'feature';
       const onWatchStub = sinon.stub();
 
       netStub.fetchJSON.withArgs(
         'https://secure-box.com/api/v5/channels/get',
         'PUT',
-        [{ id: channelToWatchId }]
+        [{ id: channelToWatchId, feature: channelFeature }]
       ).returns(
         Promise.resolve({ [channelToWatchId]: 'Open' })
       );
 
-      api.watch(channelToWatchId, onWatchStub);
+      api.watch(channelToWatchId, channelFeature, onWatchStub);
 
       this.sinon.clock.tick(settingsStub.watchInterval);
 
@@ -1008,7 +1024,7 @@ describe('API >', function () {
             netStub.fetchJSON,
             'https://secure-box.com/api/v5/channels/get',
             'PUT',
-            [{ id: channelToWatchId }]
+            [{ id: channelToWatchId, feature: channelFeature }]
           );
 
           sinon.assert.calledOnce(onWatchStub);

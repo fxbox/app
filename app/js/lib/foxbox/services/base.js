@@ -71,9 +71,10 @@ export default class BaseService extends EventDispatcher {
    * @return {Promise}
    */
   set(selector, value = null) {
+    const { id, feature } = this[p.getSendChannel](selector);
     return this[p.api].put(
       'channels/set',
-      { select: { id: this[p.getSendChannel](selector).id }, value }
+      { select: { id, feature }, value }
     );
   }
 
@@ -86,7 +87,7 @@ export default class BaseService extends EventDispatcher {
   get(selector) {
     const channel = this[p.getFetchChannel](selector);
     const returns = channel.supports_fetch.returns;
-    const payload = { id: channel.id };
+    const payload = { id: channel.id, feature: channel.feature };
 
     // If we expect binary data let's request it properly.
     if (returns && (returns.requires || returns.optional) === 'Binary') {
@@ -123,8 +124,8 @@ export default class BaseService extends EventDispatcher {
       wrappedHandlers.set(handler, wrappedHandler);
     }
 
-    const { id: channelId } = this[p.getFetchChannel](selector);
-    this[p.api].watch(channelId, wrappedHandler);
+    const { id, feature } = this[p.getFetchChannel](selector);
+    this[p.api].watch(id, feature, wrappedHandler);
   }
 
   /**

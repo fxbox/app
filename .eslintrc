@@ -52,7 +52,6 @@
     "no-throw-literal": ["error"],
     "no-warning-comments": ["error", { "terms": ["todo", "@todo:", "fixme",
       "xxx"] }],
-    "arrow-body-style": ["warn", "as-needed"],
     "arrow-parens": ["error", "always"],
     "arrow-spacing": ["error"],
     "no-var": ["error"],

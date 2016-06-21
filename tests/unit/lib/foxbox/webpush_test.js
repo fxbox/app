@@ -96,24 +96,30 @@ describe('WebPush >', function () {
           sinon.assert.calledWithExactly(
             apiStub.put,
             'channels/set',
-            [[
-              [{ id: 'channel:subscribe.webpush@link.mozilla.org' }],
-              {
+            {
+              select: {
+                id: 'channel:subscribe.webpush@link.mozilla.org',
+                feature: 'webpush/subscribe',
+              },
+              value: {
                 subscriptions: [{
                   public_key: 'AQID',
                   push_uri: 'https://x-new-fake-endpoint.org',
                   auth: 'BAUG',
                 }],
               },
-            ]]
+            }
           );
           sinon.assert.calledWithExactly(
             apiStub.put,
             'channels/set',
-            [[
-              [{ id: 'channel:resource.webpush@link.mozilla.org' }],
-              { resources: ['res1'] },
-            ]]
+            {
+              select: {
+                id: 'channel:resource.webpush@link.mozilla.org',
+                feature: 'webpush/resource',
+              },
+              value: { resources: ['res1'] },
+            }
           );
         })
         .then(done, done);
