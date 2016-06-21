@@ -129,10 +129,11 @@ export default class API {
    * future too, to validate channel value type.
    *
    * @param {string} channelId Id of the channel we'd like to watch.
+   * @param {string} channelFeature Feature of the channel we'd like to watch.
    * @param {function} handler Handler to be executed once watched value is
    * changed.
    */
-  watch(channelId, handler) {
+  watch(channelId, channelFeature, handler) {
     this[p.watchEventBus].on(channelId, handler);
 
     if (this[p.watchChannels].has(channelId)) {
@@ -141,6 +142,7 @@ export default class API {
 
     this[p.watchChannels].set(channelId, {
       id: channelId,
+      feature: channelFeature,
       // Using null as initial value, some channels can return null when value
       // is not yet available, so it perfectly fits our case.
       value: null,
@@ -279,7 +281,7 @@ export default class API {
     }
 
     const selectors = Array.from(this[p.watchChannels].values()).map(
-      ({ id }) => ({ id })
+      ({ id, feature }) => ({ id, feature })
     );
 
     return this.put('channels/get', selectors)
